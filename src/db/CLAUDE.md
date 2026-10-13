@@ -206,6 +206,14 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 
 **주간 AI 자문 실행 요일 (cycle445, 사용자 결정 2026-10-11)** — `get_weekly_advisory_weekday_raw() -> str | None`, 키 `weekly_advisory_weekday`. 저장 함수는 아직 없다(PUT 라우트 없음 — 바꾸려면 운영자가 `system_config` 에 직접 쓴다). 같은 이유로 `_select_value` + `_string_from_raw` 를 직접 써 DB 예외를 전파한다 — leaf `src/engine/weekly_advisory.py::should_run_weekly_advisory` 가 "키 없음"과 "DB 장애"를 같은 기본값(목요일)으로 접되, 그 판정은 leaf 책임이다. 값의 의미 = `src/engine/CLAUDE.md` `weekly_advisory.py` 모듈 맵 항목.
 
+**RS·재무 2단계 키 (cycle453)** — 저장 함수 없음(PUT 라우트 없음 — 킬스위치는 운영자가 `system_config` 에 직접 쓴다). 읽고 쓰는 쪽은 engine leaf 둘이 `_select_value`·`_upsert_value` 를 직접 부른다(이 모듈에 전용 getter 없음). 값의 의미 = `src/engine/CLAUDE.md` 모듈 맵 `fundamental_load_tasks.py`·`rs_fundamental_observe.py` 항목.
+
+- `fundamental_extra_load_mode` — 추가 적재 킬스위치. 키 없음 = `on` · `off` · 그 밖 = `on` + WARNING.
+- `fundamental_opinion_load_last` — 투자의견 갈래 마지막 성공 시각(`{"value": KST ISO}`) — 7일 이내면 그 주는 건너뛴다.
+- `fundamental_opinion_backfill_last` — 400일 백필을 시도한 마지막 성공 시각(같은 모양) — 90일 이내면 최신일 없는 종목은 30일치만 받는다.
+- `fundamental_estimate_empty_month` — 이번 달 추정실적 빈 응답 종목(`{"value": "YYYY-MM|t1,t2"}`) — 같은 달 재조회 생략, 달이 바뀌면 무시.
+- `rs_fundamental_observe_mode` — 부팅 관찰 기록 킬스위치. 키 없음 = `record` · `off` · 그 밖 = `record` + WARNING.
+
 **레짐 표시 설정 (매매가 소비하지 않는다)** — `.env` 폴백 없음(DB 미설정이면 코드 기본값):
 
 - `get_buy_block_mode() -> str` / `set_buy_block_mode(mode)`: 키 `buy_block_mode`, 기본 `HARD`. 4 모드 밖은 `ValueError`
@@ -362,7 +370,7 @@ list_paged_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
 - 정규화 NUMERIC 18종: 손익 5(`sale_account`/`sale_totl_prfi`/`bsop_prti`/`thtr_ntin`/`depr_cost`) + 대차 7(`cras`/`fxas`/`total_aset`/`flow_lblt`/`total_lblt`/`total_cptl`/`cpfn`) + 수익성 2(`cptl_ntin_rate`/`sale_totl_rate`) + 안정성 2(`lblt_rate`/`crnt_rate`) + 기타 2(`ebitda`/`ev_ebitda`) + `raw JSONB` + `refreshed_at TIMESTAMPTZ`. 마법공식(EV/EBITDA·ROC) + F-Score-7(`src/engine/quant_score.py`) 원천
 - CRUD(`stock_master_daily.py` 미러): `upsert_financial_batch(ticker, rows)`(100건 chunk + `ON CONFLICT (ticker, stac_yymm, div_cls) DO UPDATE SET` + graceful + KST `now_kst_iso`) · `get_financial_series(ticker, div_cls="0", limit=3)`(최근 N기, `stac_yymm` DESC, "0"=년 / "1"=분기) · `max_stac_yymm(ticker, div_cls="0")`(신선도·백필 게이트 키) · `count_all()`
 - `pg`(asyncpg) 경유 + raw JSONB 덮어쓰기 금지(G-AST1)
-- 호출자: `src/engine/scanner.py::_stock_master_financial_load_once()`(주1회 16:40 적재) + `src/engine/strategies/volatility_breakout.py::_apply_quant_filter_in_prepare()`(관찰 훅). 매매 hot path 무관
+- 호출자: `src/engine/scanner.py::_stock_master_financial_load_once()`(연간, 16:40 적재) + `src/engine/fundamental_load_tasks.py`(분기 `div_cls="1"` — `max_stac_yymm`·`upsert_financial_batch`, 같은 16:40 실행) + `src/engine/strategies/volatility_breakout.py::_apply_quant_filter_in_prepare()`(관찰 훅). 부팅 관찰 기록은 `score_inputs.financial_rows_bulk` 로 직접 읽는다. 매매 hot path 무관
 
 ## pending_next_day_clear.py — 익일청산 큐 영속화
 
@@ -417,15 +425,33 @@ T7(120일선 20영업일 기울기)·R4(250일 고점 대비 하락률)를 계�
 전부 흡수(`[]`/`0`/`None` + `logger.exception`) — 호출자(`ndx2x_ingest.ensure_history`)가
 재시도·fail-closed 판단을 맡는다.
 
-## invest_opinion.py — 증권사 투자의견 이력 · 추정실적 월 스냅샷 (RS·재무 1단계)
+## invest_opinion.py — 증권사 투자의견 이력 · 추정실적 월 스냅샷 (RS·재무)
 
-테이블 2종(migration 051, 가산형 신규 테이블) — 칸·PK 는 아래 「DB 스키마」 절. 🔴 **소비처 없음 · 2단계 배선 대기** — 적재 스케줄도 읽는 쪽도 아직 없다(명세 `_workspace/design/2026-10-13_rs_fundamental_phase1.md` + `_amend1.md`). 매매 경로와 무관한 관찰 데이터라 DB 예외는 전부 흡수한다(`logger.exception` 후 `0`/`False`/`[]`).
+테이블 2종(migration 051, 가산형 신규 테이블) — 칸·PK 는 아래 「DB 스키마」 절. 쓰는 쪽 = `src/engine/fundamental_load_tasks.py`(16:40 재무 적재 뒤 추가 적재) · 읽는 쪽 = 같은 모듈(재개 지점) + `src/engine/rs_fundamental_observe.py`(부팅 관찰 기록). 매매 경로와 무관한 관찰 데이터라 아래 셋은 DB 예외를 흡수한다(`logger.exception` 후 `0`/`False`/`[]`) — 나머지 둘은 예외를 올려 보낸다(표).
 
 | 함수 | 계약 |
 |---|---|
 | `upsert_opinions(ticker, rows) -> int` | `ON CONFLICT (ticker, bsop_date, mbcr_name) DO UPDATE` — **멱등**. `bsop_date` 가 `None` 이거나 `mbcr_name` 이 빈 행은 버리고 WARNING · 묶음 안 같은 PK 는 **마지막 행**만 남긴다. 반환 = 실제로 보낸 행 수(빈 입력·전부 무효·실패 = 0) |
 | `upsert_estimate_snapshot(ticker, snapshot_month, data) -> bool` | `ON CONFLICT (ticker, snapshot_month) DO UPDATE`. `data` = `api/invest_opinion.inquire_estimate_perform` 반환(`settle_months`·`raw`). 성공 `True` |
 | `get_opinions(ticker, date_from, date_to) -> list[dict]` | 기간 안 의견(`bsop_date DESC`). `raw`·`fetched_at` 은 읽지 않는다 |
+| `latest_bsop_dates(tickers) -> dict[str, date]` | 종목별 `max(bsop_date)` 일괄 1쿼리 — 행 없는 종목은 키 없음. 🔴 **예외를 올려 보낸다** — 빈 결과로 삼키면 추가 적재가 전 종목을 400일치 다시 받는다 |
+| `estimate_snapshot_tickers(snapshot_month) -> set[str]` | 그 달 추정실적 스냅샷 행이 있는 종목. 🔴 **예외를 올려 보낸다**(같은 이유 — 빈 집합이면 전 종목 재조회) |
+
+## candidate_scores.py — 후보·보유 점수 관찰 스냅샷 쓰기 (RS·재무 2단계, cycle453)
+
+- 테이블 `candidate_score_snapshots`(migration 052) — 칸·PK 는 아래 「DB 스키마」 절. 쓰는 쪽 = `src/engine/rs_fundamental_observe.py` 하나(부팅 관찰 기록). 매매 경로 무관.
+- `upsert_scores(rows) -> int` — `pg.executemany` 일괄 `INSERT … ON CONFLICT (target_date, strategy_id, ticker) DO UPDATE SET`(PK 밖 전 칸 덮기). 반환 = 보낸 행 수(빈 입력 = 0, DB 호출 없음). `target_date` = `to_date()` · `computed_at` 은 `None` 이면 지금(KST)·문자열이면 `datetime.fromisoformat`. 🔴 **예외를 올려 보낸다** — 호출자가 `[rs_observe_failed] stage=upsert` 로 단계별 기록한다.
+- 칸 순서 정본 = 모듈 상수 `COLUMNS`(26칸).
+
+## score_inputs.py — RS·재무 관찰 입력 일괄 읽기 (RS·재무 2단계, cycle453)
+
+읽기 전용 · 함수마다 쿼리 1회. 소비 = `src/engine/rs_fundamental_observe.py` 하나. 🔴 **예외를 올려 보낸다** — 조용한 빈 결과로 바꾸지 않는다(호출자가 단계별로 잡는다).
+
+| 함수 | 계약 |
+|---|---|
+| `recent_closes_bulk(before, n=200) -> dict[str, list[float]]` | `stock_master_daily` 에서 `before − 320일 <= bas_dd < before` 범위 종목별 최근 `n` 봉 종가(창 함수 `row_number()` 1쿼리) — 오래된→최신 순. 종가 NULL 행은 뺀다. 320일 하한(`_LOOKBACK_CAL_DAYS`)은 오래된 봉 스캔을 줄이는 장치 |
+| `master_raw_map(tickers) -> dict[str, dict]` | `stock_master.master_raw` 일괄(`ticker = ANY($1)`). 행 없음·raw 비었음·JSON 파싱 실패 = 키 없음 |
+| `financial_rows_bulk(tickers) -> dict[str, list[dict]]` | `stock_master_financial` 분기("1")·연간("0") 행 일괄 — 종목별 `stac_yymm` 오름차순 list. 칸 = `ticker`·`stac_yymm`·`div_cls`·`sale_account`·`bsop_prti`·`thtr_ntin`·`lblt_rate` |
 
 ## parameter_recommendations.py — 전략수정 AI자문 이력
 
@@ -462,9 +488,12 @@ T7(120일선 20영업일 기울기)·R4(250일 고점 대비 하락률)를 계�
   - `exit_ai_runs` — 하루 1행(`run_date` PK). 「대상 없음」(`no_targets`) 과 「워커가 안 돌았다」(`engine_not_running`·`g1_failed`) 를 가른다.
   - 🔴 **`DELETE` 권한을 주지 않는다** — 영구 보존(사용자 결정 「히스토리도 남겨두자」).
   - 🔴 매매 경로 무접촉 — `src/engine/`·8영역에 `exit_ai_*` 언급이 있으면 구조 가드(`tests/unit/ast/test_cycle446_ast_exit_ai_scope.py`)가 붉어진다.
-- **RS·재무 1단계 2표**(migration 051, 가산형 `CREATE TABLE IF NOT EXISTS` 만). 읽기·쓰기 = 위 `invest_opinion.py`. 🔴 소비처 없음 · 2단계 배선 대기.
+- **RS·재무 2표**(migration 051, 가산형 `CREATE TABLE IF NOT EXISTS` 만). 읽기·쓰기 = 위 `invest_opinion.py`. 쓰는 쪽 = 16:40 추가 적재 · 읽는 쪽 = 추가 적재(재개 지점) + 부팅 관찰 기록.
   - `invest_opinion_history` — PK `(ticker, bsop_date, mbcr_name)`. 칸 = `invt_opnn`·`rgbf_invt_opnn` TEXT · `hts_goal_prc`·`stck_prdy_clpr` BIGINT · `dprt` NUMERIC(10,2) · `raw` JSONB NOT NULL(기본 `{}`) · `fetched_at` TIMESTAMPTZ NOT NULL.
   - `estimate_perform_snapshot` — PK `(ticker, snapshot_month)`(DATE). 칸 = `settle_months` TEXT[] NOT NULL(기본 `{}`) · `raw` JSONB NOT NULL(기본 `{}`) · `fetched_at` TIMESTAMPTZ NOT NULL.
+- **`candidate_score_snapshots`**(migration 052, 가산형 `CREATE TABLE IF NOT EXISTS` + 인덱스 `idx_candidate_score_snapshots_ticker (ticker, target_date)`) — 매일 부팅 때 4전략 후보·보유 종목별 점수 1행. 쓰기 = 위 `candidate_scores.py`.
+  - PK `(target_date, strategy_id, ticker)` · NOT NULL = `target_date` DATE · `strategy_id`·`ticker`·`role` TEXT(`candidate`|`held`) · `computed_at` TIMESTAMPTZ.
+  - 점수 칸(전부 NULL 허용 — 「모름」 = NULL, 0 으로 채우지 않는다) = RS `rs_raw` DOUBLE · `rs_pct` INT · `sector_key` TEXT · `vs_sector` DOUBLE · `sector_pct`·`in_sector_pct` INT · 목표가 `revision_breadth`·`target_median_change` DOUBLE · `opinion_brokers` INT · 재무 `fin_quarter` TEXT(YYYYMM) · `op_income_q`·`op_income_q_yoy` DOUBLE · `op_turnaround` BOOL · `op_yoy_growth`·`revenue_yoy_growth` DOUBLE · `net_turnaround` BOOL · `roe`·`debt_ratio_latest` DOUBLE · `debt_ratio_down_years` INT · `ttm_op_to_max_ratio` DOUBLE · `rs_population` INT.
 
 ## TIMESTAMPTZ 계약
 

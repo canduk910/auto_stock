@@ -245,7 +245,7 @@ async def stock_master_financial_load_task_loop(scheduler: Any, *, wait_time) ->
 
     관찰 전용 (Phase 1) — 매매 로직 diff 0. 주1회 신선도 게이트(168h) + master 후 stagger.
     """
-    from src.engine.scanner import _stock_master_financial_load_once
+    from src.engine import fundamental_load_tasks, scanner
     from src.engine.task_loop_helper import run_periodic_task_loop
 
     def _noop_record(_summary: dict) -> None:
@@ -254,11 +254,31 @@ async def stock_master_financial_load_task_loop(scheduler: Any, *, wait_time) ->
     def _noop_flush() -> None:
         return None
 
+    async def _financial_load_with_extras(force: bool = False) -> dict:
+        """연간 적재(`_stock_master_financial_load_once`) 뒤에 추가 적재(분기 재무·투자의견·추정실적)를 잇는다.
+
+        연간 쪽 예외도 추가 적재를 막지 않는다(감싼 뒤 다시 올려 기존 graceful 계약 유지) — 요약은 연간 것 그대로.
+        두 호출 모두 호출 시점의 모듈 속성으로 찾는다.
+        """
+        try:
+            summary = await scanner._stock_master_financial_load_once(force)
+        except Exception:
+            try:
+                await fundamental_load_tasks.run_extra_loads_once()
+            except Exception:
+                logger.exception("[fundamental_extra_load_failed] 추가 적재 실패 graceful")
+            raise
+        try:
+            await fundamental_load_tasks.run_extra_loads_once()
+        except Exception:
+            logger.exception("[fundamental_extra_load_failed] 추가 적재 실패 graceful")
+        return summary
+
     await run_periodic_task_loop(
         scheduler=scheduler,
         task_label="stock_master_financial_load",
         wait_time=wait_time,  # 16:40 KST
-        once_callable=_stock_master_financial_load_once,
+        once_callable=_financial_load_with_extras,
         record_fn=_noop_record,
         flush_fn=_noop_flush,
         summary_log_format=(

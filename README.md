@@ -926,7 +926,7 @@ gantt
 | 16:10 | (장 마감 후 데이터 계층) `stock_master` basics 보강 — KIS CTPF1002R 매스 (`TIME_STOCK_MASTER_BASICS_REFRESH`) |
 | 16:15 | `stock_master_daily` retention purge (`TIME_STOCK_MASTER_DAILY_PURGE`) — 적재(20:30)보다 **앞**이라 그날 적재분은 다음 날 purge 대상이다. 전일까지의 경계만 다루므로 행위 무영향 |
 | 16:30 | KIS 종목 마스터 파일 적재 — `kospi_code.mst` / `kosdaq_code.mst` (`TIME_STOCK_MASTER_MASTER_LOAD`) |
-| 16:40 | 퀀트 재무 5 TR 주1회 적재 — `_stock_master_financial_load_task_loop` (마스터 16:30 후 stagger, 주1회 신선도 게이트). 매매 무관 (cycleC1~C3, 마법공식·F-Score-7 원천) |
+| 16:40 | 퀀트 재무 5 TR 주1회 적재 — `_stock_master_financial_load_task_loop` (마스터 16:30 후 stagger, 주1회 신선도 게이트). 이어서 추가 적재(분기 재무 · 증권사 투자의견 주 1회 · 추정실적 월 1회, 16:00~19:00 창 · 19:30 마감 — `fundamental_load_tasks.py`, cycle453). 매매 무관 (cycleC1~C3, 마법공식·F-Score-7 원천) |
 | 19:50 | NXT 애프터 신규 매수 중단 (`TIME_NXT_POST_BUY_STOP` — 전 전략 `buy_disabled=True`. 이 시각에 하는 일은 매수 중단뿐이다) |
 | 20:00 | NXT 애프터 종료 + WebSocket 구독 해제(`unsubscribe_all`) → 전략수정 AI 자문 생성 (OpenAI → `parameter_recommendations`, `TIME_RECOMMENDATION`) → 직후 `auto_apply_recommendations()` (cycle23, 감액만 + 50% cap, `auto_apply_enabled=true` 시) |
 | 20:00:05 | 전체 유니버스 적재 (`TIME_FULL_UNIVERSE_LOAD` — 전략수정 AI자문 직후 5초 마진) |

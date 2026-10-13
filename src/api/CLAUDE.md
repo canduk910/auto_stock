@@ -210,7 +210,7 @@ KIS 공식 일일 마스터 파일 cp949 fixed-width 파싱 → `list[dict]` →
 컬럼 이름·용도 = `src/db/CLAUDE.md` 「stock_master_financial.py」 절(정규화 NUMERIC 18종).
 
 - `fetch_financial_tr(ticker, tr_key, div_cls="0") -> list[dict]`(단일 TR, output = 다기간 list, `div_cls` 0=년/1=분기) · `fetch_all_financials(ticker, div_cls="0") -> list[dict]`(5 TR 후 `stac_yymm` join 병합)
-- 호출자 = `src/engine/scanner.py::_stock_master_financial_load_once()` 하나(주1회 16:40). 매매 hot path 무관
+- 호출자 = `src/engine/scanner.py::_stock_master_financial_load_once()`(연간, 16:40) · `src/engine/fundamental_load_tasks.py`(분기 `div_cls="1"`, 같은 16:40 실행의 추가 적재). 매매 hot path 무관
 
 ## krx.py — KRX 정식 OPEN API 클라이언트
 
@@ -366,12 +366,12 @@ WebSocket 장운영정보의 **파싱 정본**이다. 구독 송신 = `src/engin
 - 호출자는 **미국 종가 확정 뒤(KST 07:00 이후, 서머타임 전환 양쪽 포함)** 에만 불러야 한다 — 이 모듈은
   시각을 판단하지 않는다. 소비처 = `ndx2x_ingest.ensure_history` 하나.
 
-## invest_opinion.py — 종목투자의견 · 종목추정실적 (RS·재무 1단계)
+## invest_opinion.py — 종목투자의견 · 종목추정실적 (RS·재무)
 
-🔴 **소비처 없음 · 2단계 배선 대기** — scheduler·scanner·전략 어디서도 부르지 않는다(명세 `_workspace/design/2026-10-13_rs_fundamental_phase1.md` + `_amend1.md`). 두 path 는 `_QUOTE_ALLOWED_PATHS` 에 등재돼 있다(가드 `tests/unit/api/test_invest_opinion.py::test_quote_allowed_paths_include_new_paths`).
+호출자 = `src/engine/fundamental_load_tasks.py` 하나(16:40 재무 적재 뒤 추가 적재 — 투자의견 주 1회 · 추정실적 월 1회, `src/engine/CLAUDE.md` 모듈 맵). 매매 경로는 부르지 않는다(명세 `_workspace/design/2026-10-13_rs_fundamental_phase1.md` + `_amend1.md` · `…_phase2.md`). 두 path 는 `_QUOTE_ALLOWED_PATHS` 에 등재돼 있다(가드 `tests/unit/api/test_invest_opinion.py::test_quote_allowed_paths_include_new_paths`).
 
 - `inquire_invest_opinion(ticker, date_from, date_to) -> list[dict]` — `FHKST663300C0` `/uapi/domestic-stock/v1/quotations/invest-opinion`, `kis_get_quote`(시세 풀) 경유. 파라미터 = `FID_COND_MRKT_DIV_CODE="J"` · `FID_COND_SCR_DIV_CODE="16633"` · `FID_INPUT_ISCD` · `FID_INPUT_DATE_1/2`(YYYYMMDD). 반환 행 = `bsop_date`(`date`) · `mbcr_name` · `invt_opnn` · `rgbf_invt_opnn` · `hts_goal_prc`(int) · `stck_prdy_clpr`(int) · `dprt`(float) · `raw`(원본 행). 빈 숫자 = `None`, `0` 은 `0`.
-  - 한 응답 최대 `_OPINION_PAGE_SIZE=100` 행. 100 행에 닿으면 `[invest_opinion_truncated]` WARNING — 잘렸을 수 있으니 기간을 쪼개 다시 부른다(자동 분할은 없다).
+  - 한 응답 최대 `_OPINION_PAGE_SIZE=100` 행. 100 행에 닿으면 `[invest_opinion_truncated]` WARNING — 잘렸을 수 있으니 기간을 쪼개 다시 부른다(래퍼에는 자동 분할이 없다 — 추가 적재가 그 창을 반으로 1회 나눠 다시 부른다).
 - `inquire_estimate_perform(ticker) -> dict | None` — `HHKST668300C0` `/uapi/domestic-stock/v1/quotations/estimate-perform`(파라미터 `SHT_CD`). 반환 = `{ticker, raw, settle_months}` — `raw` = 응답 전체(`_response_headers` 제외), `settle_months` = `output4[].dt`. `output1` 한글명은 문서에서 ELW 용으로 잘못 붙어 있어 해석하지 않고 `raw` 로만 둔다.
 - 🔴 **둘 다 실전 전용(모의 미지원)** — `settings.is_production` 이 거짓이면 KIS 를 부르지 않고 `[]` / `None` 을 돌려준다. KIS 오류(`rt_cd != "0"`)는 삼키지 않고 전파한다.
 - 정규화·집계는 순수 leaf `src/engine/fundamental_score.py` 몫이다(`src/engine/CLAUDE.md` 모듈 맵). 저장 = `src/db/invest_opinion.py`.
