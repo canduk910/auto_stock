@@ -9,7 +9,7 @@
 - `DATABASE_URL_TEST` env 있으면 그 DSN 사용 (CI 의 postgres:15 service 컨테이너).
 - 없으면 로컬 docker `postgres:15` 컨테이너를 subprocess 로 기동 (testcontainers 부재).
   랜덤 host 포트(`-p 0:5432`) → `docker port` 로 파싱 → healthcheck.
-- 확보한 DSN 으로 asyncpg 연결 → **migrations 디렉토리의 `*.sql` 전체를 파일명 정렬 순서로 순차 적용**(새 migration 은 파일만 추가하면 자동 포함) (각 `.sql` 파일 내용을
+- 확보한 DSN 으로 asyncpg 연결 → **migrations 디렉토리의 `*.sql` 전체를 파일명 정렬 순서로 순차 적용**(새 migration 은 파일만 추가하면 자동 포함 — 043 `llm_buy_evaluations` · 045 `trade_cost_daily` · 046 `trade_history.order_price` · 047 `trade_journal_*` · 051 `invest_opinion_history`·`estimate_perform_snapshot` 포함) (각 `.sql` 파일 내용을
   `conn.execute`) → `src.db.pg` 전역 풀을 그 DSN 으로 연결 → yield → teardown.
 
 docker 도, `DATABASE_URL_TEST` 도 없으면 fixture 가 `pytest.skip` — 통합은 옵셔널.
