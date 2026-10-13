@@ -179,6 +179,10 @@ _QUOTE_ALLOWED_PATHS: frozenset[str] = frozenset({
     # 없음) → 보조 풀 라우팅 자금 안전 정책 부합. 누락 시
     # `src.api.overseas_quote.fetch_daily_chartprice` → QuotePoolPathError.
     "/uapi/overseas-price/v1/quotations/inquire-daily-chartprice",
+    # 2026-10-13 RS·재무 1단계 — 종목투자의견(FHKST663300C0) · 종목추정실적(HHKST668300C0).
+    # 시세성 조회, 계좌·주문 식별자 없음 → 보조 풀 라우팅 부합.
+    "/uapi/domestic-stock/v1/quotations/invest-opinion",
+    "/uapi/domestic-stock/v1/quotations/estimate-perform",
 })
 
 # 보조 매니저별 격리된 Rate Limit 세마포어 (메인 20, 보조 18 보수적)

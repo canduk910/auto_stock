@@ -32,12 +32,12 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 거�
 
 **자금 안전 절대 원칙**:
 - 매매(`place_order`/`cancel_order`) · 잔고(`get_balance`/`get_buyable`) · 체결조회(`get_daily_orders`) · 체결통보 = 언제나 메인 단일(`kis_get`/`kis_post`)
-- 풀에 오는 것 = `condition.py` 함수 전부 · `quotation.py`(`inquire_ccnl` · `inquire_acml_vol`) · `finance.fetch_financial_tr` · `market_operation.inquire_vi_status_today` · `period_chart.fetch_candle_chart` · `scanner._fetch_market_cap_page`. `krx.py` 는 KIS 밖이라 무관
+- 풀에 오는 것 = `condition.py` 함수 전부 · `quotation.py`(`inquire_ccnl` · `inquire_acml_vol`) · `finance.fetch_financial_tr` · `market_operation.inquire_vi_status_today` · `period_chart.fetch_candle_chart` · `overseas_quote.fetch_daily_chartprice` · `invest_opinion.py` 함수 2개 · `scanner._fetch_market_cap_page`. `krx.py` 는 KIS 밖이라 무관
 
 **Public API** — `kis_get_quote(path, tr_id, params, *, hashkey="")`(보조 라운드로빈 + 메인 fallback) · `kis_post_quote(path, tr_id, body, *, hashkey="")` · `get_quote_request_metrics() -> dict` · `reset_quote_request_metrics() -> None`
 
 **Path 가드** (`QuotePoolPathError` — `ValueError` 서브클래스):
-- 화이트리스트 **13 path**(`_QUOTE_ALLOWED_PATHS`, 상수는 `/uapi/domestic-stock/v1` 접두 포함)만 허용: `/quotations/inquire-price` / `/quotations/inquire-daily-itemchartprice` / `/ranking/fluctuation` / `/quotations/search-stock-info` / `/quotations/chk-holiday` / `/quotations/inquire-ccnl` / `/ranking/market-cap` / `/quotations/inquire-vi-status` / `/finance/income-statement` / `/finance/balance-sheet` / `/finance/profit-ratio` / `/finance/stability-ratio` / `/finance/other-major-ratios`
+- 화이트리스트 **16 path**(`_QUOTE_ALLOWED_PATHS`, 상수는 전체 경로 — 아래 15개는 `/uapi/domestic-stock/v1` 접두를 줄여 적었다)만 허용: `/quotations/inquire-price` / `/quotations/inquire-daily-itemchartprice` / `/ranking/fluctuation` / `/quotations/search-stock-info` / `/quotations/chk-holiday` / `/quotations/inquire-ccnl` / `/ranking/market-cap` / `/quotations/inquire-vi-status` / `/finance/income-statement` / `/finance/balance-sheet` / `/finance/profit-ratio` / `/finance/stability-ratio` / `/finance/other-major-ratios` / `/quotations/invest-opinion` / `/quotations/estimate-perform` + 해외 1개 `/uapi/overseas-price/v1/quotations/inquire-daily-chartprice`
 - 🔴 **신규 시세 path 는 화이트리스트 등재 + AST 가드 동반이 의무**다 — 빠뜨리면 그 호출이 `QuotePoolPathError` 로 전건 실패한다
 - `/quotations/volume-rank`(거래량순위 FHPST01710000) **재도입 금지** — 호출 0건 dead 로 폐기. 가드 `tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py`
 - 매매성 path 오염 검사는 **세그먼트 판정** — 키워드 부분일치는 `finance/balance-sheet` 를 `inquire-balance` 로 오탐한다. 가드 `tests/unit/api/test_cycle109_market_cap_allowlist.py` · `tests/unit/api/test_cycleC1_finance_allowlist.py` · `tests/unit/api/test_vi_status_quote_allowlist.py`
@@ -365,6 +365,16 @@ WebSocket 장운영정보의 **파싱 정본**이다. 구독 송신 = `src/engin
   호출해 상쇄한다(그 겹침 날짜는 이전 응답에 실존했던 날이라 이번 응답의 시작 경계가 아니다).
 - 호출자는 **미국 종가 확정 뒤(KST 07:00 이후, 서머타임 전환 양쪽 포함)** 에만 불러야 한다 — 이 모듈은
   시각을 판단하지 않는다. 소비처 = `ndx2x_ingest.ensure_history` 하나.
+
+## invest_opinion.py — 종목투자의견 · 종목추정실적 (RS·재무 1단계)
+
+🔴 **소비처 없음 · 2단계 배선 대기** — scheduler·scanner·전략 어디서도 부르지 않는다(명세 `_workspace/design/2026-10-13_rs_fundamental_phase1.md` + `_amend1.md`). 두 path 는 `_QUOTE_ALLOWED_PATHS` 에 등재돼 있다(가드 `tests/unit/api/test_invest_opinion.py::test_quote_allowed_paths_include_new_paths`).
+
+- `inquire_invest_opinion(ticker, date_from, date_to) -> list[dict]` — `FHKST663300C0` `/uapi/domestic-stock/v1/quotations/invest-opinion`, `kis_get_quote`(시세 풀) 경유. 파라미터 = `FID_COND_MRKT_DIV_CODE="J"` · `FID_COND_SCR_DIV_CODE="16633"` · `FID_INPUT_ISCD` · `FID_INPUT_DATE_1/2`(YYYYMMDD). 반환 행 = `bsop_date`(`date`) · `mbcr_name` · `invt_opnn` · `rgbf_invt_opnn` · `hts_goal_prc`(int) · `stck_prdy_clpr`(int) · `dprt`(float) · `raw`(원본 행). 빈 숫자 = `None`, `0` 은 `0`.
+  - 한 응답 최대 `_OPINION_PAGE_SIZE=100` 행. 100 행에 닿으면 `[invest_opinion_truncated]` WARNING — 잘렸을 수 있으니 기간을 쪼개 다시 부른다(자동 분할은 없다).
+- `inquire_estimate_perform(ticker) -> dict | None` — `HHKST668300C0` `/uapi/domestic-stock/v1/quotations/estimate-perform`(파라미터 `SHT_CD`). 반환 = `{ticker, raw, settle_months}` — `raw` = 응답 전체(`_response_headers` 제외), `settle_months` = `output4[].dt`. `output1` 한글명은 문서에서 ELW 용으로 잘못 붙어 있어 해석하지 않고 `raw` 로만 둔다.
+- 🔴 **둘 다 실전 전용(모의 미지원)** — `settings.is_production` 이 거짓이면 KIS 를 부르지 않고 `[]` / `None` 을 돌려준다. KIS 오류(`rt_cd != "0"`)는 삼키지 않고 전파한다.
+- 정규화·집계는 순수 leaf `src/engine/fundamental_score.py` 몫이다(`src/engine/CLAUDE.md` 모듈 맵). 저장 = `src/db/invest_opinion.py`.
 
 ## 새 API 추가 절차
 

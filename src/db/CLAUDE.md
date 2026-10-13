@@ -417,6 +417,16 @@ T7(120일선 20영업일 기울기)·R4(250일 고점 대비 하락률)를 계�
 전부 흡수(`[]`/`0`/`None` + `logger.exception`) — 호출자(`ndx2x_ingest.ensure_history`)가
 재시도·fail-closed 판단을 맡는다.
 
+## invest_opinion.py — 증권사 투자의견 이력 · 추정실적 월 스냅샷 (RS·재무 1단계)
+
+테이블 2종(migration 051, 가산형 신규 테이블) — 칸·PK 는 아래 「DB 스키마」 절. 🔴 **소비처 없음 · 2단계 배선 대기** — 적재 스케줄도 읽는 쪽도 아직 없다(명세 `_workspace/design/2026-10-13_rs_fundamental_phase1.md` + `_amend1.md`). 매매 경로와 무관한 관찰 데이터라 DB 예외는 전부 흡수한다(`logger.exception` 후 `0`/`False`/`[]`).
+
+| 함수 | 계약 |
+|---|---|
+| `upsert_opinions(ticker, rows) -> int` | `ON CONFLICT (ticker, bsop_date, mbcr_name) DO UPDATE` — **멱등**. `bsop_date` 가 `None` 이거나 `mbcr_name` 이 빈 행은 버리고 WARNING · 묶음 안 같은 PK 는 **마지막 행**만 남긴다. 반환 = 실제로 보낸 행 수(빈 입력·전부 무효·실패 = 0) |
+| `upsert_estimate_snapshot(ticker, snapshot_month, data) -> bool` | `ON CONFLICT (ticker, snapshot_month) DO UPDATE`. `data` = `api/invest_opinion.inquire_estimate_perform` 반환(`settle_months`·`raw`). 성공 `True` |
+| `get_opinions(ticker, date_from, date_to) -> list[dict]` | 기간 안 의견(`bsop_date DESC`). `raw`·`fetched_at` 은 읽지 않는다 |
+
 ## parameter_recommendations.py — 전략수정 AI자문 이력
 
 - `insert_recommendation()`: 20:00 자문 생성 시 INSERT(status: pending). `(target_date, strategy_id)` UNIQUE 충돌은 `None`
@@ -452,6 +462,9 @@ T7(120일선 20영업일 기울기)·R4(250일 고점 대비 하락률)를 계�
   - `exit_ai_runs` — 하루 1행(`run_date` PK). 「대상 없음」(`no_targets`) 과 「워커가 안 돌았다」(`engine_not_running`·`g1_failed`) 를 가른다.
   - 🔴 **`DELETE` 권한을 주지 않는다** — 영구 보존(사용자 결정 「히스토리도 남겨두자」).
   - 🔴 매매 경로 무접촉 — `src/engine/`·8영역에 `exit_ai_*` 언급이 있으면 구조 가드(`tests/unit/ast/test_cycle446_ast_exit_ai_scope.py`)가 붉어진다.
+- **RS·재무 1단계 2표**(migration 051, 가산형 `CREATE TABLE IF NOT EXISTS` 만). 읽기·쓰기 = 위 `invest_opinion.py`. 🔴 소비처 없음 · 2단계 배선 대기.
+  - `invest_opinion_history` — PK `(ticker, bsop_date, mbcr_name)`. 칸 = `invt_opnn`·`rgbf_invt_opnn` TEXT · `hts_goal_prc`·`stck_prdy_clpr` BIGINT · `dprt` NUMERIC(10,2) · `raw` JSONB NOT NULL(기본 `{}`) · `fetched_at` TIMESTAMPTZ NOT NULL.
+  - `estimate_perform_snapshot` — PK `(ticker, snapshot_month)`(DATE). 칸 = `settle_months` TEXT[] NOT NULL(기본 `{}`) · `raw` JSONB NOT NULL(기본 `{}`) · `fetched_at` TIMESTAMPTZ NOT NULL.
 
 ## TIMESTAMPTZ 계약
 
