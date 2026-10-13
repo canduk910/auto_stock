@@ -234,8 +234,9 @@ cd frontend && npm install && npm run dev
 | `strategy_funnel_snapshots` | 전략별 조건검색 단계별 후보/탈락 종목 (`(target_date, strategy_id, step_no)` UNIQUE). 잠정 쓰기는 확정 행을 덮지 못한다 |
 | `trade_journal_orders` · `_stops` · `_notes` · `_cursor` | 거래일지 (migration 047) — 주문 1건 1행(`(order_date, order_no, side)` UNIQUE) · 손절선 사건 · 메모 · 로그 커서. **`_orders`·`_stops`·`_cursor` 를 쓰는 쪽은 `journal_worker` 컨테이너의 전용 DB 역할 하나**다(`journal_worker/ops/role.sql`). backend 는 `src/db/trade_journal.py` 로 `_orders`·`_stops` 를 읽기만 하고(거래일지 탭 `GET /api/history/journal`), 메모 `_notes` 만 쓴다(`PUT /api/history/journal/notes/{id}`). 칸·규약 = `src/db/CLAUDE.md` 「DB 스키마」 절 |
 | `exit_ai_evaluations` · `exit_ai_runs` | 청산 AI 섀도 기록(migration 050, cycle446) — 평가 1행 = 포지션 × 입력 봉 날짜(영구 보존, DELETE 권한 없음) · 하루 1행(「대상 없음」과 「워커 중단」을 가른다). **쓰는 쪽은 `llm_worker` 컨테이너의 전용 DB 역할 하나**다(`llm_worker/ops/role.sql`). backend 는 `src/db/exit_ai.py` 로 **읽기만** 한다(잔고 「AI 판단」 칸 `GET /api/balance` · 거래일지 「AI 청산 의견」 `GET /api/history/journal` · 대시보드 경고등 `GET /api/system/alerts`). 매매 행위에 연결되지 않는다(`src/engine/`·8영역 무접촉) |
-| `invest_opinion_history` | 증권사 투자의견·목표가 이력 (migration 051, PK `(ticker, bsop_date, mbcr_name)`, KIS `FHKST663300C0`). **소비처 없음 · 2단계 배선 대기**(명세 `_workspace/design/2026-10-13_rs_fundamental_phase1.md` + `_amend1.md`) |
-| `estimate_perform_snapshot` | 종목 추정실적 월 스냅샷 (migration 051, PK `(ticker, snapshot_month)`, KIS `HHKST668300C0` 원본 `raw`). **소비처 없음 · 2단계 배선 대기** |
+| `invest_opinion_history` | 증권사 투자의견·목표가 이력 (migration 051, PK `(ticker, bsop_date, mbcr_name)`, KIS `FHKST663300C0`). 16:40 재무 적재 뒤 추가 적재가 주 1회 쓰고, 부팅 관찰 기록이 읽는다(매매 무관 — `src/engine/CLAUDE.md` 모듈 맵 `fundamental_load_tasks.py`·`rs_fundamental_observe.py`) |
+| `estimate_perform_snapshot` | 종목 추정실적 월 스냅샷 (migration 051, PK `(ticker, snapshot_month)`, KIS `HHKST668300C0` 원본 `raw`). 16:40 추가 적재가 월 1회 쓴다(점수 계산에 읽는 쪽은 아직 없다 — 적재가 그 달 행 유무만 본다) |
+| `candidate_score_snapshots` | 4전략(`donchian_swing`·`vcp_breakout`·`kojiro`·`etf_trend`) 후보·보유 종목별 RS·재무·목표가 점수 관찰 기록 (migration 052, PK `(target_date, strategy_id, ticker)`). 매일 부팅 때 1회 쓴다. **관찰 전용 — 매매 경로가 읽지 않는다**. 칸 = `src/db/CLAUDE.md` 「DB 스키마」 절 |
 
 > **`stock_master` / `stock_master_daily` UI 동기화 의무**: `stock_master` 컬럼 / `raw` JSONB 키 / `stock_master_daily` 컬럼을 추가하면 UI 에 노출한다. 절차 = `frontend/CLAUDE.md` 「(6) 신규 데이터 추가 시 UI 동기화 절차 (영구 가드)」 절.
 
