@@ -23,6 +23,7 @@ from src.engine import rs_score
 
 logger = logging.getLogger(__name__)
 
+INITIAL_DELAY_SECS = 60  # 부팅 후반·WS 연결과 겹치지 않게 늦춰 시작한다
 WAIT_PREPARE_SECS = 600
 PREPARE_POLL_SECS = 10
 RUN_TIMEOUT_SECS = 300
@@ -31,7 +32,9 @@ _NO_FUNDAMENTAL = frozenset({"etf_trend"})
 _MODE_KEY = "rs_fundamental_observe_mode"
 _CLOSES_N = 200
 _OPINION_LOOKBACK_DAYS = 400
-_OPINION_CONCURRENCY = 8
+_OPINION_CONCURRENCY = 3
+
+_BG_TASKS: set[asyncio.Task] = set()  # asyncio 는 Task 를 약한 참조로만 들어 GC 가 지울 수 있다 — 끝날 때까지 보관
 
 _RS_COLS = ("rs_raw", "rs_pct", "sector_key", "vs_sector", "sector_pct", "in_sector_pct")
 _TARGET_COLS = ("revision_breadth", "target_median_change", "opinion_brokers")
@@ -154,8 +157,16 @@ def _prepare_state(strategy: Any) -> str:
     return "pending"
 
 
-async def _wait_prepared(registry: Any) -> list[Any]:
-    """대상 전략(레지스트리에 있고 켜진 것)이 부팅 prepare 를 끝낼 때까지 기다린다. 못 기다린 전략은 skip 로그."""
+def _stopped(scheduler: Any) -> bool:
+    """엔진이 멈췄다(`_running` 거짓)? 속성이 없으면 돌고 있는 것으로 본다."""
+    return not getattr(scheduler, "_running", True)
+
+
+async def _wait_prepared(registry: Any, scheduler: Any = None) -> list[Any]:
+    """대상 전략(레지스트리에 있고 켜진 것)이 부팅 prepare 를 끝낼 때까지 기다린다. 못 기다린 전략은 skip 로그.
+
+    엔진이 멈추면 조용히 `[]` 로 끝난다(skip 로그도 남기지 않는다).
+    """
     pending: dict[str, Any] = {}
     for sid in TARGET_STRATEGIES:
         s = registry.get(sid)
@@ -164,6 +175,8 @@ async def _wait_prepared(registry: Any) -> list[Any]:
     ready: list[Any] = []
     deadline = time.monotonic() + WAIT_PREPARE_SECS
     while pending:
+        if _stopped(scheduler):
+            return []
         for sid, s in list(pending.items()):
             state = _prepare_state(s)
             if state == "done":
@@ -282,8 +295,11 @@ async def _run(scheduler: Any) -> None:
     try:
         # prepare 대기가 먼저다 — 킬스위치(DB 조회)를 먼저 읽으면 prepare 가 끝나지 않는 단위 테스트의 boot() 마다
         # 풀 미초기화 연결 시도로 teardown 이 10초씩 늘어난다. off 여도 대기 비용은 폴링뿐이다.
-        ready = await _wait_prepared(scheduler.registry)
-        if not ready or await _read_mode() == "off":
+        await asyncio.sleep(INITIAL_DELAY_SECS)
+        if _stopped(scheduler):
+            return
+        ready = await _wait_prepared(scheduler.registry, scheduler)
+        if not ready or await _read_mode() == "off" or _stopped(scheduler):
             return
         await asyncio.wait_for(_compute_and_write(ready, today_kst()), RUN_TIMEOUT_SECS)
     except asyncio.TimeoutError:
@@ -297,7 +313,10 @@ async def _run(scheduler: Any) -> None:
 def spawn_boot_observe(scheduler: Any) -> asyncio.Task | None:
     """부팅 관찰 기록 태스크를 띄운다(await 없음). 실행 중 루프가 없으면 None. 예외 없음."""
     try:
-        return asyncio.get_running_loop().create_task(_run(scheduler), name="rs_fundamental_observe")
+        task = asyncio.get_running_loop().create_task(_run(scheduler), name="rs_fundamental_observe")
+        _BG_TASKS.add(task)
+        task.add_done_callback(_BG_TASKS.discard)
+        return task
     except RuntimeError:
         return None
     except Exception:

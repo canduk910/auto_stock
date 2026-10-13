@@ -6,16 +6,17 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
-from datetime import date
+from datetime import date, timedelta
 
 import src.db.pg as pg
 from src.db._kst import to_date
 
+_LOOKBACK_CAL_DAYS = 320  # 200봉(≈285 달력일) + 여유 — 오래된 봉까지 스캔하지 않는다
 _FINANCIAL_COLUMNS = ("ticker", "stac_yymm", "div_cls", "sale_account", "bsop_prti", "thtr_ntin", "lblt_rate")
 
 
 async def recent_closes_bulk(before: date | str, n: int = 200) -> dict[str, list[float]]:
-    """`bas_dd < before` 종목별 최근 n봉 종가 — 오래된→최신. 창 함수 1쿼리."""
+    """`before − 320일 <= bas_dd < before` 종목별 최근 n봉 종가 — 오래된→최신. 창 함수 1쿼리."""
     rows = await pg.fetch(
         """
         SELECT ticker, bas_dd, close_price
@@ -23,11 +24,11 @@ async def recent_closes_bulk(before: date | str, n: int = 200) -> dict[str, list
             SELECT ticker, bas_dd, close_price,
                    row_number() OVER (PARTITION BY ticker ORDER BY bas_dd DESC) AS rn
             FROM stock_master_daily
-            WHERE bas_dd < $1
+            WHERE bas_dd < $1 AND bas_dd >= $3
         ) t
         WHERE rn <= $2
         """,
-        to_date(before), int(n),
+        to_date(before), int(n), to_date(before) - timedelta(days=_LOOKBACK_CAL_DAYS),
     )
     per: dict[str, list[tuple[date, float]]] = defaultdict(list)
     for r in rows or []:

@@ -77,6 +77,18 @@ async def test_recent_closes_bulk_single_window_query_and_ascending_output():
     assert all(isinstance(v, float) for vs in out.values() for v in vs)
 
 
+async def test_recent_closes_bulk_lower_bound_320_days():
+    si = _si()
+    d = date(2026, 10, 13)
+    with patch.object(si, "pg", create=True) as pg_mod:
+        pg_mod.fetch = AsyncMock(return_value=[])
+        await si.recent_closes_bulk(d, n=200)
+    sql = pg_mod.fetch.await_args.args[0]
+    args = list(pg_mod.fetch.await_args.args[1:])
+    assert re.search(r"bas_dd\s*>=\s*\$\d", sql), "스캔 축소 = bas_dd 하한"
+    assert d - timedelta(days=320) in args
+
+
 async def test_recent_closes_bulk_binds_date_even_for_str():
     si = _si()
     with patch.object(si, "pg", create=True) as pg_mod:

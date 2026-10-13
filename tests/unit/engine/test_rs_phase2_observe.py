@@ -67,6 +67,8 @@ def test_constants():
     assert rfo.PREPARE_POLL_SECS == 10
     assert rfo.RUN_TIMEOUT_SECS == 300
     assert tuple(rfo.TARGET_STRATEGIES) == ("donchian_swing", "vcp_breakout", "kojiro", "etf_trend")
+    assert rfo.INITIAL_DELAY_SECS == 60
+    assert rfo._OPINION_CONCURRENCY == 3
 
 
 # ---------------------------------------------------------------------------
@@ -203,6 +205,7 @@ class Env:
         mp.setattr(sc_db, "_select_value", self._select)
         mp.setattr(rfo, "WAIT_PREPARE_SECS", 0.3)
         mp.setattr(rfo, "PREPARE_POLL_SECS", 0.01, raising=False)
+        mp.setattr(rfo, "INITIAL_DELAY_SECS", 0, raising=False)  # 부팅 지연 60초는 테스트가 줄인다
 
     async def _closes(self, before, n=200):
         return {t: list(c) for t, c in CLOSES.items()}
@@ -484,7 +487,93 @@ async def test_spawn_with_broken_scheduler_never_raises(monkeypatch):
 
     monkeypatch.setattr(sc_db, "_select_value", _missing)
     monkeypatch.setattr(rfo, "WAIT_PREPARE_SECS", 0.3)
+    monkeypatch.setattr(rfo, "INITIAL_DELAY_SECS", 0, raising=False)
     task = rfo.spawn_boot_observe(object())
     if task is not None:
         await asyncio.wait_for(task, 5)
         assert task.exception() is None
+
+
+# ---------------------------------------------------------------------------
+# tester 지적 4~6 — Task 보관 · 시작 지연 · 중지 감지 · 의견 조회 동시성 3
+# ---------------------------------------------------------------------------
+async def test_spawned_task_is_held_in_bg_tasks_until_done(monkeypatch):
+    env = Env(monkeypatch, _default_strategies())
+    task = rfo.spawn_boot_observe(env.scheduler)
+    assert task in rfo._BG_TASKS, "약한 참조만 남으면 GC 가 태스크를 지운다 — 모듈 전역에 보관"
+    await asyncio.wait_for(task, 5)
+    await asyncio.sleep(0)
+    assert task not in rfo._BG_TASKS, "끝나면 add_done_callback 이 치운다"
+
+
+async def test_initial_delay_precedes_any_work(monkeypatch):
+    env = Env(monkeypatch, _default_strategies())
+    monkeypatch.setattr(rfo, "INITIAL_DELAY_SECS", 0.2)
+    task = rfo.spawn_boot_observe(env.scheduler)
+    await asyncio.sleep(0.05)
+    assert env.closes.await_count == 0 and env.upsert.await_count == 0, "지연 중에는 DB 를 읽지 않는다"
+    await asyncio.wait_for(task, 5)
+    assert env.upsert.await_count == 1
+
+
+async def test_scheduler_not_running_at_start_exits_silently(monkeypatch):
+    env = Env(monkeypatch, _default_strategies())
+    env.scheduler._running = False
+    task = rfo.spawn_boot_observe(env.scheduler)
+    await asyncio.wait_for(task, 5)
+    assert task.exception() is None
+    assert env.upsert.await_count == 0 and env.closes.await_count == 0
+
+
+async def test_scheduler_stops_while_waiting_prepare_exits_silently(monkeypatch, caplog):
+    strategies = _default_strategies()
+    strategies[1] = FakeStrategy("vcp_breakout", scanned=["000040"], meta={"ok": None, "phase": "boot"})
+    env = Env(monkeypatch, strategies)
+    monkeypatch.setattr(rfo, "WAIT_PREPARE_SECS", 5)
+    env.scheduler._running = True
+
+    async def _stop_later():
+        await asyncio.sleep(0.05)
+        env.scheduler._running = False
+
+    stopper = asyncio.create_task(_stop_later())
+    with caplog.at_level(logging.DEBUG):
+        task = rfo.spawn_boot_observe(env.scheduler)
+        await asyncio.wait_for(task, 2)
+    await stopper
+    assert env.upsert.await_count == 0 and env.closes.await_count == 0
+    assert not any("skipped=prepare_not_done" in r.getMessage() for r in caplog.records), "중지는 조용히 끝난다"
+
+
+async def test_scheduler_stops_right_before_compute_writes_nothing(monkeypatch):
+    env = Env(monkeypatch, _default_strategies())
+    env.scheduler._running = True
+    real = rfo._read_mode
+
+    async def _read_then_stop():
+        mode = await real()
+        env.scheduler._running = False
+        return mode
+
+    monkeypatch.setattr(rfo, "_read_mode", _read_then_stop)
+    await env.run()
+    assert env.upsert.await_count == 0 and env.closes.await_count == 0
+
+
+async def test_opinion_lookup_concurrency_is_at_most_3(monkeypatch):
+    tickers = [f"0001{i:02d}" for i in range(12)]
+    strategies = [FakeStrategy("donchian_swing", scanned=tickers)]
+    env = Env(monkeypatch, strategies)
+    live = {"now": 0, "max": 0}
+
+    async def _slow(t, a, b):
+        live["now"] += 1
+        live["max"] = max(live["max"], live["now"])
+        await asyncio.sleep(0.01)
+        live["now"] -= 1
+        return []
+
+    env.opinions.side_effect = _slow
+    await env.run()
+    assert env.opinions.await_count == len(tickers)
+    assert live["max"] <= 3, f"동시 {live['max']}건"

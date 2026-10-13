@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, time as dtime, timedelta, timezone
 from typing import Any
 
 import src.api.finance as fin_api
@@ -26,10 +26,19 @@ logger = logging.getLogger(__name__)
 KST = timezone(timedelta(hours=9))
 
 EXTRA_LOAD_HARD_CAP_SECS = 3000  # 50분 — 넘으면 남은 종목은 다음 실행으로 미룬다
+EXTRA_LOAD_WINDOW_START = dtime(16, 0)  # 이 창 밖에서 불리면(부팅 직후 즉시 실행·장중 재기동) 전부 건너뛴다
+EXTRA_LOAD_WINDOW_END = dtime(19, 0)
+EXTRA_LOAD_DEADLINE = dtime(19, 30)  # 마감 = min(하드캡, 19:30 − 지금) — 20:00 AI 자문·20:30 일봉 적재 앞에서 멈춘다
 _MODE_KEY = "fundamental_extra_load_mode"
 _OPINION_MARKER_KEY = "fundamental_opinion_load_last"
+_OPINION_BACKFILL_MARKER_KEY = "fundamental_opinion_backfill_last"
+_ESTIMATE_EMPTY_KEY = "fundamental_estimate_empty_month"
 _OPINION_INTERVAL = timedelta(days=7)
 _OPINION_BACKFILL_DAYS = 400
+_OPINION_BACKFILL_INTERVAL = timedelta(days=90)  # 최신일 없는 종목의 400일 백필은 90일마다 1회
+_OPINION_RECENT_DAYS = 30  # 백필 마커가 신선하면 오늘−30일부터만
+_OPINION_OVERLAP_DAYS = 14  # 재개 = DB 최신일 − 14일(겹쳐 받기, upsert 멱등)
+_OPINION_FAIL_RATIO = 0.1  # 실패 종목이 시도 종목의 10% 미만이면 마커를 쓴다
 _OPINION_WINDOW_DAYS = 90
 _OPINION_PAGE_SIZE = 100
 _SLEEP_SECS = 0.05
@@ -143,7 +152,7 @@ async def _fetch_window(ticker: str, a: date, b: date) -> list[dict]:
     return rows
 
 
-def _marker_fresh(raw: object, now: datetime) -> bool:
+def _marker_fresh(raw: object, now: datetime, interval: timedelta = _OPINION_INTERVAL) -> bool:
     if raw is sc_db._MISSING:
         return False
     try:
@@ -152,7 +161,7 @@ def _marker_fresh(raw: object, now: datetime) -> bool:
         return False
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=KST)
-    return timedelta(0) <= now - dt < _OPINION_INTERVAL
+    return timedelta(0) <= now - dt < interval
 
 
 async def _opinion_branch(tickers: list[str], now: datetime, deadline: float, summary: dict) -> None:
@@ -160,15 +169,24 @@ async def _opinion_branch(tickers: list[str], now: datetime, deadline: float, su
     if _marker_fresh(await sc_db._select_value(_OPINION_MARKER_KEY), now):
         summary["opinion_skipped"] += len(tickers)
         return
+    backfill_fresh = _marker_fresh(
+        await sc_db._select_value(_OPINION_BACKFILL_MARKER_KEY), now, interval=_OPINION_BACKFILL_INTERVAL)
     latest = await io_db.latest_bsop_dates(tickers)
     clean = True
+    backfill_tried = False
     for ticker in tickers:
         if _over(deadline):
             summary["truncated"] = 1
             clean = False
             break
         d = latest.get(ticker)
-        start = today - timedelta(days=_OPINION_BACKFILL_DAYS) if d is None else d + timedelta(days=1)
+        if d is not None:
+            start = d - timedelta(days=_OPINION_OVERLAP_DAYS)
+        elif backfill_fresh:
+            start = today - timedelta(days=_OPINION_RECENT_DAYS)
+        else:
+            start = today - timedelta(days=_OPINION_BACKFILL_DAYS)
+            backfill_tried = True
         if start > today:
             summary["opinion_skipped"] += 1
             continue
@@ -180,36 +198,67 @@ async def _opinion_branch(tickers: list[str], now: datetime, deadline: float, su
             if collected:
                 summary["opinion_rows"] += await io_db.upsert_opinions(ticker, collected)
         except Exception:
-            # 일부 창만 저장하면 「DB 최신일 다음날부터」 재개 규칙이 빈 창을 영구히 건너뛴다 — 이 종목은 통째로 버린다
+            # 일부 창만 저장하면 재개 규칙이 빈 창을 건너뛸 수 있다 — 이 종목은 통째로 버리고 다음 주에 다시 한다
             logger.warning("[fundamental_extra_load_failed] opinion ticker=%s 실패", ticker, exc_info=True)
             summary["opinion_failed"] += 1
-            clean = False
-    if clean:
-        await sc_db._upsert_value(_OPINION_MARKER_KEY, {"value": now.isoformat()})
+    attempted = summary["opinion_tickers"]
+    failed = summary["opinion_failed"]
+    if clean and (failed == 0 or failed < attempted * _OPINION_FAIL_RATIO):
+        stamp = {"value": now.isoformat()}
+        await sc_db._upsert_value(_OPINION_MARKER_KEY, stamp)
+        if backfill_tried:
+            await sc_db._upsert_value(_OPINION_BACKFILL_MARKER_KEY, stamp)
+
+
+def _parse_empty_memory(raw: object, month_key: str) -> set[str]:
+    """`"YYYY-MM|t1,t2"` — 이번 달 것만 돌려준다(달이 바뀌면 빈 집합)."""
+    if raw is sc_db._MISSING:
+        return set()
+    text = str(_unwrap(raw))
+    head, _, tail = text.partition("|")
+    if head != month_key:
+        return set()
+    return {t for t in tail.split(",") if t}
 
 
 async def _estimate_branch(tickers: list[str], today: date, deadline: float, summary: dict) -> None:
     month = date(today.year, today.month, 1)
+    month_key = f"{today.year:04d}-{today.month:02d}"
     have = await io_db.estimate_snapshot_tickers(month)
-    for ticker in tickers:
-        if ticker in have:
-            summary["estimate_skipped"] += 1
-            continue
-        if _over(deadline):
-            summary["truncated"] = 1
-            return
-        try:
-            resp = await io_api.inquire_estimate_perform(ticker)
-            if not resp or not resp.get("settle_months"):
-                summary["estimate_skipped"] += 1  # 빈 응답은 저장하지 않는다(커버리지 약 160종목)
-            elif await io_db.upsert_estimate_snapshot(ticker, month, resp):
-                summary["estimate_saved"] += 1
-            else:
+    try:
+        empty_before = _parse_empty_memory(await sc_db._select_value(_ESTIMATE_EMPTY_KEY), month_key)
+    except Exception:
+        logger.warning("[fundamental_extra_load_failed] %s 조회 실패 — 기억 없이 진행", _ESTIMATE_EMPTY_KEY, exc_info=True)
+        empty_before = set()
+    empty_now = set(empty_before)
+    try:
+        for ticker in tickers:
+            if ticker in have or ticker in empty_before:
+                summary["estimate_skipped"] += 1
+                continue
+            if _over(deadline):
+                summary["truncated"] = 1
+                return
+            try:
+                resp = await io_api.inquire_estimate_perform(ticker)
+                if not resp or not resp.get("settle_months"):
+                    summary["estimate_skipped"] += 1  # 빈 응답은 저장하지 않는다(커버리지 약 160종목) — 이번 달엔 다시 묻지 않는다
+                    empty_now.add(ticker)
+                elif await io_db.upsert_estimate_snapshot(ticker, month, resp):
+                    summary["estimate_saved"] += 1
+                else:
+                    summary["estimate_failed"] += 1
+            except Exception:
+                logger.warning("[fundamental_extra_load_failed] estimate ticker=%s 실패", ticker, exc_info=True)
                 summary["estimate_failed"] += 1
-        except Exception:
-            logger.warning("[fundamental_extra_load_failed] estimate ticker=%s 실패", ticker, exc_info=True)
-            summary["estimate_failed"] += 1
-        await asyncio.sleep(_SLEEP_SECS)
+            await asyncio.sleep(_SLEEP_SECS)
+    finally:
+        if empty_now != empty_before:
+            try:
+                value = f"{month_key}|{','.join(sorted(empty_now))}"
+                await sc_db._upsert_value(_ESTIMATE_EMPTY_KEY, {"value": value})
+            except Exception:
+                logger.warning("[fundamental_extra_load_failed] %s 저장 실패", _ESTIMATE_EMPTY_KEY, exc_info=True)
 
 
 async def run_extra_loads_once(*, now_kst: datetime | None = None) -> dict:
@@ -219,9 +268,15 @@ async def run_extra_loads_once(*, now_kst: datetime | None = None) -> dict:
     branch_errors = 0
     try:
         now = now_kst or datetime.now(KST)
-        summary["mode"] = await _read_mode()
+        if not (EXTRA_LOAD_WINDOW_START <= now.time() < EXTRA_LOAD_WINDOW_END):
+            summary["mode"] = "out_of_window"
+        else:
+            summary["mode"] = await _read_mode()
         if summary["mode"] == "on":
-            deadline = start + EXTRA_LOAD_HARD_CAP_SECS
+            until_deadline = (now.replace(
+                hour=EXTRA_LOAD_DEADLINE.hour, minute=EXTRA_LOAD_DEADLINE.minute, second=0, microsecond=0,
+            ) - now).total_seconds()
+            deadline = start + min(EXTRA_LOAD_HARD_CAP_SECS, until_deadline)
             tickers = await _universe()
             summary["quarterly_total"] = len(tickers)
             for name, coro_fn in (

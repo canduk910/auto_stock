@@ -270,13 +270,14 @@ async def test_opinion_no_db_rows_starts_400_days_back_in_90_day_windows(monkeyp
     assert summary["opinion_tickers"] == 1
 
 
-async def test_opinion_resumes_day_after_latest_db_date(monkeypatch):
+async def test_opinion_resumes_14_days_before_latest_db_date(monkeypatch):
     env = Env(monkeypatch, tickers=("005930", "000660"))
     env.latest_dates = {"005930": TODAY - timedelta(days=10), "000660": TODAY}
     await _run()
-    _assert_tiles(env.op_windows("005930"), TODAY - timedelta(days=9), TODAY)
+    # 재개 시작일 = DB 최신일 − 14일(겹쳐 받기 — upsert 멱등)
+    _assert_tiles(env.op_windows("005930"), TODAY - timedelta(days=24), TODAY)
     assert len(env.op_windows("005930")) == 1
-    assert env.op_windows("000660") == [], "오늘까지 이미 있으면 조회하지 않는다"
+    _assert_tiles(env.op_windows("000660"), TODAY - timedelta(days=14), TODAY)
 
 
 async def test_opinion_rows_upserted_and_counted(monkeypatch):
@@ -293,13 +294,13 @@ async def test_opinion_rows_upserted_and_counted(monkeypatch):
 
 async def test_opinion_truncated_window_is_halved_once(monkeypatch):
     env = Env(monkeypatch, tickers=("005930",))
-    env.latest_dates = {"005930": TODAY - timedelta(days=60)}  # 창 1개 = [today-59, today]
+    env.latest_dates = {"005930": TODAY - timedelta(days=60)}  # 재개 = 최신일−14 → 창 1개 = [today-74, today]
     full = [{"bsop_date": TODAY - timedelta(days=i % 50), "mbcr_name": f"B{i}", "hts_goal_prc": 1, "raw": {}}
             for i in range(100)]
     env.opinion_resp = lambda t, a, b: list(full)  # 반쪽도 100건 — 그래도 한 번만 나눈다
     await _run()
     wins = env.op_windows("005930")
-    first = (TODAY - timedelta(days=59), TODAY)
+    first = (TODAY - timedelta(days=74), TODAY)
     assert wins[0] == first, wins
     halves = wins[1:]
     assert len(halves) == 2, f"100건이면 반으로 나눠 1회 재조회(2창): {wins}"
@@ -446,3 +447,174 @@ async def test_now_kst_default_is_accepted(monkeypatch):
     Env(monkeypatch)
     summary = await flt.run_extra_loads_once()
     assert isinstance(summary, dict) and "mode" in summary
+
+
+# ---------------------------------------------------------------------------
+# 시각 창 · 마감 (tester 지적 1)
+# ---------------------------------------------------------------------------
+def test_window_constants():
+    from datetime import time
+    assert flt.EXTRA_LOAD_WINDOW_START == time(16, 0)
+    assert flt.EXTRA_LOAD_WINDOW_END == time(19, 0)
+    assert flt.EXTRA_LOAD_DEADLINE == time(19, 30)
+
+
+@pytest.mark.parametrize("hh,mm", [(7, 50), (9, 30), (15, 59), (19, 0), (21, 0)])
+async def test_out_of_window_skips_everything(monkeypatch, hh, mm):
+    env = Env(monkeypatch)
+    now = datetime(2026, 10, 13, hh, mm, tzinfo=KST)
+    summary = await flt.run_extra_loads_once(now_kst=now)
+    assert summary["mode"] == "out_of_window"
+    for m in (env.list_by_filter, env.fetch_fin, env.inquire_op, env.inquire_est,
+              env.upsert_fin, env.upsert_op, env.upsert_est):
+        assert m.await_count == 0
+    assert env.store.writes == []
+
+
+@pytest.mark.parametrize("hh,mm", [(16, 0), (16, 40), (18, 59)])
+async def test_in_window_runs(monkeypatch, hh, mm):
+    env = Env(monkeypatch)
+    summary = await flt.run_extra_loads_once(now_kst=datetime(2026, 10, 13, hh, mm, tzinfo=KST))
+    assert summary["mode"] == "on"
+    assert env.fetch_fin.await_count == 3
+
+
+async def test_deadline_is_min_of_hard_cap_and_1930(monkeypatch):
+    seen = []
+    real_over = flt._over
+
+    def _spy(deadline):
+        seen.append(deadline)
+        return real_over(deadline)
+
+    monkeypatch.setattr(flt, "_over", _spy)
+    Env(monkeypatch)
+    import time as _t
+    t0 = _t.monotonic()
+    # 18:59:50 → 19:30 까지 1810초 < 3000초 하드캡
+    await flt.run_extra_loads_once(now_kst=datetime(2026, 10, 13, 18, 59, 50, tzinfo=KST))
+    assert seen
+    assert max(seen) - t0 <= 1810 + 5, f"마감이 19:30 을 넘는다: {max(seen) - t0}"
+    seen.clear()
+    await flt.run_extra_loads_once(now_kst=datetime(2026, 10, 13, 16, 0, tzinfo=KST))
+    assert 2990 <= max(seen) - t0 <= 3010, "16:00 → 하드캡(3000초)이 더 짧다"
+
+
+# ---------------------------------------------------------------------------
+# 추정실적 빈 응답 기억 (tester 지적 2)
+# ---------------------------------------------------------------------------
+EMPTY_KEY = "fundamental_estimate_empty_month"
+
+
+def _empty_val(store):
+    raw = store.data.get(EMPTY_KEY)
+    return raw["value"] if isinstance(raw, dict) else raw
+
+
+async def test_estimate_empty_tickers_remembered_for_the_month(monkeypatch):
+    env = Env(monkeypatch, tickers=("005930", "000660"))
+    env.est_resp = lambda t: None if t == "005930" else {"ticker": t, "raw": {}, "settle_months": ["202512"]}
+    await _run()
+    val = _empty_val(env.store)
+    month, tickers = val.split("|")
+    assert month == "2026-10" and tickers.split(",") == ["005930"]
+    # 같은 달 재실행 — 005930 은 다시 조회하지 않는다
+    env.inquire_est.reset_mock()
+    env.est_have = {"000660"}
+    summary = await _run()
+    assert [c.args[0] for c in env.inquire_est.await_args_list] == []
+    assert summary["estimate_skipped"] >= 2
+
+
+async def test_estimate_empty_memory_ignored_next_month(monkeypatch):
+    env = Env(monkeypatch, tickers=("005930",), config={EMPTY_KEY: {"value": "2026-09|005930"}})
+    await _run()
+    assert [c.args[0] for c in env.inquire_est.await_args_list] == ["005930"], "달이 바뀌면 기억을 무시한다"
+
+
+async def test_estimate_empty_memory_merges_not_overwrites(monkeypatch):
+    env = Env(monkeypatch, tickers=("005930", "000660"), config={EMPTY_KEY: {"value": "2026-10|005930"}})
+    env.est_resp = lambda t: None
+    await _run()
+    assert [c.args[0] for c in env.inquire_est.await_args_list] == ["000660"]
+    month, tickers = _empty_val(env.store).split("|")
+    assert month == "2026-10" and sorted(tickers.split(",")) == ["000660", "005930"]
+
+
+async def test_estimate_empty_memory_write_failure_is_isolated(monkeypatch):
+    env = Env(monkeypatch, tickers=("005930",))
+    env.est_resp = lambda t: None
+
+    async def _boom(key, value):
+        if key == EMPTY_KEY:
+            raise RuntimeError("pg down")
+        env.store.data[key] = value
+
+    monkeypatch.setattr(sc_db, "_upsert_value", _boom)
+    summary = await _run()
+    assert isinstance(summary, dict) and summary["estimate_saved"] == 0
+
+
+# ---------------------------------------------------------------------------
+# 투자의견 재개·백필 마커·갈래 마커 (tester 지적 3)
+# ---------------------------------------------------------------------------
+BACKFILL_KEY = "fundamental_opinion_backfill_last"
+
+
+async def test_opinion_no_db_rows_with_fresh_backfill_marker_starts_30_days_back(monkeypatch):
+    env = Env(monkeypatch, tickers=("005930",), config={BACKFILL_KEY: _marker(30)})
+    await _run()
+    _assert_tiles(env.op_windows("005930"), TODAY - timedelta(days=30), TODAY)
+
+
+async def test_opinion_no_db_rows_with_stale_backfill_marker_backfills_400(monkeypatch):
+    env = Env(monkeypatch, tickers=("005930",), config={BACKFILL_KEY: _marker(91)})
+    await _run()
+    _assert_tiles(env.op_windows("005930"), TODAY - timedelta(days=400), TODAY)
+
+
+async def test_backfill_marker_written_after_400_day_attempt(monkeypatch):
+    env = Env(monkeypatch, tickers=("005930",))
+    await _run()
+    written = [v for k, v in env.store.writes if k == BACKFILL_KEY]
+    assert written, "400일 백필을 시도한 실행 끝에 마커를 쓴다"
+    val = written[-1]["value"] if isinstance(written[-1], dict) else written[-1]
+    assert datetime.fromisoformat(str(val)).date() == TODAY
+
+
+async def test_backfill_marker_not_written_when_no_backfill_attempted(monkeypatch):
+    env = Env(monkeypatch, tickers=("005930",))
+    env.latest_dates = {"005930": TODAY - timedelta(days=3)}
+    await _run()
+    assert all(k != BACKFILL_KEY for k, _ in env.store.writes)
+
+
+async def test_opinion_marker_written_when_failures_under_10_percent(monkeypatch):
+    tickers = tuple(f"{i:06d}" for i in range(1, 21))  # 20종목 중 1개 실패 = 5%
+    env = Env(monkeypatch, tickers=tickers)
+
+    async def _op(ticker, a, b):
+        if ticker == "000001":
+            raise RuntimeError("KIS 500")
+        return []
+
+    env.inquire_op.side_effect = _op
+    summary = await _run()
+    assert summary["opinion_failed"] == 1
+    assert any(k == MARKER_KEY for k, _ in env.store.writes), "10% 미만 실패는 마커를 쓴다(실패 종목은 다음 주 재시도)"
+    assert any(k == BACKFILL_KEY for k, _ in env.store.writes)
+
+
+async def test_opinion_marker_not_written_when_failures_10_percent_or_more(monkeypatch):
+    tickers = tuple(f"{i:06d}" for i in range(1, 11))  # 10종목 중 1개 = 10%
+    env = Env(monkeypatch, tickers=tickers)
+
+    async def _op(ticker, a, b):
+        if ticker == "000001":
+            raise RuntimeError("KIS 500")
+        return []
+
+    env.inquire_op.side_effect = _op
+    summary = await _run()
+    assert summary["opinion_failed"] == 1
+    assert all(k not in (MARKER_KEY, BACKFILL_KEY) for k, _ in env.store.writes)
