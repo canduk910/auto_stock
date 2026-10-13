@@ -42,6 +42,11 @@ _OPINION_FAIL_RATIO = 0.1  # 실패 종목이 시도 종목의 10% 미만이면 
 _OPINION_WINDOW_DAYS = 90
 _OPINION_PAGE_SIZE = 100
 _SLEEP_SECS = 0.05
+# 시세 조회 한도(초당 20)는 주문·잔고 호출과 같은 전역 한도를 나눠 쓴다(base._rate_limit) —
+# 16:00~20:00 애프터마켓 실매매 중이라 추가 적재는 평균 초당 약 2회 이하로 천천히 간다.
+# 첫 실행이 50분 상한에 걸려도 다음 날 이어 받는다(분기 = 최신 분기 보유 skip, 의견 = 마커 미기록).
+_QUARTERLY_TICKER_SLEEP_SECS = 2.5  # 종목당 5 TR 뒤
+_CALL_SLEEP_SECS = 0.5  # 의견 창·추정실적 1회 호출 뒤
 
 
 def target_quarter(today: date) -> str:
@@ -128,7 +133,7 @@ async def _quarterly_branch(tickers: list[str], today: date, deadline: float, su
         except Exception:
             logger.warning("[fundamental_extra_load_failed] quarterly ticker=%s 실패", ticker, exc_info=True)
             summary["quarterly_failed"] += 1
-        await asyncio.sleep(_SLEEP_SECS)
+        await asyncio.sleep(_QUARTERLY_TICKER_SLEEP_SECS)
 
 
 def _windows(start: date, end: date) -> list[tuple[date, date]]:
@@ -142,13 +147,13 @@ def _windows(start: date, end: date) -> list[tuple[date, date]]:
 
 async def _fetch_window(ticker: str, a: date, b: date) -> list[dict]:
     rows = await io_api.inquire_invest_opinion(ticker, a, b)
-    await asyncio.sleep(_SLEEP_SECS)
+    await asyncio.sleep(_CALL_SLEEP_SECS)
     if len(rows) >= _OPINION_PAGE_SIZE and (b - a).days >= 1:
         half = ((b - a).days + 1) // 2
         rows = []
         for x, y in ((a, a + timedelta(days=half - 1)), (a + timedelta(days=half), b)):
             rows += await io_api.inquire_invest_opinion(ticker, x, y)  # 1회만 나눈다
-            await asyncio.sleep(_SLEEP_SECS)
+            await asyncio.sleep(_CALL_SLEEP_SECS)
     return rows
 
 
@@ -251,7 +256,7 @@ async def _estimate_branch(tickers: list[str], today: date, deadline: float, sum
             except Exception:
                 logger.warning("[fundamental_extra_load_failed] estimate ticker=%s 실패", ticker, exc_info=True)
                 summary["estimate_failed"] += 1
-            await asyncio.sleep(_SLEEP_SECS)
+            await asyncio.sleep(_CALL_SLEEP_SECS)
     finally:
         if empty_now != empty_before:
             try:

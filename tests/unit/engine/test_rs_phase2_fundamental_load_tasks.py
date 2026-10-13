@@ -56,6 +56,13 @@ _SUMMARY_KEYS = (
 )
 
 
+
+@pytest.fixture(autouse=True)
+def _no_pacing_sleep(monkeypatch):
+    """속도 상한 sleep(실운영 보호용)은 이 파일의 동작 시험에서 0 으로 — 상한 자체는 test_rs_phase2_extra_load_pacing.py 가 본다."""
+    monkeypatch.setattr(flt, "_QUARTERLY_TICKER_SLEEP_SECS", 0.0)
+    monkeypatch.setattr(flt, "_CALL_SLEEP_SECS", 0.0)
+
 # ---------------------------------------------------------------------------
 # target_quarter — 순수 함수
 # ---------------------------------------------------------------------------
