@@ -87,6 +87,12 @@ _ESTIMATE_RESP = {
 }
 
 
+@pytest.fixture(autouse=True)
+def _real_env(monkeypatch):
+    """두 TR 모두 실전 전용 — 기본은 실전 환경(모의 케이스는 각 테스트가 vts 로 덮는다)."""
+    monkeypatch.setattr(settings, "kis_env", "real")
+
+
 # ── 화이트리스트 ─────────────────────────────────────────────────────────────
 
 @pytest.mark.parametrize("path", [OPINION_PATH, ESTIMATE_PATH])
@@ -211,3 +217,40 @@ async def test_estimate_perform_missing_output4_gives_empty_settle_months(monkey
     got = await io.inquire_estimate_perform("005930")
     assert got["settle_months"] == []
     assert got["raw"] == resp
+
+
+async def test_invest_opinion_when_vts_then_no_call_and_empty(monkeypatch):
+    """FHKST663300C0 도 모의 미지원 — 모의 환경에서는 호출하지 않는다."""
+    monkeypatch.setattr(settings, "kis_env", "vts")
+    mock_get = AsyncMock(return_value=copy.deepcopy(_OPINION_RESP))
+    monkeypatch.setattr(io, "kis_get_quote", mock_get)
+    assert await io.inquire_invest_opinion("005930", date(2024, 1, 1), date(2024, 5, 28)) == []
+    mock_get.assert_not_awaited()
+
+
+async def test_invest_opinion_truncated_100_rows_warns(monkeypatch, caplog):
+    monkeypatch.setattr(settings, "kis_env", "real")
+    row = copy.deepcopy(_OPINION_RESP["output"][0])
+    monkeypatch.setattr(io, "kis_get_quote", AsyncMock(return_value={"rt_cd": "0", "output": [row] * 100}))
+    with caplog.at_level("WARNING"):
+        await io.inquire_invest_opinion("005930", date(2024, 1, 1), date(2024, 5, 28))
+    msgs = [r.getMessage() for r in caplog.records]
+    assert any("[invest_opinion_truncated]" in m and "005930" in m and "20240101" in m for m in msgs)
+
+
+async def test_invest_opinion_under_100_rows_no_truncation_warning(monkeypatch, caplog):
+    monkeypatch.setattr(settings, "kis_env", "real")
+    monkeypatch.setattr(io, "kis_get_quote", AsyncMock(return_value=copy.deepcopy(_OPINION_RESP)))
+    with caplog.at_level("WARNING"):
+        await io.inquire_invest_opinion("005930", date(2024, 1, 1), date(2024, 5, 28))
+    assert not any("[invest_opinion_truncated]" in r.getMessage() for r in caplog.records)
+
+
+async def test_estimate_perform_strips_response_headers_from_raw(monkeypatch):
+    monkeypatch.setattr(settings, "kis_env", "real")
+    resp = copy.deepcopy(_ESTIMATE_RESP)
+    resp["_response_headers"] = {"tr_cont": "N", "gt_uid": "x"}
+    monkeypatch.setattr(io, "kis_get_quote", AsyncMock(return_value=resp))
+    got = await io.inquire_estimate_perform("005930")
+    assert "_response_headers" not in got["raw"]
+    assert got["raw"] == _ESTIMATE_RESP

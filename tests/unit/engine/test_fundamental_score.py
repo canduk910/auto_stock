@@ -217,19 +217,19 @@ def test_breadth_when_all_targets_zero_then_none():
     assert fs.target_revision_breadth(ops, AS_OF) is None
 
 
-def test_breadth_rows_outside_window_excluded():
+def test_breadth_rows_outside_window_only_serve_as_previous():
     start = _bd_back(AS_OF, 60)
     before = start - timedelta(days=1)
     while before.weekday() >= 5:
         before -= timedelta(days=1)
     ops = [
-        _op(before, "A", 50),               # 창 밖 → 직전값이 될 수 없다
-        _op(date(2026, 10, 1), "A", 120),   # 창 안 1개 → 중립
-        _op(start, "B", 100),               # 창 시작일 포함
-        _op(date(2026, 10, 1), "B", 130),   # 상향
-        _op(date(2026, 1, 5), "C", 100),    # 창 한참 밖 → C 는 분모에서 빠짐
+        _op(before, "A", 50),               # 창 밖이지만 직전 목표가로는 쓰인다 → A 상향
+        _op(date(2026, 10, 1), "A", 120),
+        _op(start, "B", 100),               # 창 시작일 포함 → 직전 없음 → 중립
+        _op(date(2026, 10, 1), "B", 130),   # 같은 증권사 직전(100) 대비 상향
+        _op(date(2026, 1, 5), "C", 100),    # 창 안 의견 없음 → 분모 제외
     ]
-    assert fs.target_revision_breadth(ops, AS_OF) == pytest.approx(1 / 2)
+    assert fs.target_revision_breadth(ops, AS_OF) == pytest.approx(1.0)
 
 
 def test_breadth_future_rows_excluded_no_lookahead():
@@ -241,13 +241,105 @@ def test_breadth_future_rows_excluded_no_lookahead():
 
 
 def test_breadth_window_bd_parameter_honored():
-    ops = [_op(_bd_back(AS_OF, 10), "A", 100), _op(AS_OF, "A", 120)]
-    assert fs.target_revision_breadth(ops, AS_OF, window_bd=10) == pytest.approx(1.0)
-    # 창 9영업일이면 첫 행이 빠져 중립
-    assert fs.target_revision_breadth(ops, AS_OF, window_bd=9) == pytest.approx(0.0)
+    old = _bd_back(AS_OF, 10)
+    ops = [_op(old, "A", 100), _op(AS_OF, "A", 120), _op(old, "B", 100)]
+    # 창 10영업일: A 상향, B 는 창 안 단일 의견 → 1/2
+    assert fs.target_revision_breadth(ops, AS_OF, window_bd=10) == pytest.approx(1 / 2)
+    # 창 9영업일: B 는 창 안 의견이 없어 분모에서 빠지고, A 의 직전(창 밖)은 허용 → 1.0
+    assert fs.target_revision_breadth(ops, AS_OF, window_bd=9) == pytest.approx(1.0)
 
 
 def test_breadth_range_bounded():
     ops = [_op(date(2026, 9, 1), "A", 100), _op(date(2026, 10, 1), "A", 50)]
     got = fs.target_revision_breadth(ops, AS_OF)
     assert -1.0 <= got <= 1.0 and got == pytest.approx(-1.0)
+
+
+# ── D3 비12월 결산 ───────────────────────────────────────────────────────────
+
+def test_available_from_non_december_fiscal_end_month():
+    # 3월 결산: 202503 = 연간(+90) , 202412 = 3분기(+45)
+    assert fs.available_from("202503", None, fiscal_end_month=3) == date(2025, 3, 31) + timedelta(days=90)
+    assert fs.available_from("202412", None, fiscal_end_month=3) == date(2024, 12, 31) + timedelta(days=45)
+    # 12월 기본값은 그대로
+    assert fs.available_from("202512", None) == date(2025, 12, 31) + timedelta(days=90)
+
+
+def test_known_as_of_march_fiscal_year_end():
+    rows = [{"stac_yymm": "202503", "value": 60.0}]
+    assert fs.known_as_of(rows, date(2025, 5, 15), fiscal_end_month=3) == []
+    assert fs.known_as_of(rows, date(2025, 6, 28), fiscal_end_month=3) == []
+    assert fs.known_as_of(rows, date(2025, 6, 29), fiscal_end_month=3) == rows
+    # 기본(12월 결산)에서는 3월이 1분기라 5/15 에 통과 — 기존 동작
+    assert fs.known_as_of(rows, date(2025, 5, 15)) == rows
+
+
+def test_known_as_of_explicit_flag_still_wins_with_fiscal_end_month():
+    rows = [{"stac_yymm": "202503", "is_annual_or_q4": False}]
+    assert fs.known_as_of(rows, date(2025, 5, 15), fiscal_end_month=3) == rows
+
+
+def test_quarterly_from_cumulative_march_fiscal_year():
+    rows = _cum(m202406=10.0, m202409=25.0, m202412=40.0, m202503=60.0)
+    got = fs.quarterly_from_cumulative(rows, fiscal_end_month=3)
+    assert got == {"202406": 10.0, "202409": 15.0, "202412": 15.0, "202503": 20.0}
+
+
+def test_quarterly_from_cumulative_march_fy_does_not_cross_fiscal_year():
+    # 202406 은 새 회계연도 1분기 — 202403(직전 회계연도 4분기)을 빼지 않는다.
+    got = fs.quarterly_from_cumulative(_cum(m202403=90.0, m202406=10.0), fiscal_end_month=3)
+    assert got["202406"] == 10.0
+    assert got["202403"] is None  # 3분기 누적 없음
+
+
+def test_quarterly_from_cumulative_march_fy_missing_prev_none():
+    got = fs.quarterly_from_cumulative(_cum(m202406=10.0, m202412=40.0), fiscal_end_month=3)
+    assert got["202412"] is None
+
+
+# ── D4 목표가 리비전 새 정의 ─────────────────────────────────────────────────
+
+def test_breadth_old_broker_downgrade_counted_with_prev_outside_window():
+    ops = [_op(date(2026, 3, 1), "C", 100), _op(date(2026, 10, 5), "C", 90)]
+    assert fs.target_revision_breadth(ops, AS_OF) == pytest.approx(-1.0)
+
+
+def test_breadth_prev_beyond_lookback_is_ignored():
+    old = _bd_back(AS_OF, 251) - timedelta(days=0)
+    ops = [_op(old, "C", 100), _op(date(2026, 10, 5), "C", 90)]
+    assert fs.target_revision_breadth(ops, AS_OF) == pytest.approx(0.0)  # 분모 1, 변화 0
+
+
+def test_breadth_same_day_duplicate_last_input_wins():
+    ops = [
+        _op(date(2026, 9, 1), "A", 100),
+        _op(date(2026, 10, 1), "A", 200),
+        _op(date(2026, 10, 1), "A", 110),  # 같은 날 마지막 입력이 이긴다 (큰 쪽 아님)
+    ]
+    assert fs.target_revision_breadth(ops, AS_OF) == pytest.approx(1.0)
+    ops2 = [
+        _op(date(2026, 9, 1), "A", 100),
+        _op(date(2026, 10, 1), "A", 200),
+        _op(date(2026, 10, 1), "A", 90),
+    ]
+    assert fs.target_revision_breadth(ops2, AS_OF) == pytest.approx(-1.0)
+
+
+def test_breadth_input_order_of_different_dates_does_not_matter():
+    ops = [_op(date(2026, 10, 1), "A", 120), _op(date(2026, 9, 1), "A", 100)]
+    assert fs.target_revision_breadth(ops, AS_OF) == pytest.approx(1.0)
+
+
+def test_target_median_change_pairs_only_and_median():
+    ops = [
+        _op(date(2026, 3, 1), "A", 100), _op(date(2026, 10, 1), "A", 120),   # +0.2
+        _op(date(2026, 3, 1), "B", 100), _op(date(2026, 10, 1), "B", 90),    # -0.1
+        _op(date(2026, 3, 1), "C", 100), _op(date(2026, 10, 1), "C", 110),   # +0.1
+        _op(date(2026, 10, 2), "D", 80),                                      # 직전 없음 → 제외
+    ]
+    assert fs.target_median_change(ops, AS_OF) == pytest.approx(0.1)
+
+
+def test_target_median_change_none_when_no_pairs():
+    assert fs.target_median_change([], AS_OF) is None
+    assert fs.target_median_change([_op(date(2026, 10, 2), "D", 80)], AS_OF) is None

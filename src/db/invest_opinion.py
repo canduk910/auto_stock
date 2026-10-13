@@ -15,9 +15,26 @@ logger = logging.getLogger(__name__)
 
 
 async def upsert_opinions(ticker: str, rows: list[dict[str, Any]]) -> int:
-    """투자의견 행 upsert(멱등). 성공 시 보낸 행 수, 실패 0."""
+    """투자의견 행 upsert(멱등). 반환 = 실제로 DB 에 보낸 행 수(필터·중복 제거 뒤), 실패 0.
+
+    bsop_date·mbcr_name 이 None/빈 행은 버리고(경고), 묶음 안 같은 PK 는 마지막 행만 남긴다.
+    """
     if not rows:
         return 0
+    dedup: dict[tuple, dict[str, Any]] = {}
+    dropped = 0
+    for r in rows:
+        d = to_date(r.get("bsop_date"))
+        name = r.get("mbcr_name")
+        if d is None or not isinstance(name, str) or not name.strip():
+            dropped += 1
+            continue
+        dedup[(d, name)] = r
+    if dropped:
+        logger.warning("invest_opinion_history 무효 행 %d건 제외: %s", dropped, ticker)
+    if not dedup:
+        return 0
+    rows = list(dedup.values())
     now = datetime.fromisoformat(now_kst_iso())
     args_list = [
         (
@@ -82,7 +99,7 @@ async def get_opinions(ticker: str, date_from: date, date_to: date) -> list[dict
             WHERE ticker = $1 AND bsop_date BETWEEN $2 AND $3
             ORDER BY bsop_date DESC
             """,
-            ticker, date_from, date_to,
+            ticker, to_date(date_from), to_date(date_to),
         )
     except Exception:
         logger.exception("invest_opinion_history 조회 실패: %s", ticker)

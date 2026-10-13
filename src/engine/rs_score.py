@@ -8,6 +8,7 @@
 """
 from __future__ import annotations
 
+import math
 from collections import defaultdict
 from typing import Mapping, Sequence
 
@@ -22,19 +23,20 @@ def ibd_lite_return(closes: Sequence[float]) -> float | None:
     if len(closes) < _MIN_BARS:
         return None
     last = closes[-1]
-    if last <= 0:
+    if not math.isfinite(last) or last <= 0:
         return None
     total = 0.0
     for n, w in _LOOKBACKS:
         base = closes[-1 - n]
-        if base <= 0:
+        if not math.isfinite(base) or base <= 0:
             return None
         total += w * (last / base - 1.0)
-    return total
+    return total if math.isfinite(total) else None
 
 
 def percentile_ranks(scores: Mapping[str, float | None]) -> dict[str, int | None]:
     """오름차순 백분위 0~99. n==1 → 99, 동점은 최소 순위."""
+    scores = {k: (v if v is not None and math.isfinite(v) else None) for k, v in scores.items()}
     vals = sorted(v for v in scores.values() if v is not None)
     n = len(vals)
     out: dict[str, int | None] = {}
@@ -60,7 +62,9 @@ def sector_relative(
     members: dict[str, list[str]] = defaultdict(list)
     for t, v in scores.items():
         sec = sector_of.get(t)
-        if v is None or sec is None or sec.startswith(_UNCLASSIFIED_PREFIX):
+        if v is None or not math.isfinite(v):
+            continue
+        if not isinstance(sec, str) or not sec.strip() or sec.startswith(_UNCLASSIFIED_PREFIX):
             continue
         members[sec].append(t)
     eligible = {s: ts for s, ts in members.items() if len(ts) >= min_members}

@@ -4,11 +4,16 @@
 """
 from __future__ import annotations
 
+import logging
 from datetime import date, datetime
 from typing import Any
 
 from src.api.base import kis_get_quote
 from src.config import settings
+
+logger = logging.getLogger(__name__)
+
+_OPINION_PAGE_SIZE = 100  # 응답 최대 행수 — 도달하면 잘렸을 수 있다
 
 OPINION_PATH = "/uapi/domestic-stock/v1/quotations/invest-opinion"
 OPINION_TR_ID = "FHKST663300C0"
@@ -40,7 +45,9 @@ def _to_date(v: Any) -> date | None:
 
 
 async def inquire_invest_opinion(ticker: str, date_from: date, date_to: date) -> list[dict]:
-    """종목투자의견 — 정규화 dict 목록(원본 행은 `raw`). KIS 오류는 전파한다."""
+    """종목투자의견 — 정규화 dict 목록(원본 행은 `raw`). 실전 전용(모의면 호출 없이 []). KIS 오류는 전파한다."""
+    if not settings.is_production:
+        return []
     resp = await kis_get_quote(
         OPINION_PATH, OPINION_TR_ID,
         params={
@@ -51,8 +58,14 @@ async def inquire_invest_opinion(ticker: str, date_from: date, date_to: date) ->
             "FID_INPUT_DATE_2": date_to.strftime("%Y%m%d"),
         },
     )
+    rows = resp.get("output") or []
+    if len(rows) >= _OPINION_PAGE_SIZE:
+        logger.warning(
+            "[invest_opinion_truncated] %s %s~%s rows=%d — 응답 상한 도달, 기간을 쪼개 재조회 필요",
+            ticker, date_from.strftime("%Y%m%d"), date_to.strftime("%Y%m%d"), len(rows),
+        )
     out: list[dict] = []
-    for row in resp.get("output") or []:
+    for row in rows:
         out.append({
             "bsop_date": _to_date(row.get("stck_bsop_date")),
             "mbcr_name": row.get("mbcr_name"),
@@ -72,4 +85,5 @@ async def inquire_estimate_perform(ticker: str) -> dict | None:
         return None
     resp = await kis_get_quote(ESTIMATE_PATH, ESTIMATE_TR_ID, params={"SHT_CD": ticker})
     months = [r.get("dt") for r in (resp.get("output4") or []) if r.get("dt")]
-    return {"ticker": ticker, "raw": resp, "settle_months": months}
+    raw = {k: v for k, v in resp.items() if k != "_response_headers"}
+    return {"ticker": ticker, "raw": raw, "settle_months": months}

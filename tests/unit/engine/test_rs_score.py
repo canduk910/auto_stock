@@ -204,3 +204,35 @@ def test_sector_relative_returns_entry_for_every_input_ticker():
     scores, sector_of = _sector_fixture()
     got = rs.sector_relative(scores, sector_of)
     assert set(got) == set(scores)
+
+
+# ── 비유한값·섹터명 결측 가드 ────────────────────────────────────────────────
+
+@pytest.mark.parametrize("bad", [float("nan"), float("inf"), float("-inf")])
+def test_ibd_lite_return_non_finite_input_gives_none(bad):
+    closes = [100.0] * 189 + [bad]
+    assert rs.ibd_lite_return(closes) is None
+    closes = [bad] + [100.0] * 188 + [110.0]
+    assert rs.ibd_lite_return(closes) is None
+
+
+@pytest.mark.parametrize("bad", [float("nan"), float("inf"), float("-inf")])
+def test_percentile_ranks_non_finite_becomes_none(bad):
+    got = rs.percentile_ranks({"a": 1.0, "b": bad, "c": 2.0})
+    assert got["b"] is None
+    assert got["a"] == 0 and got["c"] == 99
+
+
+@pytest.mark.parametrize("sec", [None, "", "   "])
+def test_sector_relative_blank_sector_name_is_missing(sec):
+    scores = {f"T{i}": 0.1 * i for i in range(6)}
+    got = rs.sector_relative(scores, {t: sec for t in scores})
+    assert all(v == {"vs_sector": None, "sector_pct": None, "in_sector_pct": None} for v in got.values())
+
+
+def test_sector_relative_non_finite_score_excluded():
+    scores = {f"T{i}": 0.1 * i for i in range(5)}
+    scores["T5"] = float("nan")
+    got = rs.sector_relative(scores, {t: "반도체" for t in scores})
+    assert got["T5"]["vs_sector"] is None
+    assert got["T0"]["vs_sector"] == pytest.approx(0.0 - 0.2)

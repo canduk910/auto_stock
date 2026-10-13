@@ -103,3 +103,43 @@ async def test_get_opinions_db_exception_returns_empty():
         pg_mod.fetch = AsyncMock(side_effect=RuntimeError("pg down"))
         out = await dbio.get_opinions("005930", date(2024, 1, 1), date(2024, 5, 28))
     assert out == []
+
+
+async def test_upsert_opinions_filters_invalid_rows_and_warns(caplog):
+    good = _row(date(2024, 5, 27), "SK", 100)
+    bad = [_row(date(2024, 5, 26), "", 1), _row(date(2024, 5, 26), None, 1),
+           {**_row(date(2024, 5, 26), "X", 1), "bsop_date": None}]
+    with patch.object(dbio, "pg", create=True) as pg_mod, caplog.at_level("WARNING"):
+        pg_mod.executemany = AsyncMock()
+        n = await dbio.upsert_opinions("005930", [good, *bad])
+    assert n == 1
+    sent = pg_mod.executemany.await_args.args[1]
+    assert len(sent) == 1 and sent[0][2] == "SK"
+    assert any("3" in r.getMessage() for r in caplog.records if r.levelname == "WARNING")
+
+
+async def test_upsert_opinions_all_invalid_makes_no_db_call():
+    with patch.object(dbio, "pg", create=True) as pg_mod:
+        pg_mod.executemany = AsyncMock()
+        n = await dbio.upsert_opinions("005930", [_row(date(2024, 5, 26), "", 1)])
+    assert n == 0
+    pg_mod.executemany.assert_not_called()
+
+
+async def test_upsert_opinions_dedupes_same_pk_keeping_last():
+    rows = [_row(date(2024, 5, 27), "SK", 100), _row(date(2024, 5, 27), "SK", 120),
+            _row(date(2024, 5, 27), "KB", 90)]
+    with patch.object(dbio, "pg", create=True) as pg_mod:
+        pg_mod.executemany = AsyncMock()
+        n = await dbio.upsert_opinions("005930", rows)
+    assert n == 2
+    sent = {a[2]: a[5] for a in pg_mod.executemany.await_args.args[1]}
+    assert sent == {"SK": 120, "KB": 90}
+
+
+async def test_get_opinions_converts_dates_via_to_date():
+    with patch.object(dbio, "pg", create=True) as pg_mod:
+        pg_mod.fetch = AsyncMock(return_value=[])
+        await dbio.get_opinions("005930", "2024-01-01", "2024-05-28")
+    _, *args = pg_mod.fetch.await_args.args
+    assert args == ["005930", date(2024, 1, 1), date(2024, 5, 28)]
