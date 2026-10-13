@@ -186,7 +186,7 @@ async def balance():
         return ApiResponse(success=False, data=None, message=f"잔고 조회 실패: {_masked_exc}")
 
     # cycle411 — 예상 매도비용 요율(수수료율+세율, ETF 는 수수료율만). 서버 오늘 기준
-    # 30일 창(M2, `today_window_rates`)에 정산 표본이 없으면 기본값으로 떨어진다 — DB
+    # 30일 창(M2, `today_window_rates`)에 근거 정산 행이 없는 요율은 기본값으로 떨어진다 — DB
     # 조회 실패도 같은 fail-open(「살까 말까」 가 아니라 화면 참고용 추정이라 전체
     # 잔고를 막지 않는다).
     try:

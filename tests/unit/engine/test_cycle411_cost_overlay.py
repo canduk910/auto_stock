@@ -77,7 +77,9 @@ def test_r1_rates_when_cost_rows_exist_then_measured_ratio():
     ]
     r = _ov().estimate_rates(rows)
     assert r["source"] == "measured"
-    assert r["fee_rate"] == pytest.approx((99 + 102) / (700000 + 720000))
+    # cycle451 — 가장 최근 정산일 하루의 요율: 수수료율 = 가장 최근 거래일(D2),
+    # 세율 = 가장 최근 매도일(D2). D1 매수는 섞이지 않는다.
+    assert r["fee_rate"] == pytest.approx(102 / 720000)
     assert r["tax_rate"] == pytest.approx(1433 / 720000)
 
 

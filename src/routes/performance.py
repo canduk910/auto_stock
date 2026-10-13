@@ -25,7 +25,7 @@ async def _net_overlay_rows(records: list[dict], strategy: str) -> list[dict] | 
     cycle411 보완 H2 — 배분(`cost_overlay.trade_costs`)은 항상 그 날짜 범위의 **전체**
     COMPLETED+PARTIAL 체결로 하고, `strategy` 필터는 배분 **뒤에** 그 전략 체결만 걸러
     `by_date` 로 더한다(배분 전에 거르면 그 전략 혼자 그 날 정산 전체를 떠안는다). 요율은
-    화면 날짜 범위가 아니라 서버 오늘 기준 30일 창(M2).
+    화면 날짜 범위가 아니라 서버 오늘 기준 30일 창 안 가장 최근 정산일의 요율(M2·cycle451).
     """
     if not records:
         return []

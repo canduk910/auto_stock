@@ -8,8 +8,9 @@ Red 메모 = `_workspace/red/cycle411/cost_overlay.md`.
 어느 것도 import 하지 않는다(`tests/unit/ast/test_cycle411_ast_scope.py::test_e1`). DB 저장값·
 마이그레이션도 건드리지 않는다. `trade_history.profit_loss` 의미(세전) 불변.
 
-- `estimate_rates` — `trade_cost_daily` 정산 행으로 수수료·세율을 추정한다(없으면 기본값
-  0.142%/0.199%, 사용자 결정 10-08 Q1).
+- `estimate_rates` — `trade_cost_daily` 정산 행으로 수수료·세율을 추정한다. 각 요율은 근거 행이
+  있는 가장 최근 정산일 하루의 비율이다(cycle451). 근거가 없는 요율은 기본값
+  0.142%/0.199%(사용자 결정 10-08 Q1).
 - `trade_costs` — 체결 행(`trade_history`) 단위 비용. 정산 행이 있으면 `trade_cost.allocate_rows`
   (key="id")로 나누고, 없으면 추정 요율 × 체결금액(세금은 매도만, ETF/ETN 매도는 0)을 쓴다.
   정산값이 있으면 ETF 라도 그 값이 정본이다(KIS 가 낸 세금을 0 으로 덮지 않는다).
@@ -37,7 +38,7 @@ from src.engine.etf_like import is_etf_like
 
 logger = logging.getLogger(__name__)
 
-#: 사용자 결정 10-08 Q1 — 최근 30달력일 `trade_cost_daily` 표본이 없을 때의 기본값.
+#: 사용자 결정 10-08 Q1 — 최근 30달력일 안에 `trade_cost_daily` 근거 행이 없을 때의 기본값.
 DEFAULT_FEE_RATE = 0.00142
 DEFAULT_TAX_RATE = 0.00199
 
@@ -88,22 +89,42 @@ def _num(v) -> Decimal:
 
 
 def estimate_rates(cost_rows: list[dict]) -> dict:
-    """정산 행으로 수수료·세율을 추정한다 — 표본 없으면 기본값(사용자 결정 10-08 Q1)."""
-    if not cost_rows:
-        return {"fee_rate": DEFAULT_FEE_RATE, "tax_rate": DEFAULT_TAX_RATE, "source": "default"}
+    """정산 행으로 수수료·세율을 추정한다 — 가장 최근 정산일 하루의 요율(cycle451).
 
-    fee_sum = sum((_num(c.get("fee")) for c in cost_rows), Decimal(0))
-    tax_sum = sum((_num(c.get("tl_tax")) for c in cost_rows), Decimal(0))
-    vol = sum((_num(c.get("buy_amt")) + _num(c.get("sll_amt")) for c in cost_rows), Decimal(0))
-    sell_vol = sum((_num(c.get("sll_amt")) for c in cost_rows), Decimal(0))
+    수수료율 = 거래금액(`buy_amt+sll_amt`) > 0 인 정산 행이 있는 가장 최근 `trad_dt` 하루의
+    Σfee ÷ Σ(buy_amt+sll_amt), 세율 = 매도금액(`sll_amt`) > 0 인 정산 행이 있는 가장 최근
+    `trad_dt` 하루의 Σtl_tax ÷ Σsll_amt (두 기준일은 다를 수 있다). 근거 행이 없는 요율만
+    기본값이고(사용자 결정 10-08 Q1), `source` 는 둘 중 하나라도 정산 행에서 나왔으면
+    `"measured"`, 둘 다 기본값이면 `"default"`. 행 순서에 의존하지 않는다.
+    """
+    fee_rate = _latest_day_rate(cost_rows, "fee", lambda c: _num(c.get("buy_amt")) + _num(c.get("sll_amt")))
+    tax_rate = _latest_day_rate(cost_rows, "tl_tax", lambda c: _num(c.get("sll_amt")))
+    source = "default" if fee_rate is None and tax_rate is None else "measured"
+    return {
+        "fee_rate": DEFAULT_FEE_RATE if fee_rate is None else fee_rate,
+        "tax_rate": DEFAULT_TAX_RATE if tax_rate is None else tax_rate,
+        "source": source,
+    }
 
-    fee_rate = float(fee_sum / vol) if vol else DEFAULT_FEE_RATE
-    tax_rate = float(tax_sum / sell_vol) if sell_vol else DEFAULT_TAX_RATE
-    return {"fee_rate": fee_rate, "tax_rate": tax_rate, "source": "measured"}
+
+def _latest_day_rate(cost_rows: list[dict], num_key: str, denom_of) -> float | None:
+    """분모(`denom_of`) > 0 인 행이 있는 가장 최근 `trad_dt` 하루의 Σ`num_key` ÷ Σ분모. 없으면 None."""
+    by_day: dict = {}
+    for c in cost_rows:
+        denom = denom_of(c)
+        if denom <= 0:
+            continue
+        day = c.get("trad_dt")
+        num_sum, denom_sum = by_day.get(day, (Decimal(0), Decimal(0)))
+        by_day[day] = (num_sum + _num(c.get(num_key)), denom_sum + denom)
+    if not by_day:
+        return None
+    num_sum, denom_sum = by_day[max(by_day)]
+    return float(num_sum / denom_sum)
 
 
 async def today_window_rates(window_days: int = RATE_WINDOW_DAYS) -> dict:
-    """서버 오늘(KST) 기준 최근 `window_days`일 정산 행으로 요율을 추정한다(cycle411 보완 M2).
+    """서버 오늘(KST) 기준 최근 `window_days`일 안의 가장 최근 정산일 요율로 추정한다(cycle411 보완 M2·cycle451).
 
     화면/계산 범위의 날짜(screen range)가 아니라 **항상 이 창**이다 — 모든 라우트
     (`/api/costs/{today,daily}` · `/api/history` · `/api/history/pnl` ·
@@ -373,7 +394,7 @@ async def overlay_pairs(pairs: list[dict]) -> dict[int, dict] | None:
     (매도세)로 따로 낸다 — 총합 보존(보유 몫 낸 수수료 + 판 몫 = 정산 합). 추정 행의 `allocated`
     는 항상 False(§6).
 
-    요율은 화면 날짜 범위가 아니라 **서버 오늘 기준 30일 창**(M2, `today_window_rates`)이고,
+    요율은 화면 날짜 범위가 아니라 **서버 오늘 기준 30일 창 안의 가장 최근 정산일**(M2·cycle451, `today_window_rates`)이고,
     ETF 판정은 `stock_master` 구분 코드 우선(M3, `stock_master_etf_flags`)이다. `slippage_won`
     은 그 페어 체결 행 중 `order_price` 가 하나도 없으면 `None`(M4, 있으면 덮인 행만 합산).
 

@@ -49,7 +49,7 @@ async def _overlay_trade_costs(trades: list[dict]) -> None:
     COMPLETED+PARTIAL 체결(`trade_cost_db.get_trades_by_status`)로 하고, 거기서 나온
     id 별 비용 중 화면에 보이는(페이지에 든) 행만 집어 쓴다 — 페이지·전략 필터는 배분
     **뒤에** 거른다(한 페이지만 보면 그 정산 1행 전부를 떠안는 결함을 막는다). 요율은
-    화면 날짜 범위가 아니라 서버 오늘 기준 30일 창(M2) · ETF 판정은 stock_master 구분
+    화면 날짜 범위가 아니라 서버 오늘 기준 30일 창 안 가장 최근 정산일의 요율(M2·cycle451) · ETF 판정은 stock_master 구분
     코드 우선(M3).
 
     비용 조회가 실패하면 기존 칸만 남기고 새 칸은 건너뛴다(사용자 결정 10-08 §2 —

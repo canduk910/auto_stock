@@ -108,7 +108,7 @@ async def costs_today(strategy: str | None = Query(None)) -> ApiResponse:
     `scheduler.py` 무접촉 경로 — `trade_cost_db`·`cost_overlay` 만 읽는다.
 
     cycle411 보완 H2 — 배분은 오늘 **전체** COMPLETED+PARTIAL 체결로 하고 `strategy` 는
-    배분 뒤에 거른다. 요율은 오늘 하루가 아니라 서버 오늘 기준 30일 창(M2) · ETF 판정은
+    배분 뒤에 거른다. 요율은 오늘 하루가 아니라 서버 오늘 기준 30일 창 안 가장 최근 정산일의 요율(M2·cycle451) · ETF 판정은
     stock_master 구분 코드 우선(M3).
     """
     today = today_kst()
@@ -170,7 +170,7 @@ async def costs_daily(
     """날짜별 비용·슬리피지·`cost_status` 추이(cycle411).
 
     cycle411 보완 M2 — 요율은 화면 범위(`from`~`to`)가 아니라 서버 오늘 기준 30일
-    창(`today_window_rates`) · M3 — ETF 판정은 stock_master 구분 코드 우선.
+    창 안 가장 최근 정산일의 요율(`today_window_rates`, cycle451) · M3 — ETF 판정은 stock_master 구분 코드 우선.
     """
     start, end = _parse_range(from_, to)
     try:
