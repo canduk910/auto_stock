@@ -151,7 +151,7 @@ class DonchianSwingStrategy(StrategyBase):
         "llm_gate_min_score": 70,
         "llm_gate_daily_call_cap": 20,
         "llm_gate_timeout_secs": 20,
-        # cycle382 — 시장 유닛(단계형, 소속 시장 종합지수 60일선). 부재·오타 = off. 기본
+        # cycle382 — 시장 유닛(단계형, KODEX200 60일선). 부재·오타 = off. 기본
         # shadow(계산·기록만). PARAM_RANGES/INT_PARAMS 편입 금지. 킬스위치 = PUT.
         "market_unit_mode": "shadow",
         # cycle405 — 깡토식 청산·사이징(§1·§5·§3·§6). R = max(kk_r_floor_pct%×E,
