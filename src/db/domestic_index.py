@@ -65,6 +65,42 @@ async def get_recent_closes(index_code: str, *, limit: int) -> list[tuple[date, 
     return [(r["bas_dd"], float(r["close_price"])) for r in ordered]
 
 
+async def get_recent_bars(index_code: str, *, limit: int) -> list[dict]:
+    """최근 ``limit`` 행 — **오름차순**. 각 행 ``{bas_dd, close, open, high, low}``(raw 에 없는 칸 = None).
+
+    화면 차트 전용(판정은 ``get_recent_closes`` 로 종가만 쓴다). 예외 = ``[]``.
+    """
+    try:
+        rows = await pg.fetch(
+            """
+            SELECT bas_dd, close_price, raw FROM domestic_index_daily
+            WHERE index_code = $1
+            ORDER BY bas_dd DESC
+            LIMIT $2
+            """,
+            index_code, limit,
+        )
+    except Exception:
+        logger.exception("domestic_index_daily get_recent_bars 실패: %s", index_code)
+        return []
+    out = []
+    for r in sorted(rows or [], key=lambda r: r["bas_dd"]):
+        raw = r["raw"] if isinstance(r["raw"], dict) else {}
+        out.append({
+            "bas_dd": r["bas_dd"], "close": float(r["close_price"]),
+            "open": _num(raw.get("open")), "high": _num(raw.get("high")), "low": _num(raw.get("low")),
+        })
+    return out
+
+
+def _num(v) -> float | None:
+    try:
+        f = float(v)
+    except (TypeError, ValueError):
+        return None
+    return f if f > 0 else None
+
+
 async def max_bas_dd(index_code: str) -> date | None:
     """가장 최근 ``bas_dd``. 없음·예외 = ``None``."""
     try:

@@ -10,6 +10,7 @@ import { getRecentFunnel } from '../api/strategy-funnel'
 import ControlPanel from '../components/ControlPanel'
 import MarketRegimeCard from '../components/MarketRegimeCard'
 import MarketRegimeLabelCard from '../components/MarketRegimeLabelCard'
+import MarketUnitChartCard from '../components/MarketUnitChartCard'
 import PortfolioRiskCard from '../components/PortfolioRiskCard'
 import KisAccountPoolCard from '../components/KisAccountPoolCard'
 import ScanMonitor from '../components/ScanMonitor'
@@ -115,6 +116,9 @@ export default function Dashboard() {
 
       {/* cycle410 (2026-10-05): 6장세 라벨 — 관찰 전용, 매매에 쓰지 않는다 */}
       <MarketRegimeLabelCard />
+
+      {/* cycle456: 시장 유닛 결정 과정 — 소속 시장 종합지수 시세·60일선 차트 + 3단계 판정 */}
+      <MarketUnitChartCard />
 
       {/* 사이클 I (2026-08-03): 포트폴리오 리스크 관찰 카드 — 시장 레짐 직하 (관찰 전용, Phase 1) */}
       <PortfolioRiskCard />

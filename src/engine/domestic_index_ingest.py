@@ -3,7 +3,7 @@
 명세 = `_workspace/red/cycle455_market_unit_by_market_spec.md` §3.4·§3.5.
 
 - ``ensure_fresh(*, phase, now_kst=None) -> dict`` — never-raise(``CancelledError`` 만 전파).
-  시장마다 DB 행 수가 ``TARGET_ROWS`` 미만이면 과거로 내려가며 전체 적재, 아니면 증분
+  시장마다 DB 행 수가 ``TARGET_ROWS``(260) 미만이면 과거로 내려가며 전체 적재, 아니면 증분
   (``max_bas_dd − 7일`` ~ 오늘). 오늘 봉은 ``TODAY_BAR_CUTOFF``(15:40 KST) 전이면 버린다(장중 미확정).
 - 지수 코드 정본 = ``market_unit.INDEX_CODE_BY_MARKET``(여기서 다시 적지 않는다).
 - 배선 = ``boot_manager.boot()`` 부팅 1회(prepare 앞) · ``data_load_tasks`` 20:30 일봉 적재 뒤.
@@ -20,7 +20,8 @@ from src.db._kst import KST
 
 logger = logging.getLogger(__name__)
 
-TARGET_ROWS = 130
+#: 화면 차트(120봉) + 판정 창(80봉)을 덮는 행 수. history 상한(50행 × 6회 = 300) 안.
+TARGET_ROWS = 260
 INCREMENTAL_BACK_DAYS = 7
 TODAY_BAR_CUTOFF = time(15, 40)
 _PREFIX = "[domestic_index_ingest] "
@@ -35,17 +36,18 @@ async def _ingest_one(market: str, code: str, now: datetime) -> dict:
     import src.db.domestic_index as db
 
     today = now.date()
+    raw: dict[str, dict] = {}
     have = await db.count(code)
     if have < TARGET_ROWS:
-        rows = await api.fetch_index_daily_history(code, today, TARGET_ROWS)
+        rows = await api.fetch_index_daily_history(code, today, TARGET_ROWS, raw_out=raw)
     else:
         head = await db.max_bas_dd(code)
         start = (head or today) - timedelta(days=INCREMENTAL_BACK_DAYS)
-        rows = await api.fetch_index_daily(code, start, today)
+        rows = await api.fetch_index_daily(code, start, today, raw_out=raw)
     if now.time() < TODAY_BAR_CUTOFF:
         today_s = today.strftime("%Y%m%d")
         rows = [r for r in rows if r[0] < today_s]
-    upserted = await db.upsert_many(code, rows)
+    upserted = await db.upsert_many(code, rows, raw_by_date=raw)
     return {"fetched": len(rows), "upserted": upserted,
             "rows": await db.count(code), "head": await db.max_bas_dd(code)}
 

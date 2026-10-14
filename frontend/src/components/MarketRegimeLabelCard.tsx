@@ -100,7 +100,7 @@ export default function MarketRegimeLabelCard() {
               {`기준 봉 ${u.basis_date}`}
             </span>
             <span className="text-gray-400 text-xs" data-testid="regime-unit-source">
-              운영 DB 종가로 다시 계산한 값
+              운영 DB 종가로 다시 계산한 KODEX 200 참고값 — 실제 판정(시장별 종합지수)은 아래 「시장 유닛 결정 과정」
             </span>
           </div>
           <div className="flex flex-wrap gap-1 mt-2 text-xs" data-testid="regime-unit-modes">

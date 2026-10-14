@@ -85,3 +85,21 @@ async def test_m4_get_market_map(pg_pool):
         assert m["990455"] == "03" and m["990456"] == "02"
     finally:
         await pg_pool.execute("DELETE FROM stock_master WHERE ticker IN ('990455', '990456')")
+
+
+async def test_m5_get_recent_bars_reads_raw_ohlc(pg_pool):
+    """cycle456 — raw 의 시가·고가·저가를 오름차순으로 읽는다. raw 에 없는 칸 = None."""
+    from src.db import domestic_index as di
+
+    await pg_pool.execute("DELETE FROM domestic_index_daily")
+    try:
+        raw = {"20261014": {"open": 2500.0, "high": 2530.0, "low": 2490.0, "volume": 100.0}}
+        await di.upsert_many("0001", [("20261013", 2510.0), ("20261014", 2520.0)], raw_by_date=raw)
+        got = await di.get_recent_bars("0001", limit=5)
+        assert [g["bas_dd"] for g in got] == [date(2026, 10, 13), date(2026, 10, 14)]
+        assert got[1] == {"bas_dd": date(2026, 10, 14), "close": 2520.0,
+                          "open": 2500.0, "high": 2530.0, "low": 2490.0}
+        assert got[0]["open"] is None and got[0]["high"] is None and got[0]["low"] is None
+        assert await di.get_recent_bars("9999", limit=5) == []
+    finally:
+        await pg_pool.execute("DELETE FROM domestic_index_daily")

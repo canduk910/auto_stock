@@ -51,13 +51,13 @@ class _API:
         self.exc_codes = set(exc_codes)
         self.calls: list[tuple] = []
 
-    async def fetch_index_daily(self, code, start, end):
+    async def fetch_index_daily(self, code, start, end, **k):
         self.calls.append(("inc", code, start, end))
         if code in self.exc_codes:
             raise RuntimeError("kis 500")
         return list(self.rows)
 
-    async def fetch_index_daily_history(self, code, end, min_rows):
+    async def fetch_index_daily_history(self, code, end, min_rows, **k):
         self.calls.append(("hist", code, end, min_rows))
         if code in self.exc_codes:
             raise RuntimeError("kis 500")
@@ -78,7 +78,7 @@ def _install(monkeypatch, db, api):
 async def test_i1_history_when_short_incremental_when_enough(monkeypatch):
     from src.engine import domestic_index_ingest as ing
 
-    db, api = _DB({"0001": 200, "1001": 10}), _API()
+    db, api = _DB({"0001": 300, "1001": 10}), _API()
     _install(monkeypatch, db, api)
     await ing.ensure_fresh(phase="boot", now_kst=datetime(2026, 10, 15, 20, 31, tzinfo=KST))
     kinds = {(c[0], c[1]) for c in api.calls}
@@ -86,18 +86,18 @@ async def test_i1_history_when_short_incremental_when_enough(monkeypatch):
     inc = next(c for c in api.calls if c[0] == "inc")
     assert inc[2] == date(2026, 10, 13) - timedelta(days=7) and inc[3] == TODAY
     hist = next(c for c in api.calls if c[0] == "hist")
-    assert hist[3] == ing.TARGET_ROWS == 130
+    assert hist[3] == ing.TARGET_ROWS == 260
 
 
 @pytest.mark.real_domestic_index_ingest
 async def test_i2_drop_today_bar_before_1540(monkeypatch):
     from src.engine import domestic_index_ingest as ing
 
-    db, api = _DB({"0001": 200, "1001": 200}), _API()
+    db, api = _DB({"0001": 300, "1001": 300}), _API()
     _install(monkeypatch, db, api)
     await ing.ensure_fresh(phase="boot", now_kst=datetime(2026, 10, 15, 7, 50, tzinfo=KST))
     assert all("20261015" not in [r[0] for r in rows] for _, rows in db.upserts)
-    db2 = _DB({"0001": 200, "1001": 200})
+    db2 = _DB({"0001": 300, "1001": 300})
     _install(monkeypatch, db2, _API())
     await ing.ensure_fresh(phase="evening", now_kst=datetime(2026, 10, 15, 20, 31, tzinfo=KST))
     assert all("20261015" in [r[0] for r in rows] for _, rows in db2.upserts)
@@ -108,7 +108,7 @@ async def test_i3_kis_exception_absorbed_per_market(monkeypatch, caplog):
     from src.engine import domestic_index_ingest as ing
 
     caplog.set_level(logging.INFO, logger="src.engine.domestic_index_ingest")
-    db, api = _DB({"0001": 200, "1001": 200}), _API(exc_codes={"1001"})
+    db, api = _DB({"0001": 300, "1001": 300}), _API(exc_codes={"1001"})
     _install(monkeypatch, db, api)
     out = await ing.ensure_fresh(phase="boot", now_kst=datetime(2026, 10, 15, 20, 31, tzinfo=KST))
     assert out["failed"] == 1 and [c for c, _ in db.upserts] == ["0001"]
@@ -157,7 +157,7 @@ async def test_k2_history_pages_back_until_min_rows(monkeypatch):
 
     calls = []
 
-    async def fake_daily(code, start, end):
+    async def fake_daily(code, start, end, **k):
         calls.append(end)
         return _bars(end, 50)
 
@@ -172,7 +172,7 @@ async def test_k2_history_pages_back_until_min_rows(monkeypatch):
 
     calls.clear()
 
-    async def empty(code, start, end):
+    async def empty(code, start, end, **k):
         calls.append(end)
         return []
 
@@ -181,7 +181,7 @@ async def test_k2_history_pages_back_until_min_rows(monkeypatch):
 
     calls.clear()
 
-    async def same(code, start, end):            # 매번 같은 봉 — 진전 없으면 멈춘다
+    async def same(code, start, end, **k):            # 매번 같은 봉 — 진전 없으면 멈춘다
         calls.append(end)
         return _bars(TODAY, 50)
 
@@ -273,3 +273,43 @@ async def test_n1_boot_tests_see_inert_ingest():
 
     assert await ing.ensure_fresh(phase="boot") == {}
 
+
+
+async def test_k4_raw_out_collects_ohlc_for_kept_rows(monkeypatch):
+    """cycle456 — raw_out 에 남긴 날짜만 시가·고가·저가·거래량·거래대금. 못 읽는 칸은 뺀다."""
+    import src.api.domestic_index as A
+
+    async def fake(path, tr_id, params=None, **k):
+        return {"output2": [
+            {"stck_bsop_date": "20261014", "bstp_nmix_prpr": "2510.5", "bstp_nmix_oprc": "2500",
+             "bstp_nmix_hgpr": "2520.1", "bstp_nmix_lwpr": "2490", "acml_vol": "123", "acml_tr_pbmn": "x"},
+            {"stck_bsop_date": "20261013", "bstp_nmix_prpr": "0", "bstp_nmix_oprc": "1"},  # 버린 행
+        ]}
+
+    monkeypatch.setattr(A, "kis_get_quote", fake)
+    raw: dict = {}
+    out = await A.fetch_index_daily("0001", date(2026, 9, 1), date(2026, 10, 14), raw_out=raw)
+    assert out == [("20261014", 2510.5)]
+    assert raw == {"20261014": {"open": 2500.0, "high": 2520.1, "low": 2490.0, "volume": 123.0}}
+
+
+@pytest.mark.real_domestic_index_ingest
+async def test_i4_ingest_passes_raw_to_upsert(monkeypatch):
+    """cycle456 — 적재가 받은 raw 를 그대로 upsert_many(raw_by_date=) 로 넘긴다."""
+    from src.engine import domestic_index_ingest as ing
+
+    seen = []
+
+    class _APIRaw(_API):
+        async def fetch_index_daily(self, code, start, end, *, raw_out=None):
+            raw_out["20261014"] = {"open": 1.0}
+            return [("20261014", 2510.0)]
+
+    class _DBRaw(_DB):
+        async def upsert_many(self, code, rows, *, raw_by_date=None):
+            seen.append(raw_by_date)
+            return len(rows)
+
+    _install(monkeypatch, _DBRaw({"0001": 300, "1001": 300}), _APIRaw())
+    await ing.ensure_fresh(phase="evening", now_kst=datetime(2026, 10, 15, 20, 31, tzinfo=KST))
+    assert seen == [{"20261014": {"open": 1.0}}, {"20261014": {"open": 1.0}}]
