@@ -18,6 +18,14 @@ test("G-E2E-MU1 — 시장 유닛 차트가 그려지고 탭이 바뀐다", asyn
   await expect(page.getByTestId("mu-chart-price").locator("path.recharts-curve").first()).toBeVisible({ timeout: 10_000 });
   // 가격은 캔들 — 봉 수만큼 그려진다
   await expect(page.getByTestId("mu-chart-price").getByTestId("mu-chart-candle")).toHaveCount(kospi.bars.length, { timeout: 10_000 });
+  // 상승(종가 ≥ 시가) = 빨강 · 하락 = 파랑 — 봉마다 색이 데이터와 맞는지
+  const ups = kospi.bars.filter((b) => b.close >= (b.open ?? b.close)).length;
+  const candles = page.getByTestId("mu-chart-price").getByTestId("mu-chart-candle");
+  await expect(candles.and(page.locator('[data-dir="up"][data-color="var(--color-red-500)"]'))).toHaveCount(ups);
+  await expect(candles.and(page.locator('[data-dir="down"][data-color="var(--color-blue-500)"]'))).toHaveCount(kospi.bars.length - ups);
+  expect(kospi.bars.length - ups).toBeGreaterThan(0);
+  // 시가 결측 봉은 회색(모름) — 고정 데이터에는 없다
+  await expect(candles.and(page.locator('[data-dir="unknown"]'))).toHaveCount(0);
   await expect(page.getByTestId(`mu-chart-state-${kospi.decision.state}`)).toHaveAttribute("data-active", "true");
   if (process.env.MU_SHOT) await card.screenshot({ path: `${process.env.MU_SHOT}/mu_kospi.png` });
   await page.getByTestId("mu-chart-tab-kosdaq").click();

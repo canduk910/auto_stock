@@ -97,14 +97,16 @@ function CandleShape(props: CandleProps) {
   const close = payload.close
   const span = hi - lo
   const toY = (v: number) => (span > 0 ? y + ((hi - v) / span) * height : y)
+  // 시가를 모르면 오른 날인지 모른다 — 빨강으로 그리지 않고 회색(모름)으로 둔다.
+  const known = payload.open != null
   const up = close >= open
-  const color = up ? 'var(--color-red-500)' : 'var(--color-blue-500)'
+  const color = !known ? 'var(--color-gray-400)' : up ? 'var(--color-red-500)' : 'var(--color-blue-500)'
   const cx = x + width / 2
   const bw = Math.max(1, width * 0.7)
   const top = toY(Math.max(open, close))
   const bodyH = Math.max(1, Math.abs(toY(open) - toY(close)))
   return (
-    <g data-testid="mu-chart-candle">
+    <g data-testid="mu-chart-candle" data-dir={!known ? 'unknown' : up ? 'up' : 'down'} data-color={color}>
       <line x1={cx} x2={cx} y1={y} y2={y + height} stroke={color} strokeWidth={1} />
       <rect x={cx - bw / 2} y={top} width={bw} height={bodyH} fill={color} stroke={color} />
     </g>
