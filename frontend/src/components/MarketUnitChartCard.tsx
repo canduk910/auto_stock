@@ -71,6 +71,64 @@ function pct(a: number | null | undefined, b: number | null | undefined): string
   return `${v > 0 ? '+' : ''}${v.toFixed(2)}%`
 }
 
+type Bar0 = MarketUnitChartData['markets'][MarketKey]['bars'][number]
+
+/** 캔들의 세로 범위 = [저가, 고가]. OHLC 가 없는 봉은 종가 한 점. */
+function candleRange(b: Bar0): [number, number] {
+  const lo = b.low ?? Math.min(b.open ?? b.close, b.close)
+  const hi = b.high ?? Math.max(b.open ?? b.close, b.close)
+  return [lo, hi]
+}
+
+interface CandleProps {
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+  payload?: Bar0
+}
+
+/** recharts Bar 의 shape — 받은 사각형(저가~고가 픽셀)에서 시가·종가 위치를 비례로 찾는다. */
+function CandleShape(props: CandleProps) {
+  const { x = 0, y = 0, width = 0, height = 0, payload } = props
+  if (!payload) return null
+  const [lo, hi] = candleRange(payload)
+  const open = payload.open ?? payload.close
+  const close = payload.close
+  const span = hi - lo
+  const toY = (v: number) => (span > 0 ? y + ((hi - v) / span) * height : y)
+  const up = close >= open
+  const color = up ? 'var(--color-red-500)' : 'var(--color-blue-500)'
+  const cx = x + width / 2
+  const bw = Math.max(1, width * 0.7)
+  const top = toY(Math.max(open, close))
+  const bodyH = Math.max(1, Math.abs(toY(open) - toY(close)))
+  return (
+    <g data-testid="mu-chart-candle">
+      <line x1={cx} x2={cx} y1={y} y2={y + height} stroke={color} strokeWidth={1} />
+      <rect x={cx - bw / 2} y={top} width={bw} height={bodyH} fill={color} stroke={color} />
+    </g>
+  )
+}
+
+interface TipProps {
+  active?: boolean
+  payload?: { payload?: Bar0 }[]
+}
+
+function CandleTooltip({ active, payload }: TipProps) {
+  const b = active ? payload?.[0]?.payload : undefined
+  if (!b) return null
+  return (
+    <div className="bg-white border border-gray-200 rounded shadow px-2 py-1 text-[11px] text-gray-700">
+      <div className="font-semibold">{b.date}</div>
+      <div>{`시가 ${fmt(b.open)} · 고가 ${fmt(b.high)} · 저가 ${fmt(b.low)} · 종가 ${fmt(b.close)}`}</div>
+      <div>{`60일선 ${fmt(b.sma60)} · 20봉 전 60일선 ${fmt(b.sma60_prev)}`}</div>
+      <div>{b.state ? `판정 ${STATE_KO[b.state]} → ${formatUnitM(b.m)} (다음 거래일 적용)` : '판정 전(80봉 미만)'}</div>
+    </div>
+  )
+}
+
 /** 같은 판정이 이어진 구간 — 차트 배경 띠. */
 function stateRuns(bars: MarketUnitChartData['markets'][MarketKey]['bars']) {
   const runs: { x1: string; x2: string; state: MarketUnitState }[] = []
@@ -273,13 +331,9 @@ export default function MarketUnitChartCard() {
                   width={56}
                   tickFormatter={(v: number) => v.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}
                 />
-                <Tooltip
-                  formatter={(v, name) => [fmt(typeof v === 'number' ? v : null), String(name)]}
-                  labelFormatter={(l) => String(l)}
-                />
-                <Line type="monotone" dataKey="high" name="고가" stroke="var(--color-gray-300)" dot={false} strokeWidth={1} isAnimationActive={false} />
-                <Line type="monotone" dataKey="low" name="저가" stroke="var(--color-gray-300)" dot={false} strokeWidth={1} isAnimationActive={false} />
-                <Line type="monotone" dataKey="close" name="종가" stroke="var(--color-gray-800)" dot={false} strokeWidth={1.6} isAnimationActive={false} />
+                <Tooltip content={<CandleTooltip />} />
+                {/* 가격 = 캔들(고가~저가 꼬리 + 시가~종가 몸통). 상승 빨강 · 하락 파랑(한국 관례) */}
+                <Bar dataKey={candleRange} name="가격" shape={CandleShape} isAnimationActive={false} />
                 <Line type="monotone" dataKey="sma60" name="60일선" stroke="var(--color-navy-600)" dot={false} strokeWidth={2} isAnimationActive={false} connectNulls={false} />
                 <Line type="monotone" dataKey="sma60_prev" name="20봉 전 60일선" stroke="var(--color-navy-300)" strokeDasharray="4 3" dot={false} strokeWidth={1} isAnimationActive={false} />
               </ComposedChart>
@@ -301,7 +355,7 @@ export default function MarketUnitChartCard() {
             </ResponsiveContainer>
           </div>
           <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-gray-500 mt-1" data-testid="mu-chart-legend">
-            <span>━ 종가 · ━ 60일선(진한 남색) · ┅ 20봉 전 60일선 · 회색 = 고가/저가</span>
+            <span>캔들 = 가격(빨강 상승 · 파랑 하락) · ━ 60일선(남색) · ┅ 20봉 전 60일선</span>
             <span>배경·아래 막대 = 그 봉 기준 판정(다음 거래일 진입에 쓰임)</span>
             {STATE_ORDER.map((s) => (
               <span key={s} className={`px-1 rounded ${STATE_CHIP[s]}`}>{`${STATE_KO[s]} ${formatUnitM(d.rules.multipliers[s])}`}</span>
