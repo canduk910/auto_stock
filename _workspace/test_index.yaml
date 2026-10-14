@@ -32358,6 +32358,7 @@ backend:
     - tests/unit/engine/test_cycle269_quote_token_refresh.py
     - tests/unit/engine/test_cycle270_quote_token_revoke_then_issue.py
     - tests/unit/engine/test_cycle296_quote_token_refresh_observe.py
+    - tests/unit/services/test_quote_session_health.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -33733,7 +33734,6 @@ backend:
     - tests/unit/services/test_mcp_client_db_toggle.py
     - tests/unit/services/test_mcp_client_session_log.py
     - tests/unit/services/test_mcp_client_unwrap.py
-    - tests/unit/services/test_quote_session_health.py
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
@@ -219783,7 +219783,7 @@ frontend:
     - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
     - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
     - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-14T07:05:17.072704+09:00'
+generated_at: '2026-10-14T20:22:11.106562+09:00'
 stats:
   backend_modules: 204
   backend_tests: 1395

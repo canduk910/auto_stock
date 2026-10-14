@@ -60,9 +60,9 @@ _KST = timezone(timedelta(hours=9))
 # 외부 의존 — monkeypatch 가능한 wrapper 함수 (테스트 격리)
 # ---------------------------------------------------------------------------
 async def _db_get_by_label(label: str):
-    """DB ``kis_quote_accounts.get_by_label(label)`` wrapper (monkeypatch point)."""
+    """DB ``kis_quote_accounts.get_account_by_label(label)`` wrapper (monkeypatch point)."""
     from src.db import kis_quote_accounts as kqa
-    return await kqa.get_by_label(label)
+    return await kqa.get_account_by_label(label)
 
 
 async def _db_update_account(account_id: str, *, active: bool) -> Optional[dict]:

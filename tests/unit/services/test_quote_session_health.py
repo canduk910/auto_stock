@@ -409,3 +409,45 @@ def test_get_recent_5xx_ratio_for_disabled_returns_full_ratio():
     assert ratio >= 0.8 and total >= 10, (
         f"비활성 라벨은 항상 메인 fallback 트리거, got ({ratio}, {total})"
     )
+
+
+# ---------------------------------------------------------------------------
+# 사양 K — DB wrapper 가 실제 DB 모듈 함수를 부른다 (2026-10-14 운영 AttributeError)
+# ---------------------------------------------------------------------------
+# 다른 사양은 `_db_get_by_label` 를 통째로 바꿔치기해 wrapper 안의 이름 어긋남
+# (`kqa.get_by_label` — 모듈에 없음)을 못 잡았다. 그 결과 10-14 16:10 label=4380
+# 자동 비활성이 DB `active=false` 를 못 써 `_select_quote_label` 이 계속 그 라벨을 골랐다.
+@pytest.mark.asyncio
+async def test_db_get_by_label_wrapper_calls_real_module_function(monkeypatch):
+    """`_db_get_by_label` → `kis_quote_accounts.get_account_by_label` (raising=True 로 실재 확인)."""
+    from src.db import kis_quote_accounts as kqa
+    from src.services import quote_session_health as qsh
+
+    sentinel = MagicMock(id="uuid-k")
+    getter = AsyncMock(return_value=sentinel)
+    monkeypatch.setattr(kqa, "get_account_by_label", getter, raising=True)
+
+    got = await qsh._db_get_by_label("4380")
+
+    getter.assert_awaited_once_with("4380")
+    assert got is sentinel
+
+
+@pytest.mark.asyncio
+async def test_auto_disable_writes_db_inactive_through_real_wrappers(monkeypatch):
+    """wrapper 를 바꿔치기하지 않고 DB 모듈 함수만 대역 → `update_account(id, active=False)` 도달."""
+    from src.db import kis_quote_accounts as kqa
+    from src.services import quote_session_health as qsh
+
+    monkeypatch.setattr(kqa, "get_account_by_label",
+                        AsyncMock(return_value=MagicMock(id="uuid-k")), raising=True)
+    update = AsyncMock(return_value=None)
+    monkeypatch.setattr(kqa, "update_account", update, raising=True)
+    monkeypatch.setattr(qsh, "_pool_disable_quote_session", AsyncMock())
+    log = AsyncMock()
+    monkeypatch.setattr(qsh, "_write_system_log", log)
+
+    await qsh.health_monitor._auto_disable("4380", reason="consecutive_failures=5")
+
+    update.assert_awaited_once_with("uuid-k", active=False)
+    assert not any("quote_session_health_db_fail" in str(c.args) for c in log.await_args_list)
