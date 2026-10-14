@@ -429,13 +429,14 @@ T7(120일선 20영업일 기울기)·R4(250일 고점 대비 하락률)를 계�
 ## domestic_index.py — 국내 업종지수 일별 종가 (시장 유닛 원천, cycle455)
 
 테이블 `domestic_index_daily`(migration 053, 가산형 신규 테이블). PK `(index_code, bas_dd)`. 모양은 위 `overseas_index.py` 와 같다.
-KIS `FHKUP03500100` 종가를 쌓는다 — `index_code` = `0001`(코스피 종합) · `1001`(코스닥 종합). 코드의 정본은 `engine/market_unit.INDEX_CODE_BY_MARKET` 이다.
-쓰는 쪽 = `engine/domestic_index_ingest.ensure_fresh` · 읽는 쪽 = 그 적재 leaf(행 수·최신일) + `engine/market_unit.compute_snapshot`(종가열).
+KIS `FHKUP03500100` 종가를 쌓고, `raw` 에 시가·고가·저가·거래량·거래대금(`{open, high, low, volume, trade_amount}`)을 담는다 — `index_code` = `0001`(코스피 종합) · `1001`(코스닥 종합). 코드의 정본은 `engine/market_unit.INDEX_CODE_BY_MARKET` 이다.
+쓰는 쪽 = `engine/domestic_index_ingest.ensure_fresh` · 읽는 쪽 = 그 적재 leaf(행 수·최신일) + `engine/market_unit.compute_snapshot`(종가열) + 화면 라우트 `routes/market_unit_chart`(봉 — `get_recent_bars`).
 
 | 함수 | 계약 |
 |---|---|
 | `upsert_many(index_code, rows, *, raw_by_date=None) -> int` | `rows` = `[(YYYYMMDD, 종가), ...]`. `ON CONFLICT (index_code, bas_dd) DO UPDATE`(`close_price`·`raw`·`updated_at`) — **멱등**. 반환 = 보낸 행 수 · 빈 목록·예외 = 0 |
 | `get_recent_closes(index_code, *, limit) -> list[tuple[date, float]]` | 최근 `limit` 행 — **오름차순**(오래된→최신). DB 는 `bas_dd DESC LIMIT` 로 가져온 뒤 뒤집는다. 예외 = `[]` |
+| `get_recent_bars(index_code, *, limit) -> list[dict]` | 최근 `limit` 행 — **오름차순**. 행 = `{bas_dd, close, open, high, low}` — `close` 는 `close_price`, 나머지는 `raw` 에서 읽고 없거나 비수치·0 이하면 `None`. **화면 차트 전용**(판정은 `get_recent_closes` 로 종가만 쓴다). 예외 = `[]` |
 | `max_bas_dd(index_code) -> date \| None` | `MAX(bas_dd)`. 없음·예외 = `None` |
 | `count(index_code) -> int` | 그 지수 행 수. 예외 = 0 |
 

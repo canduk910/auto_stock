@@ -3225,3 +3225,13 @@ cycle359 조사). cycle368 이 파서 기준점을 고치고, VI 수명 600초(�
   - **마커 6종**(로거 `src.engine.market_unit`) — INFO = `[market_unit]`(`where=calc|signal`, 1회/(ticker, where)/일) · `[market_unit_state]`((as_of, preview, state, m) 조합당 1회) · `[market_unit_daily]`(거래일마다 전략당 1줄). WARNING = `[market_unit_unavailable]` · `[market_unit_config]` · `[market_unit_error]`. cap = 인스턴스별 `KstDailyEmitCap` 3개(state·attempt·warn), `write_log` 별도 호출 없음. ⚠️ INFO 3종은 21:30 `top_patterns` 에 없고 INFO retention 2일 — 섀도 판독은 이틀 안에 `system_logs` 직접 조회. 일일 집계 `_market_unit_tally` 는 **더 뒤 날짜**가 올 때만 닫으며 `[market_unit_daily]` 를 낸다(`_market_unit_tally_roll` 의 `tally["date"] < day`). 메모리라 재시작하면 앞부분이 빠진다 — 정본은 `[market_unit]` 개별 줄.
 
 → CHANGELOG: cycle455 행
+
+
+## 「모듈 맵」 `domestic_index_ingest.py`
+### 2026-10-15 cycle456 — 적재 목표 행 수 130 → 260, `raw` 에 OHLC 저장 (정본에서 옮긴 원문)
+
+  - 시장마다 `domestic_index.count(code) < TARGET_ROWS`(130) 이면 `api.domestic_index.fetch_index_daily_history(code, 오늘, 130)`(과거로 내려가는 전체 적재), 아니면 증분 `fetch_index_daily(code, max_bas_dd − INCREMENTAL_BACK_DAYS(7일), 오늘)` → `domestic_index.upsert_many`(멱등). 지금이 `TODAY_BAR_CUTOFF`(15:40 KST) 전이면 오늘 날짜 봉을 버린다(장중 미확정). `raw` 는 채우지 않는다(표 기본값 `{}`).
+
+경위: 사용자 요청 2026-10-15 「일봉적재도 해서 시세와 이평선차트를 이용해서 시장배수 결정과정을 좀 더 시각화해줘」. 화면 차트가 120봉을 보이고 봉마다 판정(80봉 창)을 다시 내야 해서 200행이 필요하다 — 목표를 260 으로 올렸다(history 상한 50행 × 6회 = 300 안). 차트에 고가·저가를 그리려고 KIS 응답의 시가·고가·저가·거래량·거래대금을 `raw` 에 담기 시작했다. 판정 입력(종가)은 바뀌지 않았다. 기존 130행 DB 는 다음 부팅의 `count < 260` 판정으로 전체 적재를 다시 탄다.
+
+→ CHANGELOG: cycle456 행

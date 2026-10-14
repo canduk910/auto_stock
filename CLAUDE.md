@@ -230,7 +230,7 @@ cd frontend && npm install && npm run dev
 | `backtest_runs` | 외부 MCP 백테스트 영속화 (`(target_date, strategy_id, params_kind)` UNIQUE) |
 | `market_regime_snapshots` | 매크로 레짐 일일 스냅샷 (출처 = 우리 `macro` 컨테이너, `_boot()` 시점 1행) |
 | `overseas_index_daily` | 해외지수 일별 종가(cycle443) — `ndx2x_riskoff` 전략의 T7/R4 신호 원천, KIS `FHKST03030100` |
-| `domestic_index_daily` | 국내 업종지수 일별 종가(migration 053, cycle455, PK `(index_code, bas_dd)`) — 시장 유닛 원천(`0001` 코스피 종합 · `1001` 코스닥 종합), KIS `FHKUP03500100`. 부팅 1회 + 20:30 일봉 적재 뒤 적재. 정본 = `src/db/CLAUDE.md` 「domestic_index.py」 절 |
+| `domestic_index_daily` | 국내 업종지수 일별 종가(migration 053, cycle455, PK `(index_code, bas_dd)`) — 시장 유닛 원천(`0001` 코스피 종합 · `1001` 코스닥 종합), KIS `FHKUP03500100`. `raw` = 시가·고가·저가·거래량·거래대금(화면 차트 `GET /api/market-unit/chart` 용, 판정은 종가만). 부팅 1회 + 20:30 일봉 적재 뒤 적재. 정본 = `src/db/CLAUDE.md` 「domestic_index.py」 절 |
 | `kis_quote_accounts` | 보조 KIS 시세 수신 계좌 (UUID PK, label UNIQUE) |
 | `strategy_funnel_snapshots` | 전략별 조건검색 단계별 후보/탈락 종목 (`(target_date, strategy_id, step_no)` UNIQUE). 잠정 쓰기는 확정 행을 덮지 못한다 |
 | `trade_journal_orders` · `_stops` · `_notes` · `_cursor` | 거래일지 (migration 047) — 주문 1건 1행(`(order_date, order_no, side)` UNIQUE) · 손절선 사건 · 메모 · 로그 커서. **`_orders`·`_stops`·`_cursor` 를 쓰는 쪽은 `journal_worker` 컨테이너의 전용 DB 역할 하나**다(`journal_worker/ops/role.sql`). backend 는 `src/db/trade_journal.py` 로 `_orders`·`_stops` 를 읽기만 하고(거래일지 탭 `GET /api/history/journal`), 메모 `_notes` 만 쓴다(`PUT /api/history/journal/notes/{id}`). 칸·규약 = `src/db/CLAUDE.md` 「DB 스키마」 절 |

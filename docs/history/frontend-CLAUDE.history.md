@@ -1692,3 +1692,13 @@ nginx 계약(`auth_basic off;` 금지 · 옛 `nginx.conf` 부활 금지)은 루�
 경위: 배너가 `enabled` 하나만 보아서 「신규 매수 멈춤」·「섀도」 를 「실매매 진행」 으로 보였다. 방어선은 후보표의 ATR(`targets.atr`)로 화면이 다시 계산했는데, 보유 종목이 후보에서 빠지면 `-` 로 비거나 엔진 손절선과 달랐다. 밴드 게이지는 `params` 가 없을 때 코드 상수(1.0~4.5%)로 메웠고, 깔때기 라벨과 진입 문구에 운영 DB 와 다른 숫자 문턱이 박혀 있었다. 명세 = `_workspace/red/cycle414/monitor_spec.md` §1.3 · §4.5.
 
 → CHANGELOG: cycle414 행
+
+
+## 「MarketRegimeLabelCard」 `regime-unit-source` 문구
+### 2026-10-15 cycle456 — 참고값임을 밝히고 새 카드로 안내 (정본에서 옮긴 원문)
+
+- `regime-unit-source`(「운영 DB 종가로 다시 계산한 값」 — 엔진 메모리 값이 아니다. ⚠️ 재계산 원천은 `069500` 이고 엔진 원천은 종목 소속 시장의 종합지수다 — `src/routes/CLAUDE.md` `/api/market-regime-label` 행)
+
+경위: cycle455 로 엔진 원천이 시장별 종합지수가 됐는데 이 카드의 m 은 여전히 `069500` 재계산이라 실제 판정처럼 읽혔다. cycle456 이 시장별 판정 과정 카드 `MarketUnitChartCard` 를 바로 아래에 두면서 문구를 「KODEX 200 참고값 — 실제 판정은 아래」 로 바꿨다.
+
+→ CHANGELOG: cycle456 행

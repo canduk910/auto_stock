@@ -188,7 +188,7 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 - `marketUnitEffect(sid, mu)` — 시장 유닛의 뜻은 전략마다 다르다. 대상 판정은 하드코딩 목록이 아니라 **라우트 응답**이다(cycle423 카드 #5) — `mu` 가 주어지면(= 라우트가 명부 `MARKET_UNIT_SCALE_IDS` 로 이미 걸렀다) `etf_trend` 만 별도 분기, 그 밖은 전부 터틀형으로 본다. `mode === 'off'` 면 표시하지 않는다.
   - 🔴 `etf_trend` 는 **`shadow` 에서도** m≤0 이거나 스냅샷이 없으면(`ok === false`) 「사지 않음」(차단)이다. `enforce` + 스냅샷 없음도 차단이다(`etf_trend.py` 가 `state == "unavailable"` 을 직접 거른다).
   - 터틀 4전략: `shadow` = 「관찰만」(스냅샷이 없어도 차단 아님) · `enforce` = m≤0 차단, m<1 「랏 ×m」, 스냅샷 없음 = 「m=1(차단 아님)」 — 엔진 `strategy_base._market_unit_view` 가 그때 `m=1.0` 으로 산다.
-  - ⚠️ 판정 재료 = `mu` 최상위 칸 = **코스피 종합지수 스냅샷**이다. 엔진은 종목 소속 시장별로 판정하고(코스닥 종목 = 코스닥 종합지수) 한쪽 결측이면 다른 시장 배수를 쓴다(cycle455) — 화면은 둘 다 반영하지 않는다. 시장별 값은 `MonitorMarketUnit.by_market?`(`types/trading.ts`, 타입만 있고 표시하지 않는다)
+  - ⚠️ 판정 재료 = `mu` 최상위 칸 = **코스피 종합지수 스냅샷**이다. 엔진은 종목 소속 시장별로 판정하고(코스닥 종목 = 코스닥 종합지수) 한쪽 결측이면 다른 시장 배수를 쓴다(cycle455) — 화면은 둘 다 반영하지 않는다. 시장별 값은 `MonitorMarketUnit.by_market?`(`types/trading.ts`, 타입만 있고 표시하지 않는다). 시장별 판정 과정은 대시보드 `MarketUnitChartCard`(아래 절)가 보인다
 - `marketUnitBlockLabel(sid, mu)` — 위 판정이 차단일 때만 「시장 유닛 미계산」/「시장 유닛 0배」, 아니면 `null`. 후보 상태 체인과 요약표 「왜 안 사나」 가 이것 하나로 판정한다.
 - `finalFunnelStep(steps)` = 최종 단계 — `step_no===99` 우선, 없으면 그 목록의 최대 `step_no`. donchian·VCP·BFB·kojiro 의 엔진 funnel 은 9단계라 99 고정 매칭은 늘 빈손이다.
 - `funnelBottleneck(steps)` = **처음 0 이 되는 단계**. ⚠️ `/strategy-funnel` 화면의 병목(직전 대비 절대 감소 최대)과 정의가 다르다.
@@ -601,9 +601,25 @@ Dashboard 환경 배너 직하, 전략 탭 위(`<ControlPanel />` 직후).
 Dashboard `MarketRegimeCard` 바로 아래. 장세와 시장 유닛을 한 카드에 나란히 둔다(cycle410). `fetchMarketRegimeLabel()` → `GET /api/market-regime-label`(래퍼째 받는다 — `success=false` 면 서버 사유를 그대로 보인다 · 네트워크 오류 = 「장세 라벨을 불러오지 못했습니다.」), queryKey `['marketRegimeLabel']`.
 
 - 왼쪽 「장세」 = 「관찰용 — 매매에 쓰지 않습니다」. 배지 `regime-label-badge` = 한글 6종(`utils/marketRegimeLabel.ts::REGIME_LABEL_KO`) · 근거 「60일선 20일 기울기 ±x.x%」·「20일 변동성 xx%」 · `regime-label-since`(`since_truncated` 면 「… 이전부터」) · `regime-label-basis`
-- 오른쪽 「시장 유닛」 = 「실제 매수 수량에 쓰임 — enforce 인 전략만」. `regime-unit-m`(×1/×0.75/×0.5/×0, 못 매기면 —) · 근거 「종가 60일선 위/아래」·「60일선 상승/하락」 · `regime-unit-basis` · `regime-unit-source`(「운영 DB 종가로 다시 계산한 값」 — 엔진 메모리 값이 아니다. ⚠️ 재계산 원천은 `069500` 이고 엔진 원천은 종목 소속 시장의 종합지수다 — `src/routes/CLAUDE.md` `/api/market-regime-label` 행) · 전략별 모드 `regime-unit-mode-{sid}`(적용/기록만/꺼짐/모름) · 적용 0개면 「지금 적용 중인 전략 없음」
+- 오른쪽 「시장 유닛」 = 「실제 매수 수량에 쓰임 — enforce 인 전략만」. `regime-unit-m`(×1/×0.75/×0.5/×0, 못 매기면 —) · 근거 「종가 60일선 위/아래」·「60일선 상승/하락」 · `regime-unit-basis` · `regime-unit-source`(「운영 DB 종가로 다시 계산한 KODEX 200 참고값 — 실제 판정(시장별 종합지수)은 아래 「시장 유닛 결정 과정」」 — 엔진 메모리 값이 아니다. ⚠️ 재계산 원천은 `069500` 이고 엔진 원천은 종목 소속 시장의 종합지수다 — `src/routes/CLAUDE.md` `/api/market-regime-label` 행. 시장별 실제 판정은 바로 아래 `MarketUnitChartCard`) · 전략별 모드 `regime-unit-mode-{sid}`(적용/기록만/꺼짐/모름) · 적용 0개면 「지금 적용 중인 전략 없음」
 - 띠 두 줄(최근 60거래일) — `regime-label-band`(장세 색) · `regime-unit-band`(m 값). 칸 title = 날짜 + 값. 날짜는 서버 `YYYY-MM-DD` 문자열을 그대로 쓴다(`Date` 변환 없음)
 - 정의 = `src/engine/CLAUDE.md` 모듈 맵 `market_regime_label.py`·`market_unit.py` · 회귀 = `components/__tests__/MarketRegimeLabelCard.test.tsx`
+
+## MarketUnitChartCard
+
+Dashboard `MarketRegimeLabelCard` 바로 아래. 시장 유닛 배수가 정해지는 과정을 시장마다 보인다(cycle456, **읽기 전용**). `fetchMarketUnitChart()`(`api/market-unit-chart.ts`) → `GET /api/market-unit/chart`(래퍼째 받는다 — `success=false` 면 서버 `message` 를 그대로 보인다 · 네트워크 오류 = 「시장 유닛 차트를 불러오지 못했습니다.」). queryKey `['marketUnitChart']` · `staleTime` 10분 · `retry: 1`. 타입 = `types/market-unit-chart.ts`(라우트 응답 1:1 — `src/routes/CLAUDE.md` `/api/market-unit/chart` 행).
+
+- 🔴 **판정은 서버가 운영 함수(`market_unit.classify`·`compute_snapshot`)로 낸 값이다. 화면은 다시 계산하지 않는다** — 위/아래·상승/하락·배수를 화면 코드로 재판정하지 않는다.
+- 탭 `mu-chart-tab-{kospi|kosdaq}`(`aria-pressed`, 라벨 = 시장 이름 + 지수 코드).
+- 오늘 적용 배수 `mu-chart-today-m` = 엔진 `effective.m`. 엔진이 아직 계산하지 않았으면(`fallback='not_computed'`) `decision` 재계산값(`decision.ok` 면 그 m, 판정 불가면 ×1, `decision` 도 없으면 —).
+- 출처 문구 `mu-chart-source` — `effective.fallback` 별로 「엔진 메모리 값」(`-`) · 「이 시장 지수를 판정하지 못해 {다른 시장} 배수를 대신 씁니다」(`other_market`) · 「두 시장 모두 판정 불가 — 배수를 줄이지 않습니다(×1)」(`none`) · 「엔진이 아직 계산하지 않았습니다 — 운영 함수로 다시 낸 값」(`not_computed`).
+- `mu-chart-mismatch` = 엔진 값이 있고 엔진·재계산 둘 다 `ok` 인데 `state` 가 다를 때만(엔진은 부팅 때 계산 — 그 뒤 지수가 갱신됐을 수 있다).
+- 모드 칩 `mu-chart-mode-{sid}`(`strategyLabel` + `UNIT_MODE_KO`, 미등록 = 「모름」, `enforce` 만 색).
+- 3단계(`decision` 기준) — `mu-chart-step-position`(종가 vs 60일선 → 위/아래) · `mu-chart-step-slope`(60일선 vs 20봉 전 60일선 → 상승/하락) · `mu-chart-step-table`(4칸 `mu-chart-state-{state}`, 오늘 칸 `data-active`, 배수는 응답 `rules.multipliers`). 판정 불가 = `mu-chart-steps-unavailable`(사유 한글) · `decision` 없음 = `mu-chart-steps-unknown`.
+- 차트 `mu-chart-price`(`data-bars` = 봉 수) — recharts `ComposedChart`. 가격 = **캔들**(`Bar` + 커스텀 shape `CandleShape`, 캔들마다 testid `mu-chart-candle`): 꼬리 = 저가~고가 · 몸통 = 시가~종가 · 상승 `var(--color-red-500)` · 하락 `var(--color-blue-500)` · OHLC 가 없는 봉은 종가 한 점. 선은 둘뿐 — 60일선 · 20봉 전 60일선 점선. 같은 판정이 이어진 구간은 배경 띠(`ReferenceArea`). 툴팁 = 커스텀 `CandleTooltip`(시가·고가·저가·종가 · 60일선 · 20봉 전 60일선 · 판정 → 배수 「다음 거래일 적용」). 아래 `mu-chart-multiplier` = 봉별 배수 막대(`minPointSize` 2px — ×0 인 날도 보인다, 판정 없는 봉은 그리지 않는다) · 범례 `mu-chart-legend`. 🔴 띠·막대는 **그 봉 기준 판정**이고 다음 거래일 진입에 쓰인다 — 범례가 이 말을 한다. 봉 0개 = `mu-chart-empty`.
+- 색은 `index.css` 토큰 CSS 변수(`var(--color-…)`)뿐이다 — hex 리터럴 0.
+- 목 — MSW `test/handlers.ts`(`test/fixtures/marketUnitChart.fixture.ts`) · e2e `fixtures/api-mocks.ts`(`**/api/market-unit/chart`, `e2e/fixtures/market-unit-chart.fixture.ts` = 실제 라우트를 합성 시계열로 태운 출력).
+- 회귀 = `components/__tests__/MarketUnitChartCard.cycle456.test.tsx` · `e2e/market-unit-chart.spec.ts`(G-E2E-MU1 — 실브라우저에서 캔들 수 = 봉 수).
 
 ## RealtimeHealth (`/realtime-health`)
 
