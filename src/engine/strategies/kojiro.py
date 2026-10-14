@@ -1526,6 +1526,39 @@ class KojiroStrategy(StrategyBase):
     def get_scan_stats(self) -> dict:
         return dict(self._scan_stats)
 
+    def chart_indicators(self, bars: list[dict], start_index: int = 0) -> dict:
+        """거래일지 차트 지표(cycle457) — `prepare` 와 같이 `KOJIRO_FETCH_DAYS` 봉 창마다 `enrich` 한다.
+
+        봉 j 의 값 = j 로 끝나는 창(prepare 와 같은 깊이)을 `_build_ohlc_df` → `kojiro_indicators.enrich`
+        한 마지막 행. EMA 는 창 첫 봉에서 시작하므로 전체 이력으로 한 번에 낸 값과 조금 다르다.
+        """
+        cfg = self._ind_cfg
+        keys = ("ema_s", "ema_m", "ema_l", "macd1", "macd2", "macd3", "atr")
+        series: dict[str, list] = {k: [] for k in keys}
+        for j in range(len(bars)):
+            c = self._chart_candles_desc(bars, j, KOJIRO_FETCH_DAYS)
+            if j < start_index or len(c) < KOJIRO_MIN_REQUIRED:
+                for v in series.values():
+                    v.append(None)
+                continue
+            last = enrich(self._build_ohlc_df(list(reversed(c))), cfg).iloc[-1]
+            for k in keys:
+                val = last[k]
+                series[k].append(float(val) if val == val else None)  # NaN → None
+        return {
+            "lines": [
+                self._chart_line("ema_s", f"EMA{cfg.ema_short}", tone="beige"),
+                self._chart_line("ema_m", f"EMA{cfg.ema_mid}", tone="sky"),
+                self._chart_line("ema_l", f"EMA{cfg.ema_long}", tone="navy"),
+                self._chart_line("macd1", f"MACD1({cfg.ema_short}-{cfg.ema_mid})", pane="macd", tone="beige"),
+                self._chart_line("macd2", f"MACD2({cfg.ema_short}-{cfg.ema_long})", pane="macd", tone="sky"),
+                self._chart_line("macd3", f"MACD3({cfg.ema_mid}-{cfg.ema_long})", pane="macd", tone="navy"),
+                self._chart_line("atr", f"ATR{cfg.atr_period}", pane="atr", tone="brown"),
+            ],
+            "series": series,
+            "notes": [],
+        }
+
     def llm_context(self, ticker: str) -> dict:
         """AI 매수평가 핵심값(cycle445 B) — `_candidates` 의 ATR·스테이지·EMA 를 읽기만 한다."""
         try:

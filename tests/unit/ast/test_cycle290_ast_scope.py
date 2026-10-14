@@ -124,7 +124,7 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
         "6d24ef3f3afd211ae6123623075b08320cdc08c9cd48a6db965355305ad4e732",
     # 🔁 cycle364 재핀 — `prepare(as_of=)` 시그니처 확장.
     ("volatility_breakout", "prepare"):
-        "0a378b804169ed99843eca465f404fbe136184b436cd627aa1af2c2268e98ab7",
+        "92da0ef95d7f558cc80caf8a9b1a9ebacb08d1f2a849d464bf134ceb6a594845",
     # 🔁 cycle399 재핀 — 공통 섀도 모드(사용자 승인 10-02 R1) — BUY 반환 앞 섀도 관문 1문장(`if self._shadow_buy_intercepted(...): return Signal.NONE`) 삽입. 그 밖 무변경.
     ("long_tail_volatility", "check_buy_signal"):
         "be76217bf4634a401bb73564d41bcb25b6bed74e7f6ec95b1775941f9676293b",
@@ -134,7 +134,7 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
         "1149ecc8ea37fb1ba164cc1fd88e6525111d5142168ca879f1026c7890905b81",
     # 🔁 cycle364 재핀 — `prepare(as_of=)` 시그니처 확장.
     ("long_tail_volatility", "prepare"):
-        "8837076acd413ed97127a7a74ebbb4e62b7000fa9495727ad268bfedcd13b73a",
+        "4870280e9c5bca21a122d25436ebb111cb2e4cf4ed2efaaaa2b221ad5f536cd4",
     # 🔁 cycle382 재핀 — 시장 유닛(단계형) 신호 필터 삽입(추격 상한 블록 뒤 ·
     # `_breakout_high` 스탬프 앞, 사용자 결정 09-27).
     # 🔁 cycle399 재핀 — 공통 섀도 모드(사용자 승인 10-02 R1) — BUY 반환 앞 섀도 관문 1문장(`if self._shadow_buy_intercepted(...): return Signal.NONE`) 삽입. 그 밖 무변경.
@@ -157,7 +157,7 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     # 않는다.
     # 🔁 cycle382 재핀 — `_refresh_market_unit` 호출 삽입(`_resolve_prepare_as_of` 직후).
     ("donchian_swing", "prepare"):
-        "a2c018d3fa4e416bb7c92325d325d9fad7c88f86a62328500e410c3c455d930a",
+        "48641aa3d9ccea27d1f5375671270726ccae0f816143d4292ad3b27c8cd2d8b0",
     # 🔁 cycle449 재핀 — 만석 직전 가격 추적(사용자 결정 2026-10-12): `is_max_positions()` 반환
     # 앞에 `_track_baseline_while_full(...)` 호출 1줄 + fresh 경로 주석에 만석 추적 언급 1줄.
     # 그 밖 무변경. 직전 값 = `b39b26fb398ca352edaf91816b4aed04cd50f47aef29d13a8b82af0f6580ed7d`.
@@ -197,7 +197,7 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
         # 보유 종목의 `_candidates`(청산 입력 `atr14`·`ema50`·`base_low`)를 더 이상
         # 지우지 않는다(round-1 적대 검토 trading-safety medium 반영).
         # 🔁 cycle382 재핀 — `_refresh_market_unit` 호출 삽입(`_resolve_prepare_as_of` 직후).
-        "29280134b44040ae4187fb7eb95d0308885ff904a61f60e1ca4b6a061f1d416e",
+        "0d342b1ddcda7a6c3a9f13c96b461e1ea578287b8dc9b2ee005ab51882f32301",
     # 🔁 cycle382 재핀 — 시장 유닛(단계형) 신호 필터(`observe_gap(...,"pass",...)`
     # 뒤 · `_bought_today.add` 앞).
     # 🔁 cycle399 재핀 — 공통 섀도 모드(사용자 승인 10-02 R1) — BUY 반환 앞 섀도 관문 1문장(`if self._shadow_buy_intercepted(...): return Signal.NONE`) 삽입. 그 밖 무변경.

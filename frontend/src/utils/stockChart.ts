@@ -12,6 +12,25 @@ import type { ChartPeriod, StockChartBar } from '../types/stock-chart'
 
 const TICKER_RE = /^\d{6}$/
 
+/** KLineChart 한글 로케일 — 종목 차트·거래일지 차트가 같은 이름(`ko-KR`)으로 등록한다. */
+export const KLINE_LOCALE_KO = {
+  time: '날짜',
+  open: '시가',
+  high: '고가',
+  low: '저가',
+  close: '종가',
+  volume: '거래량',
+  turnover: '거래대금',
+  change: '등락',
+  second: '초',
+  minute: '분',
+  hour: '시',
+  day: '일',
+  week: '주',
+  month: '월',
+  year: '년',
+}
+
 /** KRX 6자리 **숫자** 종목코드만 차트 조회 대상이다(백엔드 422 규칙과 동일). */
 export function isChartableTicker(v: unknown): boolean {
   return typeof v === 'string' && TICKER_RE.test(v)

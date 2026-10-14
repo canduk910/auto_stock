@@ -193,6 +193,22 @@
 - BFB `_detect_pole_and_flag_detailed(candles) -> (result, fail_stage, detail)` 이 `fail_stage`(`pole_return`/`pole_red_ratio`/`flag_retracement`/`volume_contraction`)와 수치를 낸다. `_detect_pole_and_flag` 은 result 만 돌려주는 thin wrapper.
 - 휴장일 응답 필드 = `src/routes/CLAUDE.md` `/api/strategy-funnel` 행. funnel 은 **순수 관찰성** — `check_buy_signal`/`check_exit_signal` funnel hook 0건(AST).
 
+### 거래일지 차트 지표 (cycle457)
+
+`StrategyBase.chart_indicators`(계약 = `src/engine/CLAUDE.md` `strategy_base.py` 절)를 전략이 재정의한다. 🔴 **차트 값은 판정 함수와 같은 함수로 계산한다** — 판정 쪽 식을 고치면 차트도 같이 바뀌어야 하므로, 계산식을 `prepare`·판정에서 헬퍼로 뽑아 두 곳이 함께 부른다(뽑을 때 행위는 그대로 둔다).
+
+| 전략 | 그리는 것 | 판정과 함께 쓰는 함수 |
+|---|---|---|
+| `donchian_swing` | EMA(`long_ma_period`) · 직전 `donchian_period` 일 고가(돌파선) · `channel_exit_period` 일 저가(청산 채널, 0 이면 생략 — 무장(+3R) 뒤에만 청산에 쓰인다는 안내) · ATR | `_prior_high` · `_ema_recent` · `_channel_low_of` |
+| `vcp_breakout` | 추세 EMA 3선(실효 기간 — `_effective_ema_long`) · ATR. 베이스 고가는 그리지 않는다(안내) | `_daily_fetch_days` · `_effective_ema_long` · `_trend_ema_periods` · `_trend_emas`(`_check_trend_filter` 가 쓴다) |
+| `kojiro` | EMA `ema_short`/`ema_mid`/`ema_long` · MACD1~3(`macd` 칸) · ATR | `KOJIRO_FETCH_DAYS` 봉 창마다 `enrich`(prepare 와 같은 창) |
+| `etf_trend` | EMA60 · 직전 20봉 고가(돌파선) · 10봉 저가(청산 채널) · ATR20 | `etf_trend_core.breakout_line`·`ema`·`atr_wilder(true_ranges(…))`·`channel_low`(`recompute_held_atr` 의 채널도 `core.channel_low(lows)`) |
+| `bull_flag_breakout` | ATR 만 + 안내(깃발 고가는 매일 아침 다시 정해진다) | — |
+| `volatility_breakout` · `long_tail_volatility` | 그날 `main` 목표가(시가 + 오프셋) | 각자 `_noise_k` · `_target_offset_base` · `_board_target_offset`(`prepare`·`on_open_price_confirmed`) |
+| `momentum` · `ndx2x_riskoff` | 없음(기본 빈 결과) | — |
+
+새 전략을 추가할 때는 `chart_indicators` 재정의를 권한다(없으면 거래일지 차트에 캔들과 체결 자리만 나온다). 회귀 = `tests/unit/engine/strategies/test_cycle457_chart_indicators.py`(P1~P7 — 실제 `prepare` 결과와 값 대조 · 뽑은 헬퍼를 prepare 가 쓰는지).
+
 ### prepare 공통
 
 - **기준일 인자 `prepare(self, *, as_of: date | None = None)`**(전 전략 공통, 해석 = `StrategyBase._resolve_prepare_as_of`) — `None`/오늘 = 현행 그대로(부팅·07:59·5분 재준비 — 골든 `tests/unit/engine/strategies/fixtures/cycle364_prepare_golden.json`) · `> 오늘` = **미리보기**(`today_str = as_of` 라 오늘 봉이 「전일」, 기대 헤드 = `previous_trading_day(as_of)`, 21:00 저녁 캡처만) · `< 오늘` = `ValueError`. momentum 은 인자만 받는다. VB·LTV 는 PV-1 밖이다(VB 보유는 15:20 에 비고, LTV 상한가 보유가 읽는 `ticker_prev_close` 는 21:30 정산이 비운 뒤 다음 부팅이 채운다).

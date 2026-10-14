@@ -2,7 +2,7 @@
  * cycle387 — `klinecharts` 가짜 모듈(테스트 전용).
  *
  * jsdom 에는 canvas 가 없어 실제 라이브러리를 돌릴 수 없다(`getContext` 가 null). 그래서
- * `init`·`dispose`·`registerLocale` 만 가짜로 두고, `init` 이 돌려주는 차트는 **어떤 메서드를
+ * `init`·`dispose`·`registerLocale`(+ 거래일지 차트의 `registerIndicator`·`registerOverlay`)만 가짜로 두고, `init` 이 돌려주는 차트는 **어떤 메서드를
  * 불러도 기록만 하는** Proxy 다 — 모달이 `setSymbol`·`setPeriod`·`setDataLoader`·
  * `createIndicator`·`resetData`·`resize` 등을 부른 순서와 인자를 테스트가 읽는다.
  *
@@ -69,6 +69,9 @@ export const fakeKline = {
   init: vi.fn(),
   dispose: vi.fn(),
   registerLocale: vi.fn(),
+  /** cycle457 — 거래일지 차트가 모듈 최상위에서 사용자 지표·표시를 등록한다(호출 기록만). */
+  registerIndicator: vi.fn(),
+  registerOverlay: vi.fn(),
 }
 
 function installInit(): void {
@@ -101,6 +104,8 @@ export const klinechartsModule = {
   init: fakeKline.init,
   dispose: fakeKline.dispose,
   registerLocale: fakeKline.registerLocale,
+  registerIndicator: fakeKline.registerIndicator,
+  registerOverlay: fakeKline.registerOverlay,
 }
 
 export interface CollectedBars {

@@ -140,7 +140,12 @@ def test_g223_4_buy_path_prior_high_formula_unchanged():
     """`prepare` 의 돌파선 산식은 **정답 쪽** — 절대 접촉 금지."""
     fn = _func(ast.parse(_read(_DONCHIAN)), "prepare")
     assert fn is not None, "prepare 미발견"
-    assert "prior_high = max(highs[1:donchian_period + 1])" in ast.unparse(fn), (
+    # cycle457 — 산식을 `_prior_high(highs, period)` 로 꺼냈다(거래일지 차트와 같은 함수). 산식은 그대로다.
+    assert "prior_high = self._prior_high(highs, donchian_period)" in ast.unparse(fn), (
+        "매수 경로 돌파선 산식 변경 감지 — 이번 사이클 금기"
+    )
+    helper = _func(ast.parse(_read(_DONCHIAN)), "_prior_high")
+    assert helper is not None and "return max(highs[1:period + 1])" in ast.unparse(helper), (
         "매수 경로 돌파선 산식 변경 감지 — 이번 사이클 금기"
     )
 

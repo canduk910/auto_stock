@@ -59,9 +59,9 @@ _LTV_FROZEN_METHODS = {
         "1149ecc8ea37fb1ba164cc1fd88e6525111d5142168ca879f1026c7890905b81",
     # 🔁 cycle364(2026-09-26) 재핀 — `prepare(as_of=)` 시그니처 확장(사용자 승인 D3).
     "prepare":
-        "8837076acd413ed97127a7a74ebbb4e62b7000fa9495727ad268bfedcd13b73a",
+        "4870280e9c5bca21a122d25436ebb111cb2e4cf4ed2efaaaa2b221ad5f536cd4",
     "on_open_price_confirmed":
-        "4834b4cc6b03f2eddbfa94390ddcf0df41b3a561afd9056a5b2cac04f76a72ec",
+        "f0f85aecd764097b15083fdb19d58d063bfe781dc2d98d700e5bdf8273f9e190",
 }
 
 _LTV_REL = "src/engine/strategies/long_tail_volatility.py"

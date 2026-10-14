@@ -332,22 +332,10 @@ class VolatilityBreakoutStrategy(StrategyBase):
                     continue
 
                 # 노이즈 비율 계산: prev 기준 그 이전 k_period일
-                noise_list = []
-                for c in candles[prev_idx + 1 :]:
-                    high = int(c.get("stck_hgpr", "0"))
-                    low = int(c.get("stck_lwpr", "0"))
-                    open_p = int(c.get("stck_oprc", "0"))
-                    close_p = int(c.get("stck_clpr", "0"))
-                    rng = high - low
-                    if rng > 0:
-                        noise = 1 - abs(close_p - open_p) / rng
-                        noise_list.append(noise)
-
-                if not noise_list:
+                k = self._noise_k(candles[prev_idx + 1 :])
+                if k is None:
                     range_excluded.append({"ticker": ticker, "reason": "noise 영역 0"})
                     continue
-
-                k = sum(noise_list) / len(noise_list)
 
                 # 전일 Range
                 prev = candles[prev_idx]
@@ -363,7 +351,7 @@ class VolatilityBreakoutStrategy(StrategyBase):
                     continue
                 range_pass_tickers.append(ticker)
 
-                target_offset = int(prev_range * k)
+                target_offset = self._target_offset_base(prev_range, k)
                 if target_offset <= 0:
                     target_excluded.append({
                         "ticker": ticker,
@@ -738,6 +726,65 @@ class VolatilityBreakoutStrategy(StrategyBase):
         """
         return dict(self._scan_stats)
 
+    # cycle457 — prepare·시가 확정 안에 박혀 있던 목표가 계산을 이름 있는 함수로 꺼냈다(행위 동일). 거래일지
+    # 차트(`chart_indicators`)가 같은 함수를 불러 그려, 차트의 목표가와 매수 판정이 갈리지 않는다.
+    @staticmethod
+    def _noise_k(candles: list[dict]) -> float | None:
+        """노이즈 비율 평균 K — 봉마다 `1 − |종가−시가| ÷ (고가−저가)`, 폭 0 인 봉은 뺀다. 봉이 없으면 None."""
+        noise_list = []
+        for c in candles:
+            high = int(c.get("stck_hgpr", "0"))
+            low = int(c.get("stck_lwpr", "0"))
+            open_p = int(c.get("stck_oprc", "0"))
+            close_p = int(c.get("stck_clpr", "0"))
+            rng = high - low
+            if rng > 0:
+                noise = 1 - abs(close_p - open_p) / rng
+                noise_list.append(noise)
+        if not noise_list:
+            return None
+        return sum(noise_list) / len(noise_list)
+
+    @staticmethod
+    def _target_offset_base(prev_range: int, k: float) -> int:
+        """보드 배수를 곱하기 전 목표가 폭 = 전일 고저폭 × K."""
+        return int(prev_range * k)
+
+    @staticmethod
+    def _board_target_offset(base: int, k_mult: float) -> int:
+        """보드 목표가 폭 = 기본 폭 × 보드 배수(`k_value_*`), 음수면 0."""
+        return max(int(base * k_mult), 0)
+
+    def chart_indicators(self, bars: list[dict], start_index: int = 0) -> dict:
+        """거래일지 차트 지표(cycle457) — 그날 정규장(main) 목표가를 `prepare`·시가 확정과 같은 함수로 낸다.
+
+        봉 j 의 목표가 = 봉 j 시가 + `_board_target_offset(_target_offset_base(전일 고저폭, K), k_value_krx_main)`,
+        K = 전일 앞 `k_period`+1 봉의 `_noise_k`(prepare 가 읽는 `k_period`+2 봉 그대로). 운영의 기준 시가는 KRX
+        REST 확정 시가라 일봉 시가와 다를 수 있다.
+        """
+        p = self.config.params
+        k_period = int(p["k_period"])
+        k_mult = float(p.get("k_value_krx_main", 1.0))
+        out: list = []
+        for j in range(len(bars)):
+            if j < start_index or j < 1:
+                out.append(None)
+                continue
+            c = self._chart_candles_desc(bars, j - 1, k_period + 2)
+            k = self._noise_k(c[1:]) if len(c) >= 2 else None
+            prev_range = int(c[0]["stck_hgpr"]) - int(c[0]["stck_lwpr"]) if c else 0
+            if k is None or prev_range <= 0:
+                out.append(None)
+                continue
+            base = self._target_offset_base(prev_range, k)
+            open_j = int(bars[j].get("open") or 0)
+            out.append(open_j + self._board_target_offset(base, k_mult) if base > 0 and open_j > 0 else None)
+        return {
+            "lines": [self._chart_line("vb_target", f"목표가(시가+전일폭×K×{k_mult:g})", tone="brown", dashed=True)],
+            "series": {"vb_target": out},
+            "notes": ["목표가는 KRX 정규장 시가 기준입니다(프리장·애프터 보드는 그리지 않습니다)"],
+        }
+
     def llm_context(self, ticker: str) -> dict:
         """AI 매수평가 핵심값(cycle445 B) — `_targets` 의 전일 range 를 읽기만 한다.
 
@@ -909,7 +956,7 @@ class VolatilityBreakoutStrategy(StrategyBase):
         base = info.get("target_offset_base", info.get("target_offset", 0))
         k_key = self._BOARD_K_KEY.get(board, "k_value_krx_main")
         k_mult = float(self.config.params.get(k_key, 1.0))
-        target_offset = max(int(base * k_mult), 0)
+        target_offset = self._board_target_offset(base, k_mult)
 
         info.setdefault("boards", {})[board] = {
             "open_price": open_price,

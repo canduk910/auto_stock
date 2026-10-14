@@ -28,6 +28,7 @@ import { STOCK_CHART_RESPONSES } from "./fixtures/stockChart.fixture";
 // cycle410 — 6장세 라벨(관찰 전용) 응답(라우트를 실제로 태워 나온 JSON).
 import { MARKET_REGIME_LABEL_FIXTURE } from "./fixtures/marketRegimeLabel.fixture";
 import { MARKET_UNIT_CHART_FIXTURE } from "./fixtures/marketUnitChart.fixture";
+import { JOURNAL_CHART_FIXTURE } from "./fixtures/journalChart.fixture";
 // cycle416 — 매크로 화면 시장 등락 통계(KRX 일별 매매정보 집계, 관찰 전용).
 import { MARKET_BREADTH_FIXTURE } from "./fixtures/marketBreadth.fixture";
 // cycle413 — 거래일지 화면(1b). 키 정본 = tests/fixtures/cycle413_journal_shape.json(백엔드와 같은 파일).
@@ -1002,6 +1003,11 @@ export const handlers = [
   ),
   // cycle456 — 시장 유닛 결정 과정 차트(Dashboard, 읽기 전용).
   http.get(`${base}/market-unit/chart`, () => HttpResponse.json(wrap(MARKET_UNIT_CHART_FIXTURE))),
+  // cycle457 — 거래일지 차트(일봉 + 전략 지표). 전략별 고정 응답, 모르는 전략은 kojiro 것.
+  http.get(`${base}/journal-chart`, ({ request }) => {
+    const sid = new URL(request.url).searchParams.get('strategy') ?? ''
+    return HttpResponse.json(wrap(JOURNAL_CHART_FIXTURE[sid] ?? JOURNAL_CHART_FIXTURE.kojiro))
+  }),
   // cycle416 — 시장 등락 통계(매크로 6번째 섹션). `/api/macro/` 밑이 아니다(그 접두사는 macro 컨테이너로 간다).
   // 실패는 HTTP 200 + success:false 로 온다 — 시나리오별 변종은 각 테스트가 `server.use(...)` 로 덮어쓴다.
   http.get(`${base}/market/breadth`, () => HttpResponse.json(wrap(MARKET_BREADTH_FIXTURE, "최근 3영업일 (2026-10-06~2026-10-08)"))),

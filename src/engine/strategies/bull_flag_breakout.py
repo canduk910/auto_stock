@@ -806,6 +806,28 @@ class BullFlagBreakoutStrategy(StrategyBase):
     def get_scan_stats(self) -> dict:
         return dict(self._scan_stats)
 
+    def chart_indicators(self, bars: list[dict], start_index: int = 0) -> dict:
+        """거래일지 차트 지표(cycle457) — `prepare` 와 같은 `_atr` 로 봉마다 ATR 을 낸다.
+
+        깃대·깃발(돌파선 `flag_high`·손절선 `flag_low`)은 매일 아침 다시 찾는 패턴이라 일봉 선으로 다시 그리지
+        않는다 — 그 매매의 값은 카드의 진입 이유·손절선 기록에 있다.
+        """
+        ap = int(self.config.params["atr_period"])
+        out: list = []
+        for j in range(len(bars)):
+            if j < start_index:
+                out.append(None)
+                continue
+            c = self._chart_candles_desc(bars, j, ap + 2)
+            atr = self._atr([int(x["stck_hgpr"]) for x in c], [int(x["stck_lwpr"]) for x in c],
+                            [int(x["stck_clpr"]) for x in c], ap)
+            out.append(atr if atr > 0 else None)
+        return {
+            "lines": [self._chart_line("atr", f"ATR{ap}", pane="atr", tone="brown")],
+            "series": {"atr": out},
+            "notes": ["깃대·깃발 패턴 전략이라 캔들 위 선이 없습니다 — 깃발 고가(돌파선)는 매일 아침 다시 정해집니다"],
+        }
+
     def llm_context(self, ticker: str) -> dict:
         """AI 매수평가 핵심값(cycle445 B) — `_candidates` 의 폴·플래그 측정값을 읽기만 한다.
 

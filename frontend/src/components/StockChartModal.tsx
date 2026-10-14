@@ -25,7 +25,7 @@ import type { Chart } from 'klinecharts'
 
 import { getStockChart } from '../api/stock-chart'
 import type { ChartPeriod } from '../types/stock-chart'
-import { isChartableTicker, PERIOD_LABEL, PERIOD_TO_KLINE, toKLineData } from '../utils/stockChart'
+import { isChartableTicker, KLINE_LOCALE_KO, PERIOD_LABEL, PERIOD_TO_KLINE, toKLineData } from '../utils/stockChart'
 import type { KLineBar } from '../utils/stockChart'
 import { formatKstDateFromEpochMs, formatKstYearMonthFromEpochMs, KST_TIME_ZONE } from '../utils/kst'
 import { LOSS_HEX, NEUTRAL_HEX, PROFIT_HEX } from '../utils/pnlColor'
@@ -40,24 +40,8 @@ const VOL_PANE = { id: 'stock_chart_vol', height: 64 }
 const RSI_PANE = { id: 'stock_chart_rsi', height: 80 }
 const MACD_PANE = { id: 'stock_chart_macd', height: 90 }
 
-// 모듈 최상위 1회 — KLineChart 기본 로케일(영문)을 한글로 덮는다.
-registerLocale('ko-KR', {
-  time: '날짜',
-  open: '시가',
-  high: '고가',
-  low: '저가',
-  close: '종가',
-  volume: '거래량',
-  turnover: '거래대금',
-  change: '등락',
-  second: '초',
-  minute: '분',
-  hour: '시',
-  day: '일',
-  week: '주',
-  month: '월',
-  year: '년',
-})
+// 모듈 최상위 1회 — KLineChart 기본 로케일(영문)을 한글로 덮는다(값 = `utils/stockChart.ts::KLINE_LOCALE_KO`).
+registerLocale('ko-KR', KLINE_LOCALE_KO)
 
 interface Props {
   ticker: string

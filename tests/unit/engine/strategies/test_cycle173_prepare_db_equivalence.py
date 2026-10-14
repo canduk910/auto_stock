@@ -275,4 +275,11 @@ def test_g_eq3_donchian_high_single_source_from_candles():
                 "donchian prepare 신고가 = 어댑터 candles 단일 source 의무 "
                 "(get_donchian_high 별도 DB 호출 = 락 종목 신고가/EMA 혼재 위험, 자문 §249)"
             )
-            assert "max(highs[" in body, "candles 기반 신고가 계산 (kis_high) 영속"
+            # cycle457 — 신고가 계산을 `_prior_high(highs, …)` 로 꺼냈다(차트와 같은 함수). 입력은
+            # 여전히 이 함수가 candles 에서 만든 `highs` 다.
+            assert "self._prior_high(highs, " in body, "candles 기반 신고가 계산 (kis_high) 영속"
+            helper = next(
+                n for n in ast.walk(tree)
+                if isinstance(n, ast.FunctionDef) and n.name == "_prior_high"
+            )
+            assert "max(highs[1: period + 1])" in (ast.get_source_segment(src, helper) or "")

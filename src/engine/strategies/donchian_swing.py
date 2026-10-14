@@ -437,7 +437,7 @@ class DonchianSwingStrategy(StrategyBase):
                 #   candles 가 이미 어댑터 (DB 우선 + 락/신선도 KIS 폴백) 경유 → candles 의
                 #   신고가가 곧 일관된 source. 락 종목은 신고가/EMA 둘 다 KIS (폴백 candles)
                 #   → 혼재 영구 차단. 정상 종목은 candles=DB → 사이클 123 신고가 동일 (행위 보존).
-                prior_high = max(highs[1: donchian_period + 1])
+                prior_high = self._prior_high(highs, donchian_period)
                 # 사이클 226 D-1 (2026-08-25) — 돌파선 0 후보 **거부**.
                 # `prior_high == 0` 은 "20일 신고가를 계산하지 못했다" 는 뜻이지
                 # "돌파했다" 가 아니다. 그런데 아래 `prev_close <= prior_high` 는
@@ -477,8 +477,8 @@ class DonchianSwingStrategy(StrategyBase):
                 donchian_pass_tickers.append(ticker)  # 사이클 39
 
                 # 2) 60일 EMA 우상향 + 종가 > EMA
-                ema_today = self._ema(list(reversed(closes[:long_ma_period])), long_ma_period)
-                ema_yesterday = self._ema(list(reversed(closes[1: long_ma_period + 1])), long_ma_period)
+                ema_today = self._ema_recent(closes, long_ma_period)
+                ema_yesterday = self._ema_recent(closes[1:], long_ma_period)
                 if ema_today <= ema_yesterday:
                     ema_excluded.append({
                         "ticker": ticker, "name": ticker_name,
@@ -592,6 +592,24 @@ class DonchianSwingStrategy(StrategyBase):
             stats["candle_fetch_ok"], stats["donchian_pass"],
             stats["ema_uptrend_pass"], stats["volume_pass"], stats["atr_pass"],
         )
+
+    # cycle457 — prepare 안에 박혀 있던 계산을 이름 있는 함수로 꺼냈다(행위 동일). 거래일지 차트
+    # (`chart_indicators`)가 같은 함수를 불러 그려, 차트 선과 매수·청산 판정이 갈리지 않는다.
+    @staticmethod
+    def _prior_high(highs: list[int], period: int) -> int:
+        """직전 `period` 봉 최고가 — `highs` 최신순(idx 0 = 전일)에서 전일을 뺀 그 앞 `period` 봉."""
+        return max(highs[1: period + 1])
+
+    @classmethod
+    def _ema_recent(cls, closes: list[int], period: int) -> float:
+        """최근 `period` 개 종가만으로 낸 EMA — `closes` 최신순. 가장 오래된 값에서 시작한다."""
+        return cls._ema(list(reversed(closes[:period])), period)
+
+    @staticmethod
+    def _channel_low_of(lows: list[int], period: int) -> int:
+        """최근 `period` 봉 최저가(청산 채널) — `lows` 최신순(오늘 부분봉 제외). 봉이 없으면 0."""
+        window = lows[:period]
+        return min(window) if window else 0
 
     @staticmethod
     def _ema(values: list[int], period: int) -> float:
@@ -1507,8 +1525,9 @@ class DonchianSwingStrategy(StrategyBase):
             relevant = [c for c in candles if str(c.get("stck_bsop_date", "")) != today_str]
             if len(relevant) < channel_period:
                 return
-            lows = [int(c.get("stck_lwpr", "0") or 0) for c in relevant[:channel_period]]
-            channel_low = min(lows) if lows else 0
+            channel_low = self._channel_low_of(
+                [int(c.get("stck_lwpr", "0") or 0) for c in relevant[:channel_period]], channel_period,
+            )
             if channel_low > 0:
                 self._channel_low[ticker] = channel_low
         except Exception:
@@ -1598,6 +1617,49 @@ class DonchianSwingStrategy(StrategyBase):
             return out
         except Exception:
             return {}
+
+    def chart_indicators(self, bars: list[dict], start_index: int = 0) -> dict:
+        """거래일지 차트 지표(cycle457) — `prepare` 와 같은 함수로 봉마다 계산한다.
+
+        봉 j 의 값 = 「j 를 전일로 둔 아침 prepare 가 본 값」. 돌파선 = `_prior_high`(j 를 뺀 직전 N봉 고가,
+        종가 > 선 이면 다음 날 매수 후보) · EMA = `_ema_recent` · ATR = `_atr`. 청산 채널은 그날 쓰인 값
+        (j 를 뺀 직전 N봉 저가 = `_channel_low_of`, 무장 뒤에만 청산에 쓰인다).
+        """
+        p = self.config.params
+        dp, lm, ap = int(p["donchian_period"]), int(p["long_ma_period"]), int(p["atr_period"])
+        cp = int(p.get("channel_exit_period", 0) or 0)
+        limit = max(lm + 5, dp + 5) + 1  # prepare 의 fetch_days 와 같은 깊이
+        series: dict[str, list] = {"donchian_high": [], "ema": [], "atr": [], "channel_low": []}
+        for j in range(len(bars)):
+            if j < start_index:
+                for v in series.values():
+                    v.append(None)
+                continue
+            c = self._chart_candles_desc(bars, j, limit)
+            highs = [int(x["stck_hgpr"]) for x in c]
+            lows = [int(x["stck_lwpr"]) for x in c]
+            closes = [int(x["stck_clpr"]) for x in c]
+            series["donchian_high"].append(self._prior_high(highs, dp) if len(highs) >= dp + 1 else None)
+            series["ema"].append(self._ema_recent(closes, lm) if len(closes) >= lm else None)
+            atr = self._atr(highs, lows, closes, ap)
+            series["atr"].append(atr if atr > 0 else None)
+            if cp > 0 and len(lows) >= cp + 1:
+                ch = self._channel_low_of(lows[1:], cp)
+                series["channel_low"].append(ch if ch > 0 else None)
+            else:
+                series["channel_low"].append(None)
+        lines = [
+            self._chart_line("ema", f"EMA{lm}", tone="navy"),
+            self._chart_line("donchian_high", f"직전 {dp}일 고가(돌파선)", tone="brown"),
+            self._chart_line("atr", f"ATR{ap}", pane="atr", tone="brown"),
+        ]
+        notes = []
+        if cp > 0:
+            lines.insert(2, self._chart_line("channel_low", f"{cp}일 저가(청산 채널)", tone="sky", dashed=True))
+            notes.append("청산 채널은 고점이 무장가(+3R)에 닿은 뒤에만 청산에 쓰입니다")
+        else:
+            series.pop("channel_low")
+        return {"lines": lines, "series": series, "notes": notes}
 
     def get_targets_status(self) -> dict[str, dict]:
         """대시보드 노출용 — Donchian/EMA/ATR 정보."""

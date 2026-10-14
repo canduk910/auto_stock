@@ -35,7 +35,7 @@ src/
 
 ## 핵심 라이브러리
 
-TanStack Query (서버 상태) · TanStack Table (그리드) · Recharts (차트) · KLineChart (종목 차트 모달 전용 분리 청크 — 「종목 차트 모달」 절) · Tailwind v4 · React Router
+TanStack Query (서버 상태) · TanStack Table (그리드) · Recharts (차트) · KLineChart (종목 차트 모달·거래일지 차트 모달 전용 분리 청크 — 「종목 차트 모달」·「거래일지 차트 모달」 절) · Tailwind v4 · React Router
 
 ## 단일 polling owner
 
@@ -466,6 +466,7 @@ testid = `strategy-summary-table` · `strategy-summary-row-{sid}` · `strategy-s
   - 손절선 변화 — 접힘이 기본이고 접힌 동안 행을 그리지 않는다(`journal-stop-toggle` 의 `aria-expanded`). 행 `journal-stop-row` 는 `data-event`·`data-direction`(`up`·`down`·`flat`·빈 값)을 단다. 내린 행과 `paused` 는 빨강, `boot` 는 노랑 배경.
   - 400px — 카드 안 `<table>` 0 · 400px 넘는 고정 폭 클래스(`min-w-[NNNpx]`·`w-[NNNpx]`) 0 · 인라인 `style.width`/`minWidth` 0.
   - 메모 — 저장 버튼 `journal-note-save` 로만 PUT 한다(자동 저장 없음). 저장 버튼은 입력이 마지막 저장값과 같거나(바뀐 것 없음) 4,000자를 넘거나 저장 중이면 꺼진다 — 바뀐 것 없이 빈 본문 PUT(= 서버 메모 삭제)이 나가지 않는다. 상태 = 「저장 안 됨」·「저장됨」·「저장 실패」(실패해도 입력은 남는다). 본문은 `<textarea>` 값으로만 보인다. 저장 성공 시 마지막 저장값은 **보낸 본문**(`onSuccess` 의 `variables`)으로 맞춘다 — 응답을 기다리는 동안 더 친 글자는 「저장 안 됨」 으로 남는다. 그리고 `invalidateQueries({queryKey: ['journal']})` 로 캐시를 비운다 — 탭을 옮겼다 오면 저장한 값으로 다시 그린다. 입력칸 상태는 처음 그릴 때의 `note` 로만 초기화하고 `note` prop 이 바뀌어도 다시 맞추지 않는다(다른 카드 저장으로 refetch 돼도 편집 중인 입력이 덮이지 않는다).
+  - 차트 — 머리 줄 전략명 옆 「차트」 버튼(`journal-chart-open`)이 그 카드의 거래일지 차트 모달을 연다(「거래일지 차트 모달」 절).
   - **AI 청산 의견 (cycle446 D-6)** — `card.exit_ai`(백엔드 `src/db/exit_ai.py` 읽기 전용, 매매 무접촉). testid `journal-ai-opinion`(`journal-exit-` 접두와 겹치지 않는 이름 — 그 접두는 체결 영역 전용 정규식이 쓴다). `status==='not_applicable'`(대상 전략 5개 밖) = 「대상 전략 아님」 · `'no_evaluation'` = 「아직 평가 없음」 · `'lookup_failed'` = 조회 실패(amber) · `'hold_all'` = `note`(기본 「보유 판단 유지」) · `'exit_signaled'` = 첫 `exit` 평가의 `first_exit_bar_date`·`first_exit_score`·`first_exit_rationale`.
   - 금지 — 이름에 `journal` 이 든 프론트 파일(테스트 제외)에 `dangerouslySetInnerHTML`·새 `Intl.DateTimeFormat` 0(가드 `components/__tests__/handlers.honesty.cycle413.test.ts` JH5).
   - 목 — MSW 기본 핸들러(`src/test/handlers.ts`)의 GET 은 `src/test/fixtures/journal.fixture.ts` 를 그대로 돌려주고, 그 픽스처는 `na` 5종을 모두 담는다. 키 정본 = `tests/fixtures/cycle413_journal_shape.json` — 백엔드 라우트 테스트와 같은 파일이고 객체마다 키 집합이 정확히 같아야 한다(JH1~JH4). e2e 목(`e2e/fixtures/api-mocks.ts` 의 `**/api/history/journal*`·`**/api/history/journal/notes/*`)도 같은 픽스처 파일을 import 한다(사본 금지). 메모는 상태형이다 — PUT 한 본문이 다음 GET 의 카드 `note` 에 실리고, 공백뿐인 PUT 은 지운다. `journalPages`(요청 `page` 별 응답)·`journalPuts`(PUT 본문 기록) 옵션이 있다. ⚠️ `**/api/history*` 글롭은 `/api/history/journal` 을 잡지 못한다(`*` 는 `/` 를 넘지 않는다 — 가드 `_ast_api_mocks_coverage.test.ts`).
@@ -495,7 +496,7 @@ testid = `strategy-summary-table` · `strategy-summary-row-{sid}` · `strategy-s
   - 🔴 버튼·링크·입력·라벨(`button, a, input, select, textarea, label`)과 그 자손 위 더블클릭은 **무시한다**(`utils/stockChart.ts::isInteractiveTarget`) — 「매도」·「AI 자문」 두 번 누름이 차트까지 띄우면 안 된다
   - 더블클릭이 남긴 텍스트 선택을 지운다 · 6자리 숫자 코드가 아니면(`isChartableTicker`) 모달만 열고 `stock-chart-unsupported`, **요청은 보내지 않는다**
 - **분리 청크** — `components/LazyStockChartModal.tsx` = `React.lazy(() => import('./StockChartModal'))`(`klinecharts` 를 그리드 첫 로딩에서 뺀다. 훅과 다른 파일인 이유 = Fast Refresh 가드 `react-refresh/only-export-components`). 폴백 `stock-chart-chunk-loading`. 바깥 `ChunkErrorBoundary` — 재배포 뒤 옛 탭의 청크 import 가 실패해도 앱이 살고 `stock-chart-chunk-error`(새로고침 안내) + `stock-chart-chunk-error-close`
-- **라이브러리** — `klinecharts` `10.0.3`(`^` 없이 고정, 타입 동봉). 가져오는 것은 `init` · `dispose` · `registerLocale` · 타입 `Chart` **뿐**이다. 기간 `chart.setPeriod({ type, span: 1 })`(`PERIOD_TO_KLINE` D→`day` · W→`week` · M→`month`) · 데이터 `chart.setDataLoader({ getBars })` · 로케일 `ko-KR` 은 모듈 최상위에서 1회 등록. 캔들·거래량·MACD 막대 색 = `utils/pnlColor.ts` `PROFIT_HEX`·`LOSS_HEX`·`NEUTRAL_HEX`(`init` 의 `styles.candle.bar` · `styles.indicator.bars`, 새 hex 0). 닫히면 `dispose`
+- **라이브러리** — `klinecharts` `10.0.3`(`^` 없이 고정, 타입 동봉). `StockChartModal.tsx` 가 가져오는 것은 `init` · `dispose` · `registerLocale` · 타입 `Chart` **뿐**이다(거래일지 차트 모달은 `registerIndicator`·`registerOverlay` 도 쓴다 — 「거래일지 차트 모달」 절). 기간 `chart.setPeriod({ type, span: 1 })`(`PERIOD_TO_KLINE` D→`day` · W→`week` · M→`month`) · 데이터 `chart.setDataLoader({ getBars })` · 로케일 `ko-KR` 은 모듈 최상위에서 1회 등록(값 = `utils/stockChart.ts::KLINE_LOCALE_KO` — 거래일지 차트 모달과 같은 값). 캔들·거래량·MACD 막대 색 = `utils/pnlColor.ts` `PROFIT_HEX`·`LOSS_HEX`·`NEUTRAL_HEX`(`init` 의 `styles.candle.bar` · `styles.indicator.bars`, 새 hex 0). 닫히면 `dispose`
 - **지표 배치 (cycle388)** — EMA 는 가격 축에 겹쳐야 읽혀 캔들 패널에, 아래 패널엔 가격 축이 아닌 지표만 둔다.
   - 캔들 = `createIndicator({ name: 'EMA', paneId: CANDLE_PANE_ID, calcParams: [5, 20, 60, 120] }, true)` — `CANDLE_PANE_ID = 'candle_pane'`(= `PaneIdConstants.CANDLE`), `true`(`isStack`)는 기존 것을 지우지 않고 겹친다
   - 아래 패널은 위에서부터 거래량 · RSI · MACD 이고 `createIndicator` 를 이 순서로 부른다(가드 C388-2c) — `VOL_PANE = { id: 'stock_chart_vol', height: 64 }` · `RSI_PANE = { id: 'stock_chart_rsi', height: 80 }` · `MACD_PANE = { id: 'stock_chart_macd', height: 90 }`, 높이는 `chart.setPaneOptions({ id, height })`(안 주면 셋 다 100px 라 캔들이 눌린다). 캔들 패널 높이는 주지 않는다. 차트 자리 = `h-[72vh] min-h-[460px]`
@@ -509,6 +510,23 @@ testid = `strategy-summary-table` · `strategy-summary-row-{sid}` · `strategy-s
 - **목** — MSW `test/handlers.ts` 와 e2e `fixtures/api-mocks.ts`(`**/api/stock-chart/candles*`, 경로 가드 + resourceType 가드)가 같은 리터럴(`test/fixtures/stockChart.fixture.ts` · `e2e/fixtures/stock-chart.fixture.ts`)을 기간별로 주고, 6자리 숫자가 아니면 422. 단위 테스트는 jsdom 에 canvas 가 없어 `vi.mock('klinecharts', …)` 로 `test/fakeKlinecharts.ts`(호출 기록용)를 쓴다 — 실제 라이브러리는 e2e 만
 - **실제 라이브러리의 지표 거부는 e2e F32 가 본다** — klinecharts 는 거부를 개발 모드(`process.env.NODE_ENV === 'development'`)의 `console.log` 로만 남기므로 F32 는 콘솔 타입이 아니라 문구 `/klinecharts (warning|error)/i` 로 모아 `[]` 를 단언한다(e2e 는 `npm run dev`)
 - 회귀 = `components/__tests__/StockChartModal.cycle387.test.tsx` · `StockChartModal.cycle388.test.tsx`(지표 배치) · `stockChartOpen.cycle387.test.tsx`(세 그리드 배선) · `LazyStockChartModal.cycle387.test.tsx`(청크 로딩 실패) · `utils/__tests__/stockChart.cycle387.test.ts` · `utils/__tests__/kst.test.ts`(K6~K9) · `e2e/history.spec.ts`(F32·F33)
+
+## 거래일지 차트 모달 — 카드 「차트」 버튼 (cycle457)
+
+거래일지 카드(`JournalCard`)의 「차트」 버튼(`journal-chart-open`) → 그 종목의 일봉 캔들 위에 **그 전략이 판정에 쓰는 선**과 **매수·매도 체결 자리**를 겹친 모달. 읽기만 한다 — 매매·설정을 바꾸는 호출이 없다.
+
+- 🔴 **화면은 기술적 지표를 계산하지 않는다** — 지표 값은 백엔드 `GET /api/journal-chart` 가 그 전략 객체의 `chart_indicators`(매수·청산 판정과 같은 함수)로 계산해 보낸다(`src/routes/CLAUDE.md` 해당 행 · `src/engine/CLAUDE.md` `strategy_base.py` 절). 프론트에 EMA·ATR·MACD 계산식을 두지 않는다 — 가드 `utils/__tests__/journalChart.cycle457.test.ts` J0
+- **파일** = `utils/journalChart.ts`(카드 기록 → 그림 위치 순수 함수만) · `types/journal-chart.ts`(`JournalChartData` — `StockChartData` 를 extends) · `api/journal-chart.ts`(`getJournalChart(ticker, strategy, from)`, 타임아웃 `STOCK_CHART_TIMEOUT_MS`, 본문 `success:false` → `Error(message)`) · `components/JournalChartModal.tsx` · `components/LazyJournalChartModal.tsx`(`React.lazy` 분리 청크 — 폴백·오류 경계는 `LazyStockChartModal.tsx` 가 export 하는 `ChunkLoadingFallback`·`ChunkErrorBoundary` 를 그대로 쓴다. testid 도 `stock-chart-chunk-*` 그대로)
+- **조회** — 요청 하나 `getJournalChart(ticker, card.strategy, 매수일)`, 쿼리 키 `['journalChart', ticker, strategy, from]`, `retry: 1`, `staleTime` = 부분 결과(`complete=false`) 1분 · 그 밖 10분. 응답 = 일봉(종목 차트와 같은 서버 조회·캐시) + `indicators`(`lines`·`series`·`notes`) + `indicator_source` + `indicator_start_index`
+- **지표 그리기** — 모듈 최상위에서 1회 등록하는 사용자 지표 `JOURNAL_LINES`(캔들 위) · `JOURNAL_ATR` · `JOURNAL_MACD` + 내장 `VOL`. 사용자 지표의 `calc` 는 응답 `series` 값을 **봉 날짜로 찾아 돌려줄 뿐**이다(응답에 없는 날 = null). 선의 칸은 응답 `pane`(`price`·`atr`·`macd`)이 정한다 — 패널 id `journal_chart_vol` · `journal_chart_atr` · `journal_chart_macd`. 응답 `notes` 는 범례 아래 안내 문장으로 그대로 보인다
+- **카드 → 표시** (`utils/journalChart.ts` 다섯 함수) — `tradeMarks`(`entry.orders` = 매수 · `exits` = 매도 → KST 날짜·가격·수량, 가격 0 이하는 뺀다) · `stopSteps`(`stop_track.rows` 를 그날 마지막 값 계단으로, 기록이 없으면 `entry.initial_stop.price`, 보유 구간 밖 null) · `targetSteps`(`entry.target.price`, 보유 구간만) · `holdRange` · `kstDateOf`(`utils/kst` 위임)
+- **그림** — 캔들 패널 = 응답의 전략 선 + 손절선(파랑 점선) + 익절 목표(빨강 점선) + overlay `journalTradeMark`(매수 ▲ `PROFIT_HEX` · 매도 ▼ `LOSS_HEX`, 라벨 「매수 12,350×40」). 매매 구간이 오른쪽 끝에서 `FOCUS_TAIL_BARS`(15)봉 안쪽에 오도록 `scrollToTimestamp`
+- **색** — 상승·하락·매수·매도 = `utils/pnlColor.ts`. 응답 `tone` 의 선 색 = `index.css` 토큰을 실행 중 `getComputedStyle` 로 읽는다(캔버스는 CSS 변수를 못 읽는다). 못 읽으면 `NEUTRAL_HEX`
+- **로케일** — `registerLocale('ko-KR', KLINE_LOCALE_KO)`(종목 차트 모달과 같은 값 — 이 모달이 먼저 열려도 툴팁이 한글이다)
+- **testid** — 루트 `journal-chart-modal` · 범례 `journal-chart-legend`/`-marks`(`data-buys`·`data-sells`)/`-lines`/`-line-<key>`(`data-pane`)/`-note`/`-stop-legend`/`-target-legend` · 상태 `journal-chart-loading`/`-error`/`-retry`/`-empty`/`-before-data`(매수일이 받은 첫 봉보다 앞)/`-provisional`/`-unsupported`. 상태는 종목 차트와 같이 전부 따로 보인다
+- **셸** — `StockChartModal` 관용구(× · ESC · 바깥 클릭으로 닫고 연 요소로 포커스 복귀)
+- **목** — 픽스처 `test/fixtures/journalChart.fixture.ts`(`JOURNAL_CHART_FIXTURE` — 실제 전략 객체로 만든 값, MSW·e2e 공용 · 사본 금지). MSW `test/handlers.ts` 의 `/journal-chart` · e2e `fixtures/api-mocks.ts` 의 `**/api/journal-chart*`. 단위 테스트는 `test/fakeKlinecharts.ts`(`registerIndicator`·`registerOverlay` 가짜 포함)
+- 회귀 = `utils/__tests__/journalChart.cycle457.test.ts`(J0·J4·J5) · `components/__tests__/JournalChartModal.cycle457.test.tsx`(JC1~JC6) · `e2e/journal-chart.spec.ts`(G-E2E-JC1 — 실 klinecharts)
 
 ## Logs (`/logs`) — 통합 메뉴
 

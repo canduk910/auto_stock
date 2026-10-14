@@ -1702,3 +1702,13 @@ nginx 계약(`auth_basic off;` 금지 · 옛 `nginx.conf` 부활 금지)은 루�
 경위: cycle455 로 엔진 원천이 시장별 종합지수가 됐는데 이 카드의 m 은 여전히 `069500` 재계산이라 실제 판정처럼 읽혔다. cycle456 이 시장별 판정 과정 카드 `MarketUnitChartCard` 를 바로 아래에 두면서 문구를 「KODEX 200 참고값 — 실제 판정은 아래」 로 바꿨다.
 
 → CHANGELOG: cycle456 행
+
+
+## 「종목 차트 모달」 라이브러리 import 계약의 범위
+### 2026-10-15 cycle457 — 계약을 `StockChartModal.tsx` 한정으로 좁혀 적음 (정본에서 옮긴 원문)
+
+- **라이브러리** — `klinecharts` `10.0.3`(`^` 없이 고정, 타입 동봉). 가져오는 것은 `init` · `dispose` · `registerLocale` · 타입 `Chart` **뿐**이다. … 로케일 `ko-KR` 은 모듈 최상위에서 1회 등록.
+
+경위: cycle457 이 거래일지 차트 모달(`JournalChartModal.tsx`)을 더하면서 `registerIndicator`·`registerOverlay` 를 쓰게 됐다. 「뿐」 계약은 `StockChartModal.tsx` 의 것이라 주어를 그 파일로 밝혔고, 한글 로케일 값은 `utils/stockChart.ts::KLINE_LOCALE_KO` 하나로 옮겨 두 모달이 같이 쓴다.
+
+→ CHANGELOG: cycle457 행

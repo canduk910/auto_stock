@@ -1,6 +1,13 @@
 # 🔴 2026-09-27(일) 13시 — 최신 상태는 바로 아래 「지금 상태」 절 · 진행 순서는 「09-27 결정 세트」 절
 
 
+## 🟡 과제 B — 백엔드 기술적 지표 계산 정본 하나로 (2026-10-15 사용자 지시 「B부분도 과제로 워크리스트에 올려두자」)
+
+- **무엇** — EMA 가 전략마다 따로 있다: `donchian_swing._ema` · `vcp_breakout._ema`(최근 N개 종가만 잘라 첫 값 시작) · `etf_trend_core.ema`(전체 이력, 첫 값 시작) · `kojiro_indicators.ema`(pandas `ewm(adjust=False)`) · `llm_features.ema`(첫 period 단순평균 시작). ATR 도 `StrategyBase._atr`(TR 단순평균) · `kojiro_indicators.atr`(Wilder `ewm(1/n)`, 첫 TR 시작) · `etf_trend_core.atr_wilder`/`n14` 로 셋이다.
+- **왜 바로 못 합치나** — 시작 방식이 달라 합치면 그 전략의 매수 판정·손절선 값이 바뀐다(매매 행위 변경). kojiro ATR 은 손절선 정의라 상호 재사용 금지(`src/engine/CLAUDE.md` `kojiro_indicators.py`). → **사용자 승인 + `domain-consult` 선행**.
+- **할 일** — ① 공용 순수 leaf(예: `src/engine/indicators.py`)에 「시작 방식」을 인자로 받는 EMA·ATR 하나씩 ② 전략마다 지금과 **같은 결과**가 나오는 인자로 바꿔 끼우는 행위 보존 단계(골든 테스트로 값 동일 확인) ③ 그 뒤 시작 방식 통일 여부는 별도 결정.
+- **관련** — cycle457(거래일지 차트)은 이 정리 없이 각 전략이 쓰는 함수를 그대로 불러 그린다(전략 클래스의 `chart_indicators`). B 가 끝나면 그 메서드도 공용 leaf 를 부르게 바뀐다.
+
 ## 🔴 10-04(일) 새벽 자율 구간 (00:26 ~ 07:26, 커밋 작업 단위 허용 · 배포 없음 = 10-06 화 계획대로)
 
 | 무엇 | 결과 | 상태 |

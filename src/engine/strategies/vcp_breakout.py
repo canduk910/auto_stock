@@ -326,12 +326,7 @@ class VcpBreakoutStrategy(StrategyBase):
         # 모자라면 아래 `effective_ema_long` 가드가 그대로 받아 낸다. KIS 폴백 경로는
         # 여전히 한 호출 100봉이 상한이라 `min_required` 는 100 으로 둔다(올리면 DB 가
         # 100~224봉인 구간에서 더 얕은 KIS 응답으로 바뀐다 = 퇴보).
-        KIS_DAILY_CANDLES_MAX = 100
-        full_depth = resolve_daily_depth_mode(p) == DAILY_DEPTH_MODE_FULL
-        if full_depth:
-            fetch_days = ema_long + base_max + 10
-        else:
-            fetch_days = min(ema_long + base_max + 10, KIS_DAILY_CANDLES_MAX)
+        fetch_days = self._daily_fetch_days()
 
         # cycle364 R1 — 미리보기는 자기 보유·자기 익일청산대기 엔트리만 같은
         # 객체로 보존한다(donchian·kojiro 와 같은 규약). 비미리보기는 현행대로
@@ -466,7 +461,7 @@ class VcpBreakoutStrategy(StrategyBase):
                 prev_idx = 1 if candles[0].get("stck_bsop_date") == today_str else 0
                 # 사이클 33 — KIS 한도 대응: 가용 길이 기반 effective ema_long
                 available_len = len(candles) - prev_idx
-                effective_ema_long = min(ema_long, available_len - uptrend_days - 5)
+                effective_ema_long = self._effective_ema_long(available_len)
                 if effective_ema_long < 30:
                     candle_fetch_excluded.append({
                         "ticker": ticker, "name": ticker_name,
@@ -687,6 +682,53 @@ class VcpBreakoutStrategy(StrategyBase):
         except Exception:
             logger.debug("[vcp_breakout_distance_failed] 관측 실패 graceful", exc_info=True)
 
+    # cycle457 — prepare·추세 필터 안에 박혀 있던 계산을 이름 있는 함수로 꺼냈다(행위 동일). 거래일지
+    # 차트(`chart_indicators`)가 같은 함수를 불러 그려, 차트 선과 매수 판정이 갈리지 않는다.
+    def _daily_fetch_days(self) -> int:
+        """prepare 가 읽는 일봉 수 — `daily_fetch_depth_mode` 가 정한다(cycle300)."""
+        p = self.config.params
+        ema_long = p["ema_long"]
+        base_max = p["base_max_days"]
+        KIS_DAILY_CANDLES_MAX = 100
+        full_depth = resolve_daily_depth_mode(p) == DAILY_DEPTH_MODE_FULL
+        if full_depth:
+            return ema_long + base_max + 10
+        return min(ema_long + base_max + 10, KIS_DAILY_CANDLES_MAX)
+
+    def _effective_ema_long(self, available_len: int) -> int:
+        """읽은 봉 수로 세울 수 있는 실효 장기선 기간(사이클 33)."""
+        p = self.config.params
+        ema_long = p["ema_long"]
+        uptrend_days = p.get("long_ema_uptrend_days", 20)
+        return min(ema_long, available_len - uptrend_days - 5)
+
+    def _trend_ema_periods(self, effective_ema_long: int | None = None) -> tuple[int, int, int, int]:
+        """(단기, 중기, 장기, 우상향 확인 봉 수) — 중기 ≥ 장기면 중기를 줄인다."""
+        p = self.config.params
+        ema_short = p["ema_short"]
+        ema_mid = p["ema_mid"]
+        # 사이클 33 — KIS 100일 한도 대응: effective_ema_long 명시 시 우선
+        ema_long = effective_ema_long if effective_ema_long is not None else p["ema_long"]
+        # ema_mid 가 ema_long 보다 크면 의미 없음 — 자동 축소 (50/150/200 정렬 의미 보존)
+        if ema_mid >= ema_long:
+            ema_mid = max(ema_short + 1, ema_long - 10)
+        return ema_short, ema_mid, ema_long, p["long_ema_uptrend_days"]
+
+    def _trend_emas(self, closes: list[int], *,
+                    effective_ema_long: int | None = None) -> tuple[float, float, float, float] | None:
+        """(단기, 중기, 장기, 장기 우상향 확인용 과거값) EMA — `closes` 최신순. 봉이 모자라면 None."""
+        ema_short, ema_mid, ema_long, uptrend_days = self._trend_ema_periods(effective_ema_long)
+        if len(closes) < ema_long + uptrend_days:
+            return None
+        # 최신순(idx=0 어제) → 시간순 reverse
+        chrono = list(reversed(closes))
+        return (
+            self._ema(chrono[-ema_short:], ema_short),
+            self._ema(chrono[-ema_mid:], ema_mid),
+            self._ema(chrono[-ema_long:], ema_long),
+            self._ema(chrono[-(ema_long + uptrend_days): -uptrend_days], ema_long),
+        )
+
     def _check_trend_filter(self, candles: list[dict], *,
                              effective_ema_long: int | None = None) -> dict | None:
         """추세 필터: 종가 > 단기EMA > 중기EMA > 장기EMA + 장기EMA 우상향 1개월.
@@ -708,29 +750,14 @@ class VcpBreakoutStrategy(StrategyBase):
         대기) 가 있어야 계산 가능. 본 PR 은 config 값(120)·매매 동작(진입 빈도) 무변경, 표기만
         실측과 일치(방향 c). uptrend(20일 우상향) 판정은 그대로라 중장기 추세 추종 의도 보존.
         """
-        p = self.config.params
-        ema_short = p["ema_short"]
-        ema_mid = p["ema_mid"]
-        # 사이클 33 — KIS 100일 한도 대응: effective_ema_long 명시 시 우선
-        ema_long = effective_ema_long if effective_ema_long is not None else p["ema_long"]
-        # ema_mid 가 ema_long 보다 크면 의미 없음 — 자동 축소 (50/150/200 정렬 의미 보존)
-        if ema_mid >= ema_long:
-            ema_mid = max(ema_short + 1, ema_long - 10)
-        uptrend_days = p["long_ema_uptrend_days"]
-
         try:
             closes = [int(c.get("stck_clpr", "0")) for c in candles]
         except (TypeError, ValueError):
             return None
-        if len(closes) < ema_long + uptrend_days:
+        emas = self._trend_emas(closes, effective_ema_long=effective_ema_long)
+        if emas is None:
             return None
-
-        # 최신순(idx=0 어제) → 시간순 reverse
-        chrono = list(reversed(closes))
-        ema_short_today = self._ema(chrono[-ema_short:], ema_short)
-        ema_mid_today = self._ema(chrono[-ema_mid:], ema_mid)
-        ema_long_today = self._ema(chrono[-ema_long:], ema_long)
-        ema_long_past = self._ema(chrono[-(ema_long + uptrend_days): -uptrend_days], ema_long)
+        ema_short_today, ema_mid_today, ema_long_today, ema_long_past = emas
 
         close_today = closes[0]
         if close_today <= ema_short_today:
@@ -1029,6 +1056,50 @@ class VcpBreakoutStrategy(StrategyBase):
 
     def get_scan_stats(self) -> dict:
         return dict(self._scan_stats)
+
+    def chart_indicators(self, bars: list[dict], start_index: int = 0) -> dict:
+        """거래일지 차트 지표(cycle457) — `prepare` 의 추세 필터와 같은 함수로 봉마다 계산한다.
+
+        봉 j 의 값 = 「j 를 전일로 둔 아침 prepare 가 본 값」. 읽는 봉 수(`_daily_fetch_days`)와 실효 장기선
+        (`_effective_ema_long`)도 prepare 와 같다 — 그래서 `daily_fetch_depth_mode="cap100"` 이면 장기선이
+        설정값(200)보다 짧다. 그 깊이를 다 채운 봉부터 그린다. ATR = `_atr`(prepare 는 DB ATR 이 ±10% 안이면
+        그 값을 쓴다 — 정의는 같은 단순평균이다).
+        """
+        p = self.config.params
+        fetch_days = self._daily_fetch_days()
+        eff = self._effective_ema_long(fetch_days)
+        s_p, m_p, l_p, _u = self._trend_ema_periods(eff)
+        ap = int(p["atr_period"])
+        series: dict[str, list] = {"ema_short": [], "ema_mid": [], "ema_long": [], "atr": []}
+        for j in range(len(bars)):
+            if j < start_index:
+                for v in series.values():
+                    v.append(None)
+                continue
+            c = self._chart_candles_desc(bars, j, fetch_days)
+            emas = None
+            if len(c) == fetch_days and eff >= 30:
+                emas = self._trend_emas([int(x["stck_clpr"]) for x in c], effective_ema_long=eff)
+            for key, idx in (("ema_short", 0), ("ema_mid", 1), ("ema_long", 2)):
+                series[key].append(emas[idx] if emas else None)
+            atr = self._atr([int(x["stck_hgpr"]) for x in c], [int(x["stck_lwpr"]) for x in c],
+                            [int(x["stck_clpr"]) for x in c], ap)
+            series["atr"].append(atr if atr > 0 else None)
+        notes = ["베이스 고가(돌파선)는 매일 아침 다시 정해져 일봉으로 다시 그리지 않습니다"]
+        if l_p < int(p["ema_long"]):
+            notes.append(
+                f"장기선은 설정 {p['ema_long']}일이지만 읽는 일봉이 {fetch_days}봉이라 실제로는 {l_p}일선입니다"
+                " (daily_fetch_depth_mode)")
+        return {
+            "lines": [
+                self._chart_line("ema_short", f"EMA{s_p}", tone="beige"),
+                self._chart_line("ema_mid", f"EMA{m_p}", tone="sky"),
+                self._chart_line("ema_long", f"EMA{l_p}", tone="navy"),
+                self._chart_line("atr", f"ATR{ap}", pane="atr", tone="brown"),
+            ],
+            "series": series,
+            "notes": notes,
+        }
 
     def llm_context(self, ticker: str) -> dict:
         """AI 매수평가 핵심값(cycle445 B) — `_candidates` 의 베이스·EMA·거래량 값을 읽기만 한다.

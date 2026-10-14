@@ -525,6 +525,41 @@ class EtfTrendStrategy(StrategyBase):
     def get_scan_stats(self) -> dict:
         return dict(self._scan_stats)
 
+    def chart_indicators(self, bars: list[dict], start_index: int = 0) -> dict:
+        """거래일지 차트 지표(cycle457) — `prepare` 가 부르는 `etf_trend_core` 함수 그대로 봉마다 계산한다.
+
+        봉 j 의 값 = j 로 끝나는 `daily_fetch_rows` 봉 창(prepare 와 같은 깊이)에서 `entry_signal` 이 쓰는
+        `breakout_line`(직전 20봉 고가) · `ema(…, 60)` · `atr_wilder(true_ranges(…), 20)`. 청산 채널은 그날 쓰인
+        값(`channel_low` = j 를 뺀 직전 10봉 저가 — 매수 다음 날부터 청산에 쓰인다).
+        """
+        fetch_rows = int(self.config.params["daily_fetch_rows"])
+        series: dict[str, list] = {"ema60": [], "breakout_line": [], "channel_low": [], "atr20": []}
+        for j in range(len(bars)):
+            if j < start_index:
+                for v in series.values():
+                    v.append(None)
+                continue
+            w = bars[max(0, j + 1 - fetch_rows): j + 1]
+            highs = [b["high"] for b in w]
+            lows = [b["low"] for b in w]
+            closes = [b["close"] for b in w]
+            jj = len(w) - 1
+            series["breakout_line"].append(core.breakout_line(highs, jj))
+            series["ema60"].append(core.ema(closes, 60)[jj] if len(closes) >= 60 else None)
+            series["atr20"].append(
+                core.atr_wilder(core.true_ranges(highs, lows, closes), 20)[jj] if len(closes) >= 20 else None)
+            series["channel_low"].append(core.channel_low(lows[:-1]) if len(lows) > 10 else None)
+        return {
+            "lines": [
+                self._chart_line("ema60", "EMA60", tone="navy"),
+                self._chart_line("breakout_line", "직전 20봉 고가(돌파선)", tone="brown"),
+                self._chart_line("channel_low", "10봉 저가(청산 채널)", tone="sky", dashed=True),
+                self._chart_line("atr20", "ATR20", pane="atr", tone="brown"),
+            ],
+            "series": series,
+            "notes": [],
+        }
+
     def llm_context(self, ticker: str) -> dict:
         """AI 매수평가 핵심값(cycle445 B) — `_candidates` 의 ATR·거래대금·EMA60 을 읽기만 한다.
 
@@ -849,9 +884,10 @@ class EtfTrendStrategy(StrategyBase):
                 if head_stale:
                     self._emit_recover_skip(ticker, "head_stale")
 
-                chan_window = lows[-10:]
-                if chan_window:
-                    self._channel_low[ticker] = min(chan_window)
+                # cycle457 — 재현 정본의 같은 함수로(행위 동일 — 직전 10봉 저가 최솟값).
+                chan = core.channel_low(lows)
+                if chan is not None:
+                    self._channel_low[ticker] = chan
 
                 await self._apply_high_since_buy_from_candles(pos, [dict(r) for r in rows], today)
             except Exception:

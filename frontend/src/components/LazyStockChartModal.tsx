@@ -18,7 +18,7 @@ import { Component, lazy, Suspense, type ReactNode } from 'react'
 
 const StockChartModal = lazy(() => import('./StockChartModal'))
 
-function ChunkLoadingFallback() {
+export function ChunkLoadingFallback() {
   return (
     <div
       data-testid="stock-chart-chunk-loading"
@@ -36,7 +36,7 @@ interface BoundaryProps {
   children: ReactNode
 }
 
-class ChunkErrorBoundary extends Component<BoundaryProps, { hasError: boolean }> {
+export class ChunkErrorBoundary extends Component<BoundaryProps, { hasError: boolean }> {
   constructor(props: BoundaryProps) {
     super(props)
     this.state = { hasError: false }

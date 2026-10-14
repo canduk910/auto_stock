@@ -12,6 +12,7 @@ import { PARAM_SCHEMA_FIXTURE } from "./param-schema.fixture";
 import { MARKET_STATE_FIXTURE } from "./market-state.fixture";
 import { MARKET_REGIME_LABEL_FIXTURE } from "./market-regime-label.fixture";
 import { MARKET_UNIT_CHART_FIXTURE } from "./market-unit-chart.fixture";
+import { JOURNAL_CHART_FIXTURE } from "../../frontend/src/test/fixtures/journalChart.fixture";
 // cycle387 — 종목 차트(일봉·주봉·월봉) 응답 리터럴. MSW 목(`frontend/src/test/fixtures/stockChart.fixture.ts`)과 같은 값.
 import { STOCK_CHART_RESPONSES, type StockChartPeriodKey } from "./stock-chart.fixture";
 // cycle413 보완 1차 — 거래일지 응답. MSW 목과 **같은 파일**을 쓴다(키 정본 = tests/fixtures/cycle413_journal_shape.json,
@@ -528,6 +529,14 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
   await page.route("**/api/market-unit/chart", (route) =>
     route.fulfill({ json: envelope(MARKET_UNIT_CHART_FIXTURE) }),
   );
+  // cycle457 — 거래일지 차트(일봉 + 전략 지표). MSW 와 같은 고정 응답 파일. 경로·resourceType 가드는
+  // 종목 차트와 같은 규약(vite 모듈 `/src/api/journal-chart.ts` 요청에 JSON 을 돌려주지 않는다).
+  await page.route("**/api/journal-chart*", (route) => {
+    if (!isRealApiCall(route.request().url())) return route.continue();
+    if (route.request().resourceType() === "script") return route.continue();
+    const sid = new URL(route.request().url()).searchParams.get("strategy") ?? "";
+    return route.fulfill({ json: envelope(JOURNAL_CHART_FIXTURE[sid] ?? JOURNAL_CHART_FIXTURE.kojiro) });
+  });
   await page.route("**/api/realtime/subscriptions", (route) =>
     route.fulfill({ json: envelope({ sessions: [], total_count: 0 }) }),
   );

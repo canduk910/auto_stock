@@ -1840,6 +1840,45 @@ class StrategyBase(ABC):
         except Exception:
             trace_observer_failure("[shadow_buy]", ticker, self._shadow_logged)
 
+    @staticmethod
+    def _chart_candles_desc(bars: list[dict], j: int, limit: int | None = None) -> list[dict]:
+        """`bars[j]` 를 「전일」(candles[0]) 로 둔 KIS 일봉 모양 목록(최신순) — `chart_indicators` 전용.
+
+        전략의 `prepare()` 가 아침에 받는 일봉과 같은 모양·순서로 바꿔, 같은 계산 함수에 그대로 넣는다.
+        `limit` = prepare 가 실제로 읽는 봉 수(넘으면 오래된 쪽을 자른다).
+        """
+        start = 0 if limit is None else max(0, j + 1 - limit)
+        out = []
+        for b in reversed(bars[start:j + 1]):
+            out.append({
+                "stck_bsop_date": str(b.get("date", "")).replace("-", ""),
+                "stck_oprc": b.get("open", 0), "stck_hgpr": b.get("high", 0),
+                "stck_lwpr": b.get("low", 0), "stck_clpr": b.get("close", 0),
+                "acml_vol": b.get("volume", 0),
+            })
+        return out
+
+    @staticmethod
+    def _chart_line(key: str, title: str, pane: str = "price", tone: str = "navy",
+                    dashed: bool = False) -> dict:
+        return {"key": key, "title": title, "pane": pane, "tone": tone, "dashed": dashed}
+
+    def chart_indicators(self, bars: list[dict], start_index: int = 0) -> dict:
+        """거래일지 차트에 겹칠 전략 지표(cycle457, 사용자 요청 2026-10-15).
+
+        `bars` = 일봉 오름차순(오래된 것 먼저) dict 목록 — 키 `date`·`open`·`high`·`low`·`close`·`volume`.
+        `start_index` 앞의 봉은 계산하지 않고 `None` 으로 둔다(5년 전체를 봉마다 다시 계산하지 않으려고 —
+        라우트가 매매 구간 앞뒤만 계산하게 정한다).
+        반환 = `{"lines": [...], "series": {key: [값|None, …]}, "notes": [str, …]}`.
+        - `lines` 원소 = `{key, title, pane, tone, dashed}` — `pane` ∈ `price`(캔들 위) · `atr` · `macd`.
+        - `series[key]` 길이 = `len(bars)`, 그 봉 시점에 계산할 수 없으면 `None`.
+
+        🔴 계산은 그 전략이 매수·청산 판정에 쓰는 **같은 함수**로 한다 — 화면 전용 계산식을 새로 만들지
+        않는다(사용자 지시 2026-10-15). 기본은 빈 결과(전략이 재정의하지 않으면 그릴 지표가 없다).
+        순수 계산만 허용한다(`await`·DB·HTTP·전략 상태 변경 0). 예외는 호출부(라우트)가 흡수한다.
+        """
+        return {"lines": [], "series": {}, "notes": []}
+
     def llm_context(self, ticker: str) -> dict:
         """AI 매수평가 입력에 실리는 전략별 핵심값(cycle445 B, 사용자 결정 2026-10-11).
 

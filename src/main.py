@@ -53,6 +53,7 @@ from src.routes import (
     market_regime_label,
     market_breadth,
     market_unit_chart,
+    journal_chart,
 )
 from src.routes.stock_master import router as stock_master_router
 from src.auth.token import token_manager
@@ -373,6 +374,7 @@ app.include_router(costs.router)
 app.include_router(market_regime_label.router)
 app.include_router(market_breadth.router)
 app.include_router(market_unit_chart.router)
+app.include_router(journal_chart.router)
 app.include_router(stock_master_router, prefix="/api/stock-master", tags=["stock-master"])
 
 

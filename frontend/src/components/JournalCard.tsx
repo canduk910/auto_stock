@@ -6,6 +6,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { putJournalNote } from '../api/history'
+import LazyJournalChartModal from './LazyJournalChartModal'
 import { strategyLabel } from '../utils/strategyMeta'
 import { formatKstDateTime } from '../utils/kst'
 import type { CostBasis } from '../utils/costBasis'
@@ -524,6 +525,8 @@ interface Props {
 export default function JournalCard({ card, basis, stopsRecordStart }: Props) {
   // cycle413 보완 1차 #12(M6e) — 당일 매매는 「보유 0일」 이 아니라 「당일」.
   const heldLabel = card.held_days === 0 ? '당일' : `보유 ${card.held_days}일`
+  // cycle457 — 「차트」 = 일봉 캔들 + 전략 지표 + 매수·매도 표시 + 손절선·목표선(`JournalChartModal`).
+  const [chartOpen, setChartOpen] = useState(false)
   return (
     <div
       data-testid={`journal-card-${card.anchor_trade_id}`}
@@ -536,8 +539,19 @@ export default function JournalCard({ card, basis, stopsRecordStart }: Props) {
           <span className="text-xs text-gray-400">{card.status === 'open' ? '보유 중' : '청산'}</span>
           <span className="text-xs text-gray-400">{heldLabel}</span>
         </div>
-        <span className="text-xs text-gray-400">{strategyLabel(card.strategy)}</span>
+        <div className="flex items-baseline gap-2">
+          <span className="text-xs text-gray-400">{strategyLabel(card.strategy)}</span>
+          <button
+            type="button"
+            data-testid="journal-chart-open"
+            onClick={() => setChartOpen(true)}
+            className="px-2 py-0.5 text-xs border border-gray-300 rounded text-gray-600 hover:bg-gray-50"
+          >
+            차트
+          </button>
+        </div>
       </div>
+      {chartOpen && <LazyJournalChartModal card={card} onClose={() => setChartOpen(false)} />}
       <div className="text-xs text-gray-400">
         {kst(card.opened_at)} → {card.closed_at ? kst(card.closed_at) : '보유 중'}
       </div>
