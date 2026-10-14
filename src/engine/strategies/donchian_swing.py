@@ -151,7 +151,7 @@ class DonchianSwingStrategy(StrategyBase):
         "llm_gate_min_score": 70,
         "llm_gate_daily_call_cap": 20,
         "llm_gate_timeout_secs": 20,
-        # cycle382 — 시장 유닛(단계형, KODEX200 60일선). 부재·오타 = off. 기본
+        # cycle382 — 시장 유닛(단계형, 소속 시장 종합지수 60일선). 부재·오타 = off. 기본
         # shadow(계산·기록만). PARAM_RANGES/INT_PARAMS 편입 금지. 킬스위치 = PUT.
         "market_unit_mode": "shadow",
         # cycle405 — 깡토식 청산·사이징(§1·§5·§3·§6). R = max(kk_r_floor_pct%×E,
@@ -1925,10 +1925,12 @@ class DonchianSwingStrategy(StrategyBase):
             remaining_qty=remaining_qty, fallback="-",
         )
 
-    def _kk_signal_m(self) -> float:
-        """신호 단계(§6)에서 쓸 시장 유닛 배수 — enforce ∧ m<1 일 때만 줄인다(shadow/off=1.0)."""
+    def _kk_signal_m(self, ticker: "str | None" = None) -> float:
+        """신호 단계(§6)에서 쓸 시장 유닛 배수 — enforce ∧ m<1 일 때만 줄인다(shadow/off=1.0).
+
+        cycle455 — 배수는 종목 소속 시장 기준(`ticker` 없으면 코스피)."""
         try:
-            view = self._market_unit_view()
+            view = self._market_unit_view(ticker)
             if view.mode == "enforce" and view.m < 1.0:
                 return view.m
         except Exception:
@@ -1938,7 +1940,7 @@ class DonchianSwingStrategy(StrategyBase):
     def _kk_lot_zero_blocks(self, ticker: str, current_price: int) -> bool:
         """§6-1 — 설계 랏이 0 이면 신호 단계에서 거른다(수량 0 이 order_engine 오귀인을
         만들지 않도록)."""
-        m = self._kk_signal_m()
+        m = self._kk_signal_m(ticker)
         q, n = self._kk_design_lot(current_price, ticker, m)
         if q > 0:
             return False

@@ -183,6 +183,8 @@ _QUOTE_ALLOWED_PATHS: frozenset[str] = frozenset({
     # 시세성 조회, 계좌·주문 식별자 없음 → 보조 풀 라우팅 부합.
     "/uapi/domestic-stock/v1/quotations/invest-opinion",
     "/uapi/domestic-stock/v1/quotations/estimate-perform",
+    # cycle455 — 국내 업종지수 일봉(FHKUP03500100) · 시장 유닛 원천(코스피·코스닥 종합지수).
+    "/uapi/domestic-stock/v1/quotations/inquire-daily-indexchartprice",
 })
 
 # 보조 매니저별 격리된 Rate Limit 세마포어 (메인 20, 보조 18 보수적)

@@ -277,12 +277,18 @@ class StrategyConfig:
 
 
 class MarketUnitView(NamedTuple):
-    """cycle382 — 시장 유닛 현재 view (매 호출 즉시 재평가, 캐시 없음)."""
+    """cycle382 — 시장 유닛 현재 view (매 호출 즉시 재평가, 캐시 없음).
+
+    cycle455 — ``market`` = 판정에 쓴 종목 시장(``kospi``|``kosdaq``) · ``fallback`` =
+    ``"-"``(제 시장 스냅샷) | ``"other_market"``(제 시장 결측 → 다른 시장 배수) | ``"none"``(둘 다 결측).
+    """
 
     mode: str
     m: float
     state: str
     reason: str
+    market: str = "kospi"
+    fallback: str = "-"
 
 
 class MarketUnitLots(NamedTuple):
@@ -413,7 +419,11 @@ class StrategyBase(ABC):
         self._ratio_cap_logged: KstDailyEmitCap[str] = KstDailyEmitCap[str]()
         # cycle382 — 시장 유닛(단계형) 스냅샷은 거래일별로 담는다(오늘 · 다음
         # 거래일 최대 두 칸). caps 3개(state·attempt·warn) + 일일 집계 tally.
+        # cycle455 — 시장별 판정: `_market_unit_snaps` = 코스피 종합지수 스냅샷(기존 모양 유지),
+        # `_market_unit_snaps_kq` = 코스닥 종합지수 스냅샷. 종목 → 시장 지도는 refresh 가 채운다.
         self._market_unit_snaps: dict[date, Any] = {}
+        self._market_unit_snaps_kq: dict[date, Any] = {}
+        self._market_unit_market_map: dict[str, str] = {}
         self._market_unit_caps = _MarketUnitCaps()
         self._market_unit_tally: dict | None = None
         # cycle384 — buy_paused 관측 cap (키: "cfg|p|v" / "skip|{ticker}").
@@ -1814,7 +1824,7 @@ class StrategyBase(ABC):
             m: Any = "-"
             mu_state: Any = "-"
             try:
-                view = self._market_unit_view()
+                view = self._market_unit_view(ticker)
                 m, mu_state = view.m, view.state
             except Exception:
                 pass
@@ -2279,31 +2289,55 @@ class StrategyBase(ABC):
 
     # ──────────── cycle382 — 시장 유닛(단계형, 터틀 4전략 한정) ────────────
     #
-    # 명세 = `_workspace/red/cycle382_market_unit_spec.md`. KODEX200(069500) 60일선
-    # 계단(1/¾/½/0)으로 그날 신규 진입의 **설계 랏만** 줄인다. 예산·잔여·K축·ρ축·
+    # 명세 = `_workspace/red/cycle382_market_unit_spec.md`. 종목 소속 시장 종합지수
+    # (cycle455 — 코스피 0001·코스닥 1001) 60일선 계단(1/¾/½/0)으로 그날 신규
+    # 진입의 **설계 랏만** 줄인다. 예산·잔여·K축·ρ축·
     # 보유분·청산은 전부 무접촉(A06/A07). 관문(`_apply_budget_limit`) 본문은 byte
     # 무변경(A12) — 여기 헬퍼들은 관문 **앞**에서 0 을 돌려주거나 관문에 줄인 수량을
     # 넘길 뿐이다.
 
+    def _market_unit_snaps_of(self, market: str) -> "dict[date, Any]":
+        """시장 → 거래일별 스냅샷 dict(코스피 = `_market_unit_snaps`, 코스닥 = `_market_unit_snaps_kq`)."""
+        if market == "kosdaq":
+            snaps = getattr(self, "_market_unit_snaps_kq", None)
+            if not isinstance(snaps, dict):
+                snaps = {}
+                self._market_unit_snaps_kq = snaps
+            return snaps
+        return self._market_unit_snaps
+
     async def _refresh_market_unit(self, *, as_of_date: date, preview: bool) -> None:
         """4 터틀 전략 `prepare()` 가 `_resolve_prepare_as_of` 직후 정확히 1회 부른다.
 
-        leaf `market_unit.compute_snapshot`(never-raise)을 부르고 한 번 더 감싼다.
-        같은 날짜에 `ok=True` 스냅샷이 이미 있으면 새 실패가 덮지 않는다(보존
-        규칙) — 새 것이 `ok=True` 면 항상 덮는다. 오늘(KST)보다 과거 키는 지운다.
-        모드가 `off` 여도 계산한다(그래야 `enforce` PUT 이 재시작 없이 먹는다).
+        시장마다(cycle455 — 코스피·코스닥 종합지수) leaf `market_unit.compute_snapshot`
+        (never-raise)을 부르고 한 번 더 감싼다. 같은 날짜·같은 시장에 `ok=True` 스냅샷이
+        이미 있으면 새 실패가 덮지 않는다(보존 규칙) — 새 것이 `ok=True` 면 항상 덮는다.
+        오늘(KST)보다 과거 키는 지운다. 종목 → 시장 지도(`load_market_map`)는 비어 오면
+        기존 지도를 유지한다. 모드가 `off` 여도 계산한다(그래야 `enforce` PUT 이 재시작
+        없이 먹는다).
         """
         from src.engine import market_unit
 
+        snaps_by_market: dict = {}
+        for market in market_unit.MARKETS:
+            try:
+                snap = await market_unit.compute_snapshot(
+                    as_of_date, preview=preview, market=market,
+                )
+            except Exception:
+                snap = market_unit.Snapshot(
+                    as_of=as_of_date, preview=preview, ok=False, state="unavailable",
+                    m=1.0, reason="exception", bar_date=None, expected_head=None,
+                    rows=0, close=None, sma60=None, sma60_prev=None, above=None,
+                    rising=None, market=market,
+                )
+            snaps_by_market[market] = snap
         try:
-            snap = await market_unit.compute_snapshot(as_of_date, preview=preview)
+            market_map = await market_unit.load_market_map()
         except Exception:
-            snap = market_unit.Snapshot(
-                as_of=as_of_date, preview=preview, ok=False, state="unavailable",
-                m=1.0, reason="exception", bar_date=None, expected_head=None,
-                rows=0, close=None, sma60=None, sma60_prev=None, above=None,
-                rising=None,
-            )
+            market_map = {}
+        if market_map:
+            self._market_unit_market_map = market_map
 
         try:
             self._market_unit_tally_roll(as_of_date)
@@ -2312,35 +2346,40 @@ class StrategyBase(ABC):
             )
             self._market_unit_tally["modes"].add(mode)
 
-            existing = self._market_unit_snaps.get(as_of_date)
-            kept = existing is not None and existing.ok and not snap.ok
-            if not kept:
-                self._market_unit_snaps[as_of_date] = snap
-
             today = datetime.now(_KST).date()
-            for stale_key in [d for d in self._market_unit_snaps if d < today]:
-                del self._market_unit_snaps[stale_key]
+            for market, snap in snaps_by_market.items():
+                store = self._market_unit_snaps_of(market)
+                existing = store.get(as_of_date)
+                kept = existing is not None and existing.ok and not snap.ok
+                if not kept:
+                    store[as_of_date] = snap
+                for stale_key in [d for d in store if d < today]:
+                    del store[stale_key]
 
-            if snap.ok:
-                self._market_unit_tally["state"] = snap.state
-                self._market_unit_tally["m"] = snap.m
-                self._emit_market_unit_state(snap, mode)
-            else:
-                self._emit_market_unit_unavailable(
-                    as_of=snap.as_of, preview=snap.preview, reason=snap.reason,
-                    rows=snap.rows, head=snap.bar_date, expected_head=snap.expected_head,
-                    kept=kept, where="refresh",
-                )
+                if snap.ok:
+                    prefix = "" if market == market_unit.DEFAULT_MARKET else "kq_"
+                    self._market_unit_tally[f"{prefix}state"] = snap.state
+                    self._market_unit_tally[f"{prefix}m"] = snap.m
+                    self._emit_market_unit_state(snap, mode)
+                else:
+                    self._emit_market_unit_unavailable(
+                        as_of=snap.as_of, preview=snap.preview, reason=snap.reason,
+                        rows=snap.rows, head=snap.bar_date, expected_head=snap.expected_head,
+                        kept=kept, where="refresh", market=market,
+                    )
         except Exception:
             logger.debug(
                 "[market_unit_refresh_failed] strategy=%s", self.strategy_id,
                 exc_info=True,
             )
 
-    def _market_unit_view(self) -> MarketUnitView:
+    def _market_unit_view(self, ticker: "str | None" = None) -> MarketUnitView:
         """현재 모드·오늘 스냅샷을 매 호출 재평가한다(캐시 없음 — PUT 즉시 반영).
 
-        순수 메모리 읽기 · `await` 0. 오늘 스냅샷이 없으면(아직 계산 안 됨)
+        순수 메모리 읽기 · `await` 0. cycle455 — 종목 시장(`market_of`, 미상·`ticker=None`
+        = 코스피)의 오늘 스냅샷이 `ok` 면 그 배수, 아니면 다른 시장 스냅샷이 `ok` 면 그
+        배수(`fallback="other_market"`), 둘 다 아니면 m=1.0(`fallback="none"`).
+        두 시장 모두 오늘 스냅샷이 없으면(아직 계산 안 됨)
         `[market_unit_unavailable] where=view reason=not_computed` 1회/일 —
         기존 스냅샷이 있는데 `ok=False` 면 그 경보는 refresh 가 이미 냈으므로
         여기서는 조용히 `unavailable` 을 돌려준다.
@@ -2355,17 +2394,34 @@ class StrategyBase(ABC):
         if mode == "off":
             return MarketUnitView(mode="off", m=1.0, state="-", reason="off")
 
+        market = market_unit.market_of(ticker, getattr(self, "_market_unit_market_map", None))
+        other = next((mk for mk in market_unit.MARKETS if mk != market), market)
         today = datetime.now(_KST).date()
-        snap = self._market_unit_snaps.get(today)
-        if snap is None:
+        snap = self._market_unit_snaps_of(market).get(today)
+        other_snap = self._market_unit_snaps_of(other).get(today)
+        if snap is not None and snap.ok:
+            return MarketUnitView(
+                mode=mode, m=snap.m, state=snap.state, reason="ok", market=market, fallback="-",
+            )
+        if other_snap is not None and other_snap.ok:
+            return MarketUnitView(
+                mode=mode, m=other_snap.m, state=other_snap.state,
+                reason=(snap.reason if snap is not None else "not_computed"),
+                market=market, fallback="other_market",
+            )
+        if snap is None and other_snap is None:
             self._emit_market_unit_unavailable(
                 as_of=today, preview=False, reason="not_computed", rows=0,
-                head=None, expected_head=None, kept=False, where="view",
+                head=None, expected_head=None, kept=False, where="view", market=market,
             )
-            return MarketUnitView(mode=mode, m=1.0, state="unavailable", reason="not_computed")
-        if not snap.ok:
-            return MarketUnitView(mode=mode, m=1.0, state="unavailable", reason=snap.reason)
-        return MarketUnitView(mode=mode, m=snap.m, state=snap.state, reason="ok")
+            return MarketUnitView(
+                mode=mode, m=1.0, state="unavailable", reason="not_computed",
+                market=market, fallback="none",
+            )
+        reason = snap.reason if snap is not None else "not_computed"
+        return MarketUnitView(
+            mode=mode, m=1.0, state="unavailable", reason=reason, market=market, fallback="none",
+        )
 
     def _market_unit_lots(
         self, current_price: int, ticker: "str | None", m: float,
@@ -2450,7 +2506,7 @@ class StrategyBase(ABC):
         `[market_unit_error] where=calc` + `None`(= m=1 경로, fail-open).
         """
         try:
-            view = self._market_unit_view()
+            view = self._market_unit_view(ticker)
             if view.mode not in ("shadow", "enforce") or view.m >= 1.0:
                 return None
             lots = self._market_unit_lots(current_price, ticker, view.m)
@@ -2471,7 +2527,7 @@ class StrategyBase(ABC):
         킬스위치가 먹는다). 예외는 fail-open(현행 BUY 경로 유지).
         """
         try:
-            view = self._market_unit_view()
+            view = self._market_unit_view(ticker)
             if view.mode != "enforce" or view.m >= 1.0:
                 return False
             lots = self._market_unit_lots(current_price, ticker, view.m)
@@ -2497,7 +2553,8 @@ class StrategyBase(ABC):
             tally = None
         if tally is None:
             self._market_unit_tally = {
-                "date": day, "state": "-", "m": 1.0, "modes": set(),
+                "date": day, "state": "-", "m": 1.0, "kq_state": "-", "kq_m": 1.0,
+                "modes": set(),
                 "calc_attempts": 0, "would_skip": 0, "reduced": 0,
                 "signal_skips": 0, "lot_before_sum": 0, "lot_after_sum": 0,
             }
@@ -2506,21 +2563,24 @@ class StrategyBase(ABC):
         """`[market_unit_state]` — refresh 성공. cap = (as_of,preview,state,m) 조합당 1회."""
         from src.engine import market_unit
 
-        key = f"state|{snap.as_of.isoformat()}|{int(snap.preview)}|{snap.state}|{snap.m}"
+        market = getattr(snap, "market", market_unit.DEFAULT_MARKET)
+        key = (
+            f"state|{snap.as_of.isoformat()}|{int(snap.preview)}|{snap.state}|{snap.m}|{market}"
+        )
         if not self._market_unit_caps.state.should_emit(key):
             return
         try:
             market_unit.logger.info(
                 "[market_unit_state] strategy=%s as_of=%s preview=%d source=%s bar=%s "
                 "close=%.2f sma60=%.2f sma60_prev=%.2f above=%d rising=%d state=%s "
-                "m=%.2f mode=%s rows=%d expected_head=%s",
+                "m=%.2f mode=%s rows=%d expected_head=%s market=%s",
                 self.strategy_id, snap.as_of.isoformat(), int(snap.preview),
-                market_unit.SOURCE_TICKER,
+                market_unit.INDEX_CODE_BY_MARKET.get(market, "-"),
                 snap.bar_date.isoformat() if snap.bar_date else "-",
                 snap.close or 0.0, snap.sma60 or 0.0, snap.sma60_prev or 0.0,
                 int(bool(snap.above)), int(bool(snap.rising)), snap.state, snap.m,
                 mode, snap.rows,
-                snap.expected_head.isoformat() if snap.expected_head else "-",
+                snap.expected_head.isoformat() if snap.expected_head else "-", market,
             )
         except Exception:
             pass
@@ -2529,6 +2589,7 @@ class StrategyBase(ABC):
     def _emit_market_unit_unavailable(
         self, *, as_of: date, preview: bool, reason: str, rows: int,
         head: "date | None", expected_head: "date | None", kept: bool, where: str,
+        market: str = "kospi",
     ) -> None:
         """`[market_unit_unavailable]` — refresh 실패 · view 에 오늘 스냅샷 없음.
 
@@ -2536,17 +2597,17 @@ class StrategyBase(ABC):
         """
         from src.engine import market_unit
 
-        key = f"unavail|{as_of.isoformat()}|{reason}|{where}"
+        key = f"unavail|{as_of.isoformat()}|{reason}|{where}|{market}"
         if not self._market_unit_caps.warn.should_emit(key):
             return
         try:
             market_unit.logger.warning(
                 "[market_unit_unavailable] strategy=%s as_of=%s preview=%d reason=%s "
-                "rows=%s head=%s expected_head=%s kept=%d where=%s → m=1.00",
+                "rows=%s head=%s expected_head=%s kept=%d where=%s market=%s → m=1.00",
                 self.strategy_id, as_of.isoformat(), int(preview), reason, rows,
                 head.isoformat() if head else "-",
                 expected_head.isoformat() if expected_head else "-",
-                int(kept), where,
+                int(kept), where, market,
             )
         except Exception:
             pass
@@ -2612,10 +2673,10 @@ class StrategyBase(ABC):
             market_unit.logger.info(
                 "[market_unit] strategy=%s state=%s m=%.2f lot_before=%d lot_after=%d "
                 "mode=%s ticker=%s path=%s price=%d fallback=%s skip=%d reason=%s "
-                "where=calc",
+                "where=calc market=%s market_fallback=%s",
                 self.strategy_id, view.state, view.m, lots.lot_before, lots.lot_after,
                 view.mode, ticker, lots.path, current_price, lots.fallback,
-                0 if reason is None else 1, reason or "-",
+                0 if reason is None else 1, reason or "-", view.market, view.fallback,
             )
         except Exception:
             pass
@@ -2644,9 +2705,10 @@ class StrategyBase(ABC):
             market_unit.logger.info(
                 "[market_unit] strategy=%s state=%s m=%.2f lot_before=%d lot_after=%d "
                 "mode=%s ticker=%s path=%s price=%d fallback=%s skip=1 reason=%s "
-                "where=signal",
+                "where=signal market=%s market_fallback=%s",
                 self.strategy_id, view.state, view.m, lots.lot_before, lots.lot_after,
                 view.mode, ticker, lots.path, current_price, lots.fallback, reason,
+                view.market, view.fallback,
             )
         except Exception:
             pass
@@ -2661,11 +2723,11 @@ class StrategyBase(ABC):
             market_unit.logger.info(
                 "[market_unit_daily] strategy=%s date=%s state=%s m=%.2f modes=%s "
                 "calc_attempts=%d would_skip=%d reduced=%d signal_skips=%d "
-                "lot_before_sum=%d lot_after_sum=%d",
+                "lot_before_sum=%d lot_after_sum=%d kq_state=%s kq_m=%.2f",
                 self.strategy_id, tally["date"].isoformat(), tally["state"],
                 tally["m"], modes, tally["calc_attempts"], tally["would_skip"],
                 tally["reduced"], tally["signal_skips"], tally["lot_before_sum"],
-                tally["lot_after_sum"],
+                tally["lot_after_sum"], tally.get("kq_state", "-"), tally.get("kq_m", 1.0),
             )
         except Exception:
             pass

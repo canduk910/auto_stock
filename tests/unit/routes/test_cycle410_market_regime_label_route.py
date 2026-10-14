@@ -236,6 +236,14 @@ def test_mu2_matches_operational_loader_compute_snapshot(wire, monkeypatch):
         return max(d for d in dates if d < as_of)
 
     monkeypatch.setattr(tc, "previous_trading_day", prev_day)
+
+    # cycle455 — 운영 로더의 원천은 종합지수 표(`domestic_index`)로 바뀌었다. 판정식이 같은지만
+    # 보려고 같은 종가열을 그 seam 에 먹인다(라벨 화면은 069500 그대로 — 원천이 다른 것은 의도).
+    async def closes(index_code, *, limit):
+        # 이전 `get_recent_daily` 대역처럼 limit 을 보지 않고 전 구간을 준다(과거 날짜 대조용).
+        return sorted(((r["bas_dd"], r["close_price"]) for r in rows), key=lambda x: x[0])
+
+    monkeypatch.setattr("src.db.domestic_index.get_recent_closes", closes)
     states = set()
     for h in hist:
         snap = asyncio.run(mu.compute_snapshot(date.fromisoformat(h["date"]), preview=True))

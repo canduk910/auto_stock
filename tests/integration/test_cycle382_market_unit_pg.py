@@ -1,9 +1,12 @@
-"""cycle382 Red (선택 P01) — 실 Postgres: `069500` 일봉 90행 → `market_unit.compute_snapshot` 손계산 일치.
+"""cycle382 Red (선택 P01) — 실 Postgres: 지수 일봉 90행 → `market_unit.compute_snapshot` 손계산 일치.
+
+cycle455 — 원천이 `stock_master_daily` 의 069500 에서 `domestic_index_daily` 의 코스피 종합지수
+(`0001`)로 바뀌었다. 판정식·손계산 값은 그대로다.
 
 명세 = `_workspace/red/cycle382_market_unit_spec.md` §1 · §2 · §11.2(P01)
 
 잰 것:
-- 실 `stock_master_daily.get_recent_daily`(DESC · asyncpg `date` · INTEGER 종가)를 그대로 읽어
+- 실 `domestic_index.get_recent_closes`(asyncpg `date` · NUMERIC 종가)를 그대로 읽어
   마지막 80봉(`bas_dd < as_of`)으로 판정한다 — mock 이 못 잡는 `bas_dd` 자료형 처리.
 - as_of 당일 행(`bas_dd == as_of`)은 창에 들어오지 않는다(라이브 부팅 = D−1 판정).
 
@@ -33,25 +36,26 @@ def _weekdays_desc(head: date, n: int) -> list[date]:
     return out
 
 
-async def test_c382_pg_compute_snapshot_matches_hand_calculation(clean_stock_master_daily):
+async def test_c382_pg_compute_snapshot_matches_hand_calculation(pg_pool):
     try:
         from src.engine import market_unit
     except ImportError as exc:  # pragma: no cover — Red 단계
         pytest.fail(f"[Red] src/engine/market_unit.py 미존재 — {exc}")
-    pg = clean_stock_master_daily
+    pg = pg_pool
+    await pg.execute("DELETE FROM domestic_index_daily")
     # 오름차순 90개: 앞 10개는 창 밖(판정에 영향 없어야 한다) + F2(위·하락 ¾)
     f2 = [12000 - 10 * i for i in range(79)] + [12500]
     closes_asc = [99_999] * 10 + f2
     dates_desc = _weekdays_desc(_HEAD, len(closes_asc))
     for d, c in zip(dates_desc, reversed(closes_asc)):
         await pg.execute(
-            "INSERT INTO stock_master_daily (ticker, bas_dd, close_price) VALUES ($1, $2, $3)",
-            "069500", d, c,
+            "INSERT INTO domestic_index_daily (index_code, bas_dd, close_price) VALUES ($1, $2, $3)",
+            "0001", d, c,
         )
     # as_of 당일 극단값 행 — 창에 들어오면 판정이 뒤집힌다
     await pg.execute(
-        "INSERT INTO stock_master_daily (ticker, bas_dd, close_price) VALUES ($1, $2, $3)",
-        "069500", _AS_OF, 1,
+        "INSERT INTO domestic_index_daily (index_code, bas_dd, close_price) VALUES ($1, $2, $3)",
+        "0001", _AS_OF, 1,
     )
 
     snap = await market_unit.compute_snapshot(_AS_OF, preview=False)
@@ -62,3 +66,5 @@ async def test_c382_pg_compute_snapshot_matches_hand_calculation(clean_stock_mas
     assert abs(float(snap.sma60) - 11_526.5) < 0.006
     assert abs(float(snap.sma60_prev) - 11_705.0) < 0.006
     assert float(snap.close) == 12_500
+    assert snap.market == "kospi"
+    await pg.execute("DELETE FROM domestic_index_daily")

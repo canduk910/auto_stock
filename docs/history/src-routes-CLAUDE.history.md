@@ -776,3 +776,12 @@ Hx/Mx**` 태그가 어겼다(2차 통합 검증 F14). 더불어 `/api/performanc
 경위: cycle414 대시보드 전략 패널·요약표가 같은 GET 을 10초마다 읽어 실효 손절선의 정본으로 쓴다(`frontend/src/api/balance.ts::getExitLines`). 「워커 전용」 이 사실과 달라졌다. 응답 모양·캐시·순수성 계약은 그대로다.
 
 → CHANGELOG: cycle414 행
+
+
+## `/api/strategies/monitor` — `market_unit`
+### 2026-10-14 cycle455 — 시장 유닛 원천을 069500 에서 종목 소속 시장 종합지수로 (정본에서 옮긴 원문)
+
+(표 한 행 가운데 바뀐 구절만 원문 그대로)
+`market_unit`(대상 = `strategy_manifest.MARKET_UNIT_SCALE_IDS`, 명부의 `market_unit_policy=="scale"` 파생 — 리팩토링 카드 #5·cycle423, 손으로 적은 전략 목록이 아니다. 오늘 스냅샷 `_market_unit_snaps[오늘]` 의 `mode`·`ok`·`m`·`state`·`bar_date`·`reason` 그대로, 없으면 `{mode, ok: false, reason: "not_computed"}`. 그 밖 전략 null)
+
+→ CHANGELOG: cycle455 행

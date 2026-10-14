@@ -951,3 +951,11 @@ flowchart TB
 읽는 쪽(backend `GET /api/history/journal`) 문단을 더했다.
 
 → CHANGELOG: cycle413 행
+
+
+## 8장 머리말 — 시장 유닛
+### 2026-10-14 cycle455 — 시장 유닛 원천을 069500 에서 종목 소속 시장 종합지수로 (정본에서 옮긴 원문)
+
+터틀 4전략(donchian·BFB·VCP·kojiro)에는 **시장 유닛**(cycle382)이 하나 더 있다. KODEX 200 60일선 계단(1 · ¾ · ½ · 0)으로
+
+→ CHANGELOG: cycle455 행

@@ -136,18 +136,38 @@ async def stock_master_daily_load_task_loop(scheduler: Any, *, wait_time) -> Non
     시각 정본은 `scheduler.TIME_STOCK_MASTER_DAILY_LOAD` 하나다 — 이 facade 는 값을
     주입받기만 한다(리터럴·주석 모두 정본 이원화 금지).
     """
-    from src.engine.scanner import _stock_master_daily_load_once
+    from src.engine import domestic_index_ingest, scanner
     from src.engine.stock_master_daily_metrics import (
         record_stock_master_daily_load,
         flush_stock_master_daily_load_collector,
     )
     from src.engine.task_loop_helper import run_periodic_task_loop
 
+    async def _daily_load_with_index() -> dict:
+        """cycle455 — 일봉 적재(`_stock_master_daily_load_once`) 뒤 종합지수 적재(`ensure_fresh`)를 잇는다.
+
+        `_financial_load_with_extras` 와 같은 합성 — 일봉 쪽 예외도 지수 적재를 막지 않고(감싼 뒤
+        다시 올린다) 요약은 일봉 것 그대로다. 두 호출 모두 호출 시점의 모듈 속성으로 찾는다.
+        """
+        try:
+            summary = await scanner._stock_master_daily_load_once()
+        except Exception:
+            try:
+                await domestic_index_ingest.ensure_fresh(phase="evening")
+            except Exception:
+                logger.exception("[domestic_index_ingest] 저녁 적재 실패 graceful")
+            raise
+        try:
+            await domestic_index_ingest.ensure_fresh(phase="evening")
+        except Exception:
+            logger.exception("[domestic_index_ingest] 저녁 적재 실패 graceful")
+        return summary
+
     await run_periodic_task_loop(
         scheduler=scheduler,
         task_label="stock_master_daily_load",
         wait_time=wait_time,  # 정본 = scheduler.TIME_STOCK_MASTER_DAILY_LOAD
-        once_callable=_stock_master_daily_load_once,
+        once_callable=_daily_load_with_index,
         record_fn=record_stock_master_daily_load,
         flush_fn=flush_stock_master_daily_load_collector,
         summary_log_format=(

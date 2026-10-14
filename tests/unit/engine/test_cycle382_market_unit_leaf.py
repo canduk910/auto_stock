@@ -20,7 +20,7 @@ from freezegun import freeze_time
 
 from tests.unit.engine._cycle382_support import (
     D1, D2, D3, D4, DAY, F1, F2, F3, F4, HEAD, NEXT, T2, T3, TF,
-    Seams, field, kst, lines, make, mu, need_base, open_info, rows_for,
+    Seams, field, kospi_only, kst, lines, make, mu, need_base, open_info, rows_for,
 )
 
 pytestmark = pytest.mark.unit
@@ -43,7 +43,8 @@ def _state_m(closes) -> tuple[str, float]:
 # ===========================================================================
 def test_r00_constants_and_multiplier_table_are_the_spec_values():
     lf = mu()
-    assert lf.SOURCE_TICKER == "069500"
+    assert "SOURCE_TICKER" not in vars(lf), "cycle455 — 069500 은 시장 유닛 원천이 아니다"
+    assert dict(lf.INDEX_CODE_BY_MARKET) == {"kospi": "0001", "kosdaq": "1001"}
     assert (lf.MA_WINDOW, lf.SLOPE_LOOKBACK, lf.MIN_ROWS, lf.FETCH_ROWS) == (60, 20, 80, 120)
     assert lf.MIN_ROWS == lf.MA_WINDOW + lf.SLOPE_LOOKBACK
     assert isinstance(lf.MULTIPLIERS, MappingProxyType), "배수표는 읽기 전용 매핑이어야 한다"
@@ -224,7 +225,7 @@ async def test_r14_seam_arguments_and_bas_dd_type_tolerance(monkeypatch):
     assert snap.bar_date == HEAD
     assert seams.daily_calls, "get_recent_daily seam 을 부르지 않았다(모듈 속성 조회 seam)"
     ticker, days = seams.daily_calls[0]
-    assert ticker == "069500" and days >= 80
+    assert ticker == "0001" and days >= 80          # cycle455 — 코스피 종합지수(기본 시장)
     assert seams.cal_calls == [DAY], "previous_trading_day(as_of) 로 기대 머리를 구해야 한다"
 
 
@@ -316,7 +317,7 @@ async def test_r16_refresh_emits_unavailable_warning_with_reason(monkeypatch, ca
     Seams(rows_for(F4, date(2026, 9, 22)), prev_day=HEAD).install(monkeypatch)
     s = make("donchian_swing", mode="shadow")
     await s._refresh_market_unit(as_of_date=DAY, preview=False)
-    warns = lines(caplog, "[market_unit_unavailable]", min_level=logging.WARNING)
+    warns = kospi_only(lines(caplog, "[market_unit_unavailable]", min_level=logging.WARNING))
     assert len(warns) == 1, warns
     assert field(warns[0], "strategy") == "donchian_swing"
     assert field(warns[0], "reason") == "stale_head"

@@ -212,7 +212,9 @@ def test_a01_leaf_pure_functions_and_import_boundary():
     offenders = [m for m in every if m.startswith(banned)]
     assert offenders == [], f"leaf 가 금지 모듈을 import 한다 — {offenders}"
     lazy = [m for m in every if m.startswith("src.")]
-    assert set(lazy) <= {"src.db", "src.db.stock_master_daily", "src.engine", "src.engine.trading_calendar"}, lazy
+    # cycle455 — 원천이 종합지수(`src.db.domestic_index`)로, 종목 → 시장 지도(`src.db.stock_master`)가 더해졌다.
+    assert set(lazy) <= {"src.db", "src.db.domestic_index", "src.db.stock_master",
+                         "src.engine", "src.engine.trading_calendar"}, lazy
 
 
 def test_a01_leaf_logger_name_is_module_name():

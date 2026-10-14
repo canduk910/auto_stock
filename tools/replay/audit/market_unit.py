@@ -21,7 +21,10 @@ if _ROOT not in sys.path:
 
 from src.engine import market_unit as _op  # noqa: E402  (운영 판정 그대로)
 
-SOURCE_TICKER = _op.SOURCE_TICKER
+# cycle455 — 운영 원천은 종목 소속 시장 종합지수(코스피 0001 · 코스닥 1001)로 바뀌었다.
+# 재생 보관소에는 지수 일봉이 없어 069500(KODEX 200)을 코스피 대용으로 그대로 쓴다 —
+# 판정식(`classify`)은 운영 것 그대로다. 코스닥 종목도 이 한 열로 재생한다(운영과 다름).
+SOURCE_TICKER = "069500"
 
 
 def m_at_bars(closes: np.ndarray) -> np.ndarray:

@@ -1337,3 +1337,11 @@ target 220 → 마진 34 영업일(사이클196 의 34 와 같다). `fetch_daily
 — 워커 역할(`role.sql`)에 DELETE·TRUNCATE 가 없다는 사실은 그대로다.
 
 → CHANGELOG: cycle413 행
+
+
+## stock_master_daily.py — `get_recent_daily` 상한
+### 2026-10-14 cycle455 — 시장 유닛 원천을 069500 에서 종목 소속 시장 종합지수로 (정본에서 옮긴 원문)
+
+    - ⚠️ 상한은 관문이지 읽는 양이 아니다. 100행 초과 요청 = VCP `daily_fetch_depth_mode="full"` · `market_unit`(`FETCH_ROWS = 120`) · 야간 `pyramid_shadow`(400)뿐이다.
+
+→ CHANGELOG: cycle455 행

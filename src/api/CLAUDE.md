@@ -32,12 +32,12 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 거�
 
 **자금 안전 절대 원칙**:
 - 매매(`place_order`/`cancel_order`) · 잔고(`get_balance`/`get_buyable`) · 체결조회(`get_daily_orders`) · 체결통보 = 언제나 메인 단일(`kis_get`/`kis_post`)
-- 풀에 오는 것 = `condition.py` 함수 전부 · `quotation.py`(`inquire_ccnl` · `inquire_acml_vol`) · `finance.fetch_financial_tr` · `market_operation.inquire_vi_status_today` · `period_chart.fetch_candle_chart` · `overseas_quote.fetch_daily_chartprice` · `invest_opinion.py` 함수 2개 · `scanner._fetch_market_cap_page`. `krx.py` 는 KIS 밖이라 무관
+- 풀에 오는 것 = `condition.py` 함수 전부 · `quotation.py`(`inquire_ccnl` · `inquire_acml_vol`) · `finance.fetch_financial_tr` · `market_operation.inquire_vi_status_today` · `period_chart.fetch_candle_chart` · `overseas_quote.fetch_daily_chartprice` · `domestic_index.fetch_index_daily`(`fetch_index_daily_history` 포함) · `invest_opinion.py` 함수 2개 · `scanner._fetch_market_cap_page`. `krx.py` 는 KIS 밖이라 무관
 
 **Public API** — `kis_get_quote(path, tr_id, params, *, hashkey="")`(보조 라운드로빈 + 메인 fallback) · `kis_post_quote(path, tr_id, body, *, hashkey="")` · `get_quote_request_metrics() -> dict` · `reset_quote_request_metrics() -> None`
 
 **Path 가드** (`QuotePoolPathError` — `ValueError` 서브클래스):
-- 화이트리스트 **16 path**(`_QUOTE_ALLOWED_PATHS`, 상수는 전체 경로 — 아래 15개는 `/uapi/domestic-stock/v1` 접두를 줄여 적었다)만 허용: `/quotations/inquire-price` / `/quotations/inquire-daily-itemchartprice` / `/ranking/fluctuation` / `/quotations/search-stock-info` / `/quotations/chk-holiday` / `/quotations/inquire-ccnl` / `/ranking/market-cap` / `/quotations/inquire-vi-status` / `/finance/income-statement` / `/finance/balance-sheet` / `/finance/profit-ratio` / `/finance/stability-ratio` / `/finance/other-major-ratios` / `/quotations/invest-opinion` / `/quotations/estimate-perform` + 해외 1개 `/uapi/overseas-price/v1/quotations/inquire-daily-chartprice`
+- 화이트리스트 **17 path**(`_QUOTE_ALLOWED_PATHS`, 상수는 전체 경로 — 아래 16개는 `/uapi/domestic-stock/v1` 접두를 줄여 적었다)만 허용: `/quotations/inquire-price` / `/quotations/inquire-daily-itemchartprice` / `/ranking/fluctuation` / `/quotations/search-stock-info` / `/quotations/chk-holiday` / `/quotations/inquire-ccnl` / `/ranking/market-cap` / `/quotations/inquire-vi-status` / `/finance/income-statement` / `/finance/balance-sheet` / `/finance/profit-ratio` / `/finance/stability-ratio` / `/finance/other-major-ratios` / `/quotations/invest-opinion` / `/quotations/estimate-perform` / `/quotations/inquire-daily-indexchartprice` + 해외 1개 `/uapi/overseas-price/v1/quotations/inquire-daily-chartprice`
 - 🔴 **신규 시세 path 는 화이트리스트 등재 + AST 가드 동반이 의무**다 — 빠뜨리면 그 호출이 `QuotePoolPathError` 로 전건 실패한다
 - `/quotations/volume-rank`(거래량순위 FHPST01710000) **재도입 금지** — 호출 0건 dead 로 폐기. 가드 `tests/unit/api/test_cycle179_no_volume_rank_in_quote_allowlist.py`
 - 매매성 path 오염 검사는 **세그먼트 판정** — 키워드 부분일치는 `finance/balance-sheet` 를 `inquire-balance` 로 오탐한다. 가드 `tests/unit/api/test_cycle109_market_cap_allowlist.py` · `tests/unit/api/test_cycleC1_finance_allowlist.py` · `tests/unit/api/test_vi_status_quote_allowlist.py`
@@ -365,6 +365,14 @@ WebSocket 장운영정보의 **파싱 정본**이다. 구독 송신 = `src/engin
   호출해 상쇄한다(그 겹침 날짜는 이전 응답에 실존했던 날이라 이번 응답의 시작 경계가 아니다).
 - 호출자는 **미국 종가 확정 뒤(KST 07:00 이후, 서머타임 전환 양쪽 포함)** 에만 불러야 한다 — 이 모듈은
   시각을 판단하지 않는다. 소비처 = `ndx2x_ingest.ensure_history` 하나.
+
+## domestic_index.py — 국내 업종지수 기간별시세 (시장 유닛 원천, cycle455)
+
+- 상수 = `PATH="/uapi/domestic-stock/v1/quotations/inquire-daily-indexchartprice"` · `TR_ID="FHKUP03500100"`(국내주식업종기간별시세, 실전·모의 동일) · `MAX_ROWS_PER_CALL=50` · `HISTORY_MAX_CALLS=6` · `HISTORY_SLEEP_SECS=0.2`. 정본 스펙 = `docs/kis/domestic-stock-industry.md` 「국내주식업종기간별시세(일_주_월_년)」.
+- `fetch_index_daily(index_code, start, end) -> list[tuple[str, float]]` — KIS 1회, `kis_get_quote`(시세 풀, `_QUOTE_ALLOWED_PATHS` 등재 — 가드 `tests/unit/engine/test_cycle455_domestic_index_ingest.py::test_k3_path_in_quote_allowlist`). 파라미터 = `FID_COND_MRKT_DIV_CODE="U"` · `FID_INPUT_ISCD`(업종 코드) · `FID_INPUT_DATE_1/2`(YYYYMMDD) · `FID_PERIOD_DIV_CODE="D"`. 반환 = `output2` 의 `(stck_bsop_date, float(bstp_nmix_prpr))` — 날짜 오름차순·같은 날짜 중복 제거. 날짜 불량·비수치·비유한·0 이하 행은 버린다.
+- `fetch_index_daily_history(index_code, end, min_rows) -> list[tuple[str, float]]` — `end` 부터 과거로 80 달력일 창을 내려가며 `min_rows` 를 채울 때까지 부른다(상한 `HISTORY_MAX_CALLS`회, 창 사이 `HISTORY_SLEEP_SECS`). 다음 창의 종료일 = 이번 응답의 가장 옛 날짜 − 1일. 0행 응답 · 새 날짜가 하나도 늘지 않은 응답이면 멈춘다.
+- **실측(2026-10-14, 운영 키)** — `0001`·`1001`·`2001` 모두 `rt_cd=0`. 1회 **최대 50행**, `output2` 는 **최신 먼저**, 연속조회(`tr_cont`) 불가 — 더 과거는 종료일을 과거로 당겨 다시 부른다.
+- KIS 오류는 삼키지 않고 호출자에게 올린다. 소비처 = `src/engine/domestic_index_ingest.py` 하나(흡수·마커는 그쪽 — `src/engine/CLAUDE.md` 모듈 맵).
 
 ## invest_opinion.py — 종목투자의견 · 종목추정실적 (RS·재무)
 

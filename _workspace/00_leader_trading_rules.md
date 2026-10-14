@@ -73,11 +73,12 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
   - **롤백** = 해당 전략 `max_lot_ratio_mult = 20.0`. **PUT 은 즉시 / SQL UPDATE 는 다음 재시작에서만** 반영되고, 보유 중 장중 재시작은 금지(cycle232 D6)이므로 **장중 실효 수단은 PUT 뿐**이다. ⚠️ 키가 배포되기 **전**에는 PUT 이 무음 실패(미지 키 탈락) + `params` 통째 덮어쓰기로 SQL 값까지 지운다.
   - `compute_unit_qty_guarded` 의 notional 상한이 `position_ratio × 예산` 이라 **터틀 수량 ≤ 비중 수량**이 항상 성립 = 전환은 **순수 축소 방향**.
   - race 가드: `pending_buys`는 `place_order` 응답 직후 동기 영역에서 즉시 등록 — 기존 매핑 등록 규약과 동일하게 합산 일관성 보장
-- **시장 유닛(단계형) `market_unit_mode` (cycle382, 사용자 결정 2026-09-27)** — 터틀 4전략(`donchian_swing`·`bull_flag_breakout`·`vcp_breakout`·`kojiro`) 한정. KODEX 200(`069500`) 60일선으로 그날 신규 진입의 **설계 랏만** 계단형으로 줄인다 — 위·상승 = 1.0(그대로) · 위·하락 = 0.75 · 아래·상승 = 0.5 · 아래·하락 = **0.0**(신규 진입 없음). 상승 = 60일선이 20봉 전 60일선보다 높다. 동률(종가 = 60일선, 60일선 = 20봉 전 값)은 약한 쪽으로 판정한다. 판정은 D-1(전 영업일) 종가 기준이라 07:45 부팅 시점에 이미 안다.
+- **시장 유닛(단계형) `market_unit_mode` (cycle382, 사용자 결정 2026-09-27)** — 터틀 4전략(`donchian_swing`·`bull_flag_breakout`·`vcp_breakout`·`kojiro`) 한정. **종목 소속 시장의 종합지수** 60일선으로 그날 신규 진입의 **설계 랏만** 계단형으로 줄인다 — 위·상승 = 1.0(그대로) · 위·하락 = 0.75 · 아래·상승 = 0.5 · 아래·하락 = **0.0**(신규 진입 없음). 상승 = 60일선이 20봉 전 60일선보다 높다. 동률(종가 = 60일선, 60일선 = 20봉 전 값)은 약한 쪽으로 판정한다. 판정은 D-1(전 영업일) 종가 기준이라 07:45 부팅 시점에 이미 안다.
+  - **시장별 판정(cycle455 — 사용자 결정 2026-10-14)** — 코스피 종목 = 코스피 종합지수(KIS 업종 `0001`) · 코스닥 종목(`stock_master.excg_dvsn_cd=="03"`) = 코스닥 종합지수(`1001`) · 시장을 모르는 종목 = 코스피. 같은 날 같은 전략에서 두 시장 배수가 다를 수 있다. 종목 없이 묻는 자리(etf_trend 의 결손·m≤0 거름)는 코스피로 본다. 근거 = 처음 설계(cycle376)의 검증 원천도 코스피 종합지수였다 · 코스닥 적용 자문 = `_workspace/domain_consult/2026-10-13_market_unit_kosdaq.md` · 명세 = `_workspace/red/cycle455_market_unit_by_market_spec.md`.
   - **적용 자리 = 설계 랏뿐이다.** `cash_usage_ratio`·`total_investment`·잔여 클램프·K축(`max_lot_units`)·ρ축(`max_lot_ratio_mult`)·오픈리스크 캡·보유분·청산 규약은 전부 무접촉. 예산 경로(`cash_usage_ratio`·`total_investment` 축소)는 재현에서 조금 더 좋았지만(샤프 변화 +0.29 대 +0.23, MA60 ½ 기준) 택하지 않았다 — 7전략 전부와 일일 손실 분모·정산 기준선·비중 하한선 검증이 함께 흔들리고, 매크로 자동 조정과 같은 손잡이라 두 효과를 로그로 가를 수 없다(자문 §7.4).
   - **축소일(m<1)에는 1주 폴백도, 터틀→비중 경로 낙하도 하지 않는다**(원인 불문 — ATR 결측이든 저변동 floor 든 동일). 폴백을 허용하면 donchian·VCP 는 0.5 조차 실현되지 않는다(재현 실측 — 폴백 유지 시 실현배수 0.70·0.61, 폴백 금지 시 0.45~0.48).
   - **줄인 랏으로 못 사는 종목은 신호 단계에서 거른다**(`enforce` 만) — m=0(`zero_state`) · 줄였더니 0주(`rounds_to_zero`) · m=1 이었다면 폴백·낙하로 샀을 종목(`no_fallback`). 수량 0 을 관문까지 흘리면 「매수 수량 0 → 900s cooldown(투자금 부족)」으로 오귀인된다(cycle316 재현 차단). 잔여 부족(`funds`)은 거르지 않는다 — 기존 자금 경로가 맞는 귀인이다.
-  - **결측·stale·예외 → m=1.0**(fail-open, 현행 그대로) — 장세 데이터 결손이 매수를 조용히 줄이면 안 된다.
+  - **결측·stale·예외** — 제 시장 지수가 결측이면 다른 시장의 배수를 쓴다(「한쪽 결측 → 그 시장만 m=1」 금지 — 약세장에서 결측 쪽만 풀배수로 열린다). 두 시장 모두 결측이면 **m=1.0**(fail-open) — 장세 데이터 결손이 매수를 조용히 줄이면 안 된다.
   - **모드 3단계** `off|shadow|enforce` — 부재·오타 = `off`. 4전략 기본값은 **`shadow`**(계산·기록만, 수량 불변) — 1주 섀도 관찰 뒤 `enforce` 전환은 별도 사용자 승인. `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(리스크 정체성 상수, AI 자동 튜닝 대상 아님). 킬스위치·`enforce` 전환 = 전략마다 `PUT /api/strategies/{id}/params {"params":{"market_unit_mode":"off"}}` **즉시**(모드를 매 호출 읽는다). 🔴 전략 끄기(`enabled`·`weight=0`)로 되돌리지 않는다 — 보유분 손절이 멈춘다.
   - **매크로 레짐과는 다른 축이다** — 매크로 레짐(`cash_usage_ratio` 자동 조정)은 관찰 지표라 매수를 차단·축소하지 않는다(§8-3). 시장 유닛은 그와 별개로 전략 사이징에서만 작동하는 규칙이다.
   - 근거 = `_workspace/domain_consult/cycle376_market_unit.md`(계좌 재현 — 6년 낙폭 −61.5%→−27.5%, 샤프 −0.40→+0.18) · 명세 = `_workspace/red/cycle382_market_unit_spec.md`.
@@ -654,7 +655,7 @@ DEFAULT_PARAMS = {
     # 장중 킬스위치 — 값은 order_engine 코드 상수와 동일(행위 변경 0).
     "order_exchange_clock_mode": "enforce",
     "after_market_exit_division": "44",
-    # cycle382 — 시장 유닛(단계형, KODEX200 60일선). 부재·오타=off, 기본 shadow
+    # cycle382 — 시장 유닛(단계형, 종목 소속 시장 종합지수 60일선 — cycle455). 부재·오타=off, 기본 shadow
     # (계산·기록만). PARAM_RANGES/INT_PARAMS 미편입. 킬스위치 = PUT 즉시.
     "market_unit_mode": "shadow",
 }
@@ -810,7 +811,7 @@ DEFAULT_PARAMS = {
     # 장중 킬스위치 — 값은 order_engine 코드 상수와 동일(행위 변경 0).
     "order_exchange_clock_mode": "enforce",
     "after_market_exit_division": "44",
-    # cycle382 — 시장 유닛(단계형, KODEX200 60일선). 부재·오타=off, 기본 shadow
+    # cycle382 — 시장 유닛(단계형, 종목 소속 시장 종합지수 60일선 — cycle455). 부재·오타=off, 기본 shadow
     # (계산·기록만). PARAM_RANGES/INT_PARAMS 미편입. 킬스위치 = PUT 즉시.
     "market_unit_mode": "shadow",
 }

@@ -557,7 +557,7 @@ donchian·kojiro 만 틱 평가를 건너뛰고 1분 REST 폴 루프가 평가�
 15:30~16:00 은 주문 발사점(`execute_buy`·`execute_sell`)에서 주문이 막힌다(`order_engine._market_rest_now`).
 매수 수량은 `calc_buy_quantity` → `_apply_budget_limit` 관문을 지난다(루트 `CLAUDE.md` 「핵심 안전 규칙」).
 
-터틀 4전략(donchian·BFB·VCP·kojiro)에는 **시장 유닛**(cycle382)이 하나 더 있다. KODEX 200 60일선 계단(1 · ¾ · ½ · 0)으로
+터틀 4전략(donchian·BFB·VCP·kojiro)에는 **시장 유닛**(cycle382)이 하나 더 있다. 종목이 속한 시장의 종합지수(코스피 `0001` · 코스닥 `1001`, cycle455) 60일선 계단(1 · ¾ · ½ · 0)으로
 그날 신규 진입의 설계 랏을 줄이고, `enforce` 모드에서는 줄인 랏으로 못 사는 종목을 신호 단계에서 거른다.
 기본 모드 `shadow` 는 계산·기록만 하고 수량을 바꾸지 않는다. 규칙 = 루트 `CLAUDE.md` 「자금 관리」 절.
 

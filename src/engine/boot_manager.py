@@ -38,6 +38,8 @@ logger = logging.getLogger(__name__)
 # vs 사이클 158 VB hook (90초) — 본 가드는 적재 본체 완료까지 5분 cap polling.
 BOOT_PREPARE_STOCK_MASTER_WAIT_SECS = 300
 BOOT_PREPARE_STOCK_MASTER_POLL_SECS = 10
+#: cycle455 — 부팅 때 종합지수 적재(`domestic_index_ingest.ensure_fresh`) 대기 상한(초).
+BOOT_INDEX_BUDGET_SECS = 20
 
 #: `[daily_head_stale]` 관측 전용 KST (cycle283 — 달력일 판정 금지, 주말 갭 오탐 차단)
 _HEAD_STALE_KST = timezone(timedelta(hours=9))
@@ -544,6 +546,20 @@ async def boot(scheduler: "TradingScheduler") -> None:
             "[boot_prepare_wait_timeout] stock_master 0건 — %ds 대기 후 prepare 진행 (graceful)",
             BOOT_PREPARE_STOCK_MASTER_WAIT_SECS,
         )
+
+    # cycle455 — 시장 유닛 원천인 종합지수(코스피 0001·코스닥 1001) 일봉을 prepare **앞**에서
+    # 최신으로 만든다(일봉 확정 대기 바로 앞 — 확정은 배경에서 이미 돌고 있다). 상한
+    # `BOOT_INDEX_BUDGET_SECS` — 넘거나 실패해도 부팅은 계속한다(fail-open: 판정은 DB 에
+    # 있는 봉으로 하고, 그마저 없으면 배수 1).
+    try:
+        from src.engine import domestic_index_ingest
+        await asyncio.wait_for(
+            domestic_index_ingest.ensure_fresh(phase="boot"), timeout=BOOT_INDEX_BUDGET_SECS,
+        )
+    except asyncio.CancelledError:
+        raise
+    except Exception:
+        logger.warning("[domestic_index_ingest] phase=boot 실패·시간 초과 graceful", exc_info=True)
 
     # cycle386 — 확정 태스크를 예산(`BOOT_BUDGET_SECS`) 안에서 기다린다. 예산을
     # 넘겨도 부팅은 여기서 더 기다리지 않는다(fail-open) — 배경이 저속으로 계속한다.

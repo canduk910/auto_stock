@@ -179,6 +179,14 @@ export interface PositionDetail {
 // ── cycle414 — 전략 진행상황 읽기 전용 라우트 `GET /api/strategies/monitor` 모양(명세 §3.2) ──
 
 /** 라우트 `market_unit` — 엔진 스냅샷 `_market_unit_snaps[오늘]` 직접 읽기. `ok=false` 면 `m`·`state` 없음. */
+export interface MonitorMarketUnitMarket {
+  ok: boolean
+  m?: number
+  state?: string
+  bar_date?: string | null
+  reason?: string
+}
+
 export interface MonitorMarketUnit {
   mode: string
   ok: boolean
@@ -186,6 +194,8 @@ export interface MonitorMarketUnit {
   state?: string
   bar_date?: string | null
   reason?: string
+  /** cycle455 — 시장별 판정(코스피·코스닥 종합지수). 위 칸들은 코스피 값이다. */
+  by_market?: { kospi: MonitorMarketUnitMarket; kosdaq: MonitorMarketUnitMarket }
 }
 
 export interface MonitorFunnelStep {

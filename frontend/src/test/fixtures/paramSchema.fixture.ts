@@ -2751,7 +2751,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "kojiro",
         "etf_trend"
       ],
-      "help": "cycle382 — KODEX 200(069500) 60일선 계단(위·상승 1 / 위·하락 ¾ / 아래·상승 ½ / 아래·하락 0)으로 터틀 4전략 신규 진입의 **설계 랏만** 줄인다. `off`(부재·오타 포함) = 매수 수량·신호에 관여하지 않는다(설계 랏 그대로) — 장세 계산·기록(`prepare()` 의 `[market_unit_state]`/`[market_unit_unavailable]`)은 모드와 무관하게 계속된다. `shadow`(기본) = 계산·기록에 더해 그 계산으로 줄었을 수량을 한 줄(`[market_unit] where=calc`)로 기록만 하고 수량은 그대로 둔다. `enforce` = 실제로 줄인다 — m=0 인 날은 그 종목 신규 진입 자체가 신호 단계에서 걸러진다(「매수 수량 0 → 900s cooldown(투자금 부족)」 으로 오귀인되지 않는다). 축소일에는 1주 폴백·터틀→비중 낙하 어느 것도 하지 않는다(원인 불문). 예산(`total_investment`)·잔여·K축(`max_lot_units`)·ρ축(`max_lot_ratio_mult`)·오픈리스크 캡·보유분·청산 규약은 전부 무접촉이다. 결측·stale·예외는 `m=1.0`(현행 그대로) + WARNING — 결측이 매수를 조용히 줄이지 않는다. `PUT /api/strategies/{id}/params` 로 즉시 반영되는 킬스위치다. AI 자동 튜닝 대상이 아니다(`PARAM_RANGES`/`INT_PARAMS` 편입 금지 — 리스크 정체성 상수)."
+      "help": "cycle382·455 — 종목 소속 시장 종합지수(코스피 0001·코스닥 1001, 그 시장 판정을 못 하면 다른 시장 값) 60일선 계단(위·상승 1 / 위·하락 ¾ / 아래·상승 ½ / 아래·하락 0)으로 터틀 4전략 신규 진입의 **설계 랏만** 줄인다. `off`(부재·오타 포함) = 매수 수량·신호에 관여하지 않는다(설계 랏 그대로) — 장세 계산·기록(`prepare()` 의 `[market_unit_state]`/`[market_unit_unavailable]`)은 모드와 무관하게 계속된다. `shadow`(기본) = 계산·기록에 더해 그 계산으로 줄었을 수량을 한 줄(`[market_unit] where=calc`)로 기록만 하고 수량은 그대로 둔다. `enforce` = 실제로 줄인다 — m=0 인 날은 그 종목 신규 진입 자체가 신호 단계에서 걸러진다(「매수 수량 0 → 900s cooldown(투자금 부족)」 으로 오귀인되지 않는다). 축소일에는 1주 폴백·터틀→비중 낙하 어느 것도 하지 않는다(원인 불문). 예산(`total_investment`)·잔여·K축(`max_lot_units`)·ρ축(`max_lot_ratio_mult`)·오픈리스크 캡·보유분·청산 규약은 전부 무접촉이다. 결측·stale·예외는 `m=1.0`(현행 그대로) + WARNING — 결측이 매수를 조용히 줄이지 않는다. `PUT /api/strategies/{id}/params` 로 즉시 반영되는 킬스위치다. AI 자동 튜닝 대상이 아니다(`PARAM_RANGES`/`INT_PARAMS` 편입 금지 — 리스크 정체성 상수)."
     },
     {
       "key": "min_market_cap",

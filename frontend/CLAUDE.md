@@ -188,6 +188,7 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 - `marketUnitEffect(sid, mu)` — 시장 유닛의 뜻은 전략마다 다르다. 대상 판정은 하드코딩 목록이 아니라 **라우트 응답**이다(cycle423 카드 #5) — `mu` 가 주어지면(= 라우트가 명부 `MARKET_UNIT_SCALE_IDS` 로 이미 걸렀다) `etf_trend` 만 별도 분기, 그 밖은 전부 터틀형으로 본다. `mode === 'off'` 면 표시하지 않는다.
   - 🔴 `etf_trend` 는 **`shadow` 에서도** m≤0 이거나 스냅샷이 없으면(`ok === false`) 「사지 않음」(차단)이다. `enforce` + 스냅샷 없음도 차단이다(`etf_trend.py` 가 `state == "unavailable"` 을 직접 거른다).
   - 터틀 4전략: `shadow` = 「관찰만」(스냅샷이 없어도 차단 아님) · `enforce` = m≤0 차단, m<1 「랏 ×m」, 스냅샷 없음 = 「m=1(차단 아님)」 — 엔진 `strategy_base._market_unit_view` 가 그때 `m=1.0` 으로 산다.
+  - ⚠️ 판정 재료 = `mu` 최상위 칸 = **코스피 종합지수 스냅샷**이다. 엔진은 종목 소속 시장별로 판정하고(코스닥 종목 = 코스닥 종합지수) 한쪽 결측이면 다른 시장 배수를 쓴다(cycle455) — 화면은 둘 다 반영하지 않는다. 시장별 값은 `MonitorMarketUnit.by_market?`(`types/trading.ts`, 타입만 있고 표시하지 않는다)
 - `marketUnitBlockLabel(sid, mu)` — 위 판정이 차단일 때만 「시장 유닛 미계산」/「시장 유닛 0배」, 아니면 `null`. 후보 상태 체인과 요약표 「왜 안 사나」 가 이것 하나로 판정한다.
 - `finalFunnelStep(steps)` = 최종 단계 — `step_no===99` 우선, 없으면 그 목록의 최대 `step_no`. donchian·VCP·BFB·kojiro 의 엔진 funnel 은 9단계라 99 고정 매칭은 늘 빈손이다.
 - `funnelBottleneck(steps)` = **처음 0 이 되는 단계**. ⚠️ `/strategy-funnel` 화면의 병목(직전 대비 절대 감소 최대)과 정의가 다르다.
@@ -600,7 +601,7 @@ Dashboard 환경 배너 직하, 전략 탭 위(`<ControlPanel />` 직후).
 Dashboard `MarketRegimeCard` 바로 아래. 장세와 시장 유닛을 한 카드에 나란히 둔다(cycle410). `fetchMarketRegimeLabel()` → `GET /api/market-regime-label`(래퍼째 받는다 — `success=false` 면 서버 사유를 그대로 보인다 · 네트워크 오류 = 「장세 라벨을 불러오지 못했습니다.」), queryKey `['marketRegimeLabel']`.
 
 - 왼쪽 「장세」 = 「관찰용 — 매매에 쓰지 않습니다」. 배지 `regime-label-badge` = 한글 6종(`utils/marketRegimeLabel.ts::REGIME_LABEL_KO`) · 근거 「60일선 20일 기울기 ±x.x%」·「20일 변동성 xx%」 · `regime-label-since`(`since_truncated` 면 「… 이전부터」) · `regime-label-basis`
-- 오른쪽 「시장 유닛」 = 「실제 매수 수량에 쓰임 — enforce 인 전략만」. `regime-unit-m`(×1/×0.75/×0.5/×0, 못 매기면 —) · 근거 「종가 60일선 위/아래」·「60일선 상승/하락」 · `regime-unit-basis` · `regime-unit-source`(「운영 DB 종가로 다시 계산한 값」 — 엔진 메모리 값이 아니다) · 전략별 모드 `regime-unit-mode-{sid}`(적용/기록만/꺼짐/모름) · 적용 0개면 「지금 적용 중인 전략 없음」
+- 오른쪽 「시장 유닛」 = 「실제 매수 수량에 쓰임 — enforce 인 전략만」. `regime-unit-m`(×1/×0.75/×0.5/×0, 못 매기면 —) · 근거 「종가 60일선 위/아래」·「60일선 상승/하락」 · `regime-unit-basis` · `regime-unit-source`(「운영 DB 종가로 다시 계산한 값」 — 엔진 메모리 값이 아니다. ⚠️ 재계산 원천은 `069500` 이고 엔진 원천은 종목 소속 시장의 종합지수다 — `src/routes/CLAUDE.md` `/api/market-regime-label` 행) · 전략별 모드 `regime-unit-mode-{sid}`(적용/기록만/꺼짐/모름) · 적용 0개면 「지금 적용 중인 전략 없음」
 - 띠 두 줄(최근 60거래일) — `regime-label-band`(장세 색) · `regime-unit-band`(m 값). 칸 title = 날짜 + 값. 날짜는 서버 `YYYY-MM-DD` 문자열을 그대로 쓴다(`Date` 변환 없음)
 - 정의 = `src/engine/CLAUDE.md` 모듈 맵 `market_regime_label.py`·`market_unit.py` · 회귀 = `components/__tests__/MarketRegimeLabelCard.test.tsx`
 

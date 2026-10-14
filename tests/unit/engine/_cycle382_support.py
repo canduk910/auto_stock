@@ -153,7 +153,7 @@ def make(sid: str, *, budget: int = 1_000_000, mode: str | None = None, **params
 
 
 def snapshot(m: float, day: date = DAY, *, ok: bool = True, preview: bool = False,
-             reason: str | None = None):
+             reason: str | None = None, market: str = "kospi"):
     """``market_unit.Snapshot`` 한 칸 (명세 §3.1 필드 전부 키워드)."""
     lf = mu()
     if ok:
@@ -166,14 +166,18 @@ def snapshot(m: float, day: date = DAY, *, ok: bool = True, preview: bool = Fals
         bar_date=day - timedelta(days=1) if ok else None,
         expected_head=day - timedelta(days=1), rows=80 if ok else 0,
         close=10000 if ok else None, sma60=10000.0 if ok else None,
-        sma60_prev=10000.0 if ok else None, above=above, rising=rising,
+        sma60_prev=10000.0 if ok else None, above=above, rising=rising, market=market,
     )
 
 
-def seed(s, m: float, day: date = DAY, **kw) -> None:
-    """오늘(또는 ``day``) 스냅샷을 전략 객체에 직접 심는다 — calc·신호 테스트를 leaf 판정과 분리."""
+def seed(s, m: float, day: date = DAY, *, market: str = "kospi", **kw) -> None:
+    """오늘(또는 ``day``) 스냅샷을 전략 객체에 직접 심는다 — calc·신호 테스트를 leaf 판정과 분리.
+
+    cycle455 — ``market="kosdaq"`` 면 코스닥 칸(``_market_unit_snaps_kq``)에 심는다.
+    """
     need_base()
-    s._market_unit_snaps[day] = snapshot(m, day, **kw)
+    store = s._market_unit_snaps_kq if market == "kosdaq" else s._market_unit_snaps
+    store[day] = snapshot(m, day, market=market, **kw)
 
 
 # ===========================================================================
@@ -201,11 +205,25 @@ def rows_for(closes_asc: list, head: date = HEAD, *, extra_desc: list[dict] | No
     return (extra_desc or []) + rows
 
 
-class Seams:
-    """``get_recent_daily`` · ``previous_trading_day`` 대역. 호출 인자를 기록한다."""
+#: cycle455 — 시장 유닛 원천 = 종합지수(코스피 ``0001`` · 코스닥 ``1001``)
+KOSPI_CODE = "0001"
+KOSDAQ_CODE = "1001"
 
-    def __init__(self, rows=None, prev_day=HEAD, *, rows_by_ticker=None) -> None:
+
+class Seams:
+    """``domestic_index.get_recent_closes`` · ``previous_trading_day`` · ``get_market_map`` 대역.
+
+    cycle455 — 원천이 069500 일봉에서 종합지수로 바뀌었다. ``rows``(``get_recent_daily`` 모양,
+    DESC)는 코스피 지수 행으로 쓰고, ``kq_rows`` 를 주지 않으면 코스닥도 같은 행을 쓴다.
+    ``daily_calls`` 에는 ``(index_code, limit)`` 이 쌓인다. ``get_recent_daily`` 는 다른 종목
+    (``rows_by_ticker``)용으로 남긴다.
+    """
+
+    def __init__(self, rows=None, prev_day=HEAD, *, rows_by_ticker=None, kq_rows=None,
+                 market_map=None) -> None:
         self.rows = rows if rows is not None else rows_for(F2)
+        self.kq_rows = kq_rows
+        self.market_map = market_map or {}
         self.prev_day = prev_day
         self.rows_by_ticker = rows_by_ticker or {}
         self.daily_calls: list[tuple] = []
@@ -214,12 +232,23 @@ class Seams:
         self.cal_exc: BaseException | None = None
 
     async def get_recent_daily(self, ticker, days=20, *a, **k):
-        self.daily_calls.append((ticker, days))
-        if self.daily_exc is not None:
-            raise self.daily_exc
-        if ticker == "069500":
+        if ticker == "069500":                       # 다른 소비처(VB RS 훅 등)용 — 시장 유닛은 안 읽는다
             return [dict(r) for r in self.rows]
         return list(self.rows_by_ticker.get(ticker, []))
+
+    async def get_recent_closes(self, index_code, *, limit):
+        self.daily_calls.append((index_code, limit))
+        if self.daily_exc is not None:
+            raise self.daily_exc
+        src = self.rows if index_code == KOSPI_CODE else (
+            self.kq_rows if self.kq_rows is not None else self.rows)
+        out = []
+        for r in src:
+            out.append((r.get("bas_dd"), r.get("close_price")))
+        return list(reversed(out))[-limit:] if limit else list(reversed(out))
+
+    async def get_market_map(self):
+        return dict(self.market_map)
 
     async def previous_trading_day(self, d):
         self.cal_calls.append(d)
@@ -231,6 +260,8 @@ class Seams:
 
     def install(self, monkeypatch) -> "Seams":
         monkeypatch.setattr("src.db.stock_master_daily.get_recent_daily", self.get_recent_daily)
+        monkeypatch.setattr("src.db.domestic_index.get_recent_closes", self.get_recent_closes)
+        monkeypatch.setattr("src.db.stock_master.get_market_map", self.get_market_map)
         monkeypatch.setattr("src.engine.trading_calendar.previous_trading_day", self.previous_trading_day)
         return self
 
@@ -240,6 +271,8 @@ class Seams:
 
         return (
             patch("src.db.stock_master_daily.get_recent_daily", new=self.get_recent_daily),
+            patch("src.db.domestic_index.get_recent_closes", new=self.get_recent_closes),
+            patch("src.db.stock_master.get_market_map", new=self.get_market_map),
             patch("src.engine.trading_calendar.previous_trading_day", new=self.previous_trading_day),
         )
 
@@ -290,3 +323,9 @@ def kst_naive_datetime_class():
 
 def kst(h: int, m: int = 0, s: int = 0, *, day: date = DAY) -> str:
     return datetime(day.year, day.month, day.day, h, m, s, tzinfo=KST).isoformat()
+
+
+def kospi_only(ls: list[str]) -> list[str]:
+    """cycle455 — 시장별 판정이라 refresh 마커가 시장마다 1줄씩 나온다. 코스피 줄만."""
+    return [ln for ln in ls if "market=kosdaq" not in ln]
+

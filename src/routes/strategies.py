@@ -662,19 +662,27 @@ def _monitor_market_unit(strategy, today_date):
     from src.engine import market_unit
 
     mode, _valid = market_unit.normalize_mode(strategy.config.params.get(market_unit.MODE_KEY))
-    snaps = getattr(strategy, "_market_unit_snaps", None)
-    snap = snaps.get(today_date) if isinstance(snaps, dict) else None
-    if snap is None:
-        return {"mode": mode, "ok": False, "reason": "not_computed"}
-    bar_date = getattr(snap, "bar_date", None)
-    return {
-        "mode": mode,
-        "ok": bool(getattr(snap, "ok", False)),
-        "m": getattr(snap, "m", None),
-        "state": getattr(snap, "state", None),
-        "bar_date": bar_date.isoformat() if bar_date is not None else None,
-        "reason": getattr(snap, "reason", None),
-    }
+
+    def _one(attr):
+        snaps = getattr(strategy, attr, None)
+        snap = snaps.get(today_date) if isinstance(snaps, dict) else None
+        if snap is None:
+            return {"ok": False, "reason": "not_computed"}
+        bar_date = getattr(snap, "bar_date", None)
+        return {
+            "ok": bool(getattr(snap, "ok", False)),
+            "m": getattr(snap, "m", None),
+            "state": getattr(snap, "state", None),
+            "bar_date": bar_date.isoformat() if bar_date is not None else None,
+            "reason": getattr(snap, "reason", None),
+        }
+
+    # cycle455 — 기존 키는 코스피 종합지수 값 그대로, `by_market` 에 시장별 값을 더한다.
+    kospi = _one("_market_unit_snaps")
+    by_market = {"kospi": kospi, "kosdaq": _one("_market_unit_snaps_kq")}
+    if kospi.get("reason") == "not_computed" and "m" not in kospi:
+        return {"mode": mode, "ok": False, "reason": "not_computed", "by_market": by_market}
+    return {"mode": mode, **kospi, "by_market": by_market}
 
 
 def _monitor_skip_counts(parsed):

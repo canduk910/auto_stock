@@ -1372,7 +1372,8 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         type="enum", min=None, max=None, step=None, unit="",
         editable=True, risk="identity", auto_tunable=False, deprecated=False,
         applies_to=_TURTLE_SIZED, range_src="enum", choices=_MARKET_UNIT_MODE_CHOICES,
-        help="cycle382 — KODEX 200(069500) 60일선 계단(위·상승 1 / 위·하락 ¾ /"
+        help="cycle382·455 — 종목 소속 시장 종합지수(코스피 0001·코스닥 1001, 그 시장"
+             " 판정을 못 하면 다른 시장 값) 60일선 계단(위·상승 1 / 위·하락 ¾ /"
              " 아래·상승 ½ / 아래·하락 0)으로 터틀 4전략 신규 진입의 **설계 랏만**"
              " 줄인다. `off`(부재·오타 포함) = 매수 수량·신호에 관여하지 않는다"
              "(설계 랏 그대로) — 장세 계산·기록(`prepare()` 의 `[market_unit_state]`"

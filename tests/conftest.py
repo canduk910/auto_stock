@@ -674,6 +674,33 @@ def _neutralize_daily_bar_finalize(
 
 
 # ---------------------------------------------------------------------------
+# cycle455 — 부팅·저녁 「종합지수 적재」 leaf 중립화 (cycle386 과 같은 이유)
+#
+# `boot_manager.boot()` 가 prepare 앞에서 `domestic_index_ingest.ensure_fresh(phase="boot")` 를
+# 최대 `BOOT_INDEX_BUDGET_SECS`(20초) 기다리고, 20:30 일봉 적재 합성도 같은 함수를 부른다. 본체는
+# DB(`domestic_index_daily`)·KIS(FHKUP03500100)를 쓴다 — 그대로 두면 `boot()` 를 도는 기존
+# 테스트들이 실 DB·네트워크를 찾다 실패하거나 20초씩 기다린다.
+# 시정 = `ensure_fresh` 를 **즉시 끝나는 빈 코루틴**으로 바꾼다(배선은 그대로 돈다). leaf 를 직접
+# 검증하는 테스트는 `@pytest.mark.real_domestic_index_ingest` 로 옵트아웃한다.
+# ---------------------------------------------------------------------------
+@pytest.fixture(autouse=True)
+def _neutralize_domestic_index_ingest(
+    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
+):
+    if request.node.get_closest_marker("real_domestic_index_ingest"):
+        return  # leaf 자체를 검증하는 테스트 — 중립화 금지
+    try:
+        from src.engine import domestic_index_ingest as _dii_mod
+    except Exception:
+        return
+
+    async def _inert_ensure_fresh(*_a: Any, **_k: Any) -> dict:
+        return {}
+
+    monkeypatch.setattr(_dii_mod, "ensure_fresh", _inert_ensure_fresh, raising=False)
+
+
+# ---------------------------------------------------------------------------
 # cycle393 — `[no_feed_held]` REST 증거 seam 중립화
 #
 # `stale_watcher_core` 의 `[no_feed_held]` 판정이 KRX 전용 보유 종목의 누적거래량을

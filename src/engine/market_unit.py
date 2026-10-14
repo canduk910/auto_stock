@@ -1,17 +1,20 @@
-"""cycle382 — 시장 유닛(단계형) 판정 leaf.
+"""cycle382 — 시장 유닛(단계형) 판정 leaf. cycle455 — 종목 소속 시장별 판정.
 
-KODEX 200(``069500``) 일봉 60일선으로 그날 장세를 4단계로 나눈다. 위·상승 = 1.0
+시장 종합지수(코스피 종목 = 코스피 종합 ``0001`` · 코스닥 종목 = 코스닥 종합 ``1001``)
+일봉 60일선으로 그날 장세를 4단계로 나눈다. 위·상승 = 1.0
 (설계 랏 그대로) · 위·하락 = 0.75 · 아래·상승 = 0.5 · 아래·하락 = 0.0(신규 진입
 없음). 결측·stale·예외는 전부 ``m=1.0``(fail-open) — 결측이 매수를 조용히
 줄이면 안 된다.
 
-명세 정본 = ``_workspace/red/cycle382_market_unit_spec.md`` §1~§3.
+명세 정본 = ``_workspace/red/cycle382_market_unit_spec.md`` §1~§3 · 시장별 판정 =
+``_workspace/red/cycle455_market_unit_by_market_spec.md``.
 설계 정본 = ``_workspace/domain_consult/cycle376_market_unit.md`` §6.3·§7.3·§10.
 
 순수 판정(``classify``·``normalize_mode``)은 표준 라이브러리만 쓴다.
-``compute_snapshot`` 만 DB(``stock_master_daily.get_recent_daily``)와 휴장일
-판정(``trading_calendar.previous_trading_day``)을 함수 안 지연 import 로 부른다
-— 테스트가 그 두 이름을 모듈 속성으로 monkeypatch 하는 seam 이다.
+``compute_snapshot`` 만 DB(``domestic_index.get_recent_closes``)와 휴장일
+판정(``trading_calendar.previous_trading_day``)을, ``load_market_map`` 만 DB
+(``stock_master.get_market_map``)를 함수 안 지연 import 로 부른다 — 테스트가 그
+이름들을 모듈 속성으로 monkeypatch 하는 seam 이다.
 
 모든 시장 유닛 마커는 이 모듈의 ``logger``(``"src.engine.market_unit"``) 하나로
 나간다 — 호출자(``StrategyBase`` 의 헬퍼들)가 이 로거 객체를 직접 써서 로그를
@@ -31,7 +34,15 @@ from typing import Any, Sequence
 logger = logging.getLogger(__name__)
 
 # ── 상수 (leaf 한 곳에만 — AST A02) ─────────────────────────────────────────
-SOURCE_TICKER = "069500"          # KODEX 200
+#: 시장 → KIS 업종 코드(종합지수) — 단일 정본(적재 leaf ``domestic_index_ingest`` 가 import).
+INDEX_CODE_BY_MARKET: "MappingProxyType[str, str]" = MappingProxyType({
+    "kospi": "0001",
+    "kosdaq": "1001",
+})
+MARKETS = ("kospi", "kosdaq")
+DEFAULT_MARKET = "kospi"
+#: ``stock_master.excg_dvsn_cd`` → 시장. 표에 없는 값·미상 = ``DEFAULT_MARKET``.
+MARKET_OF_EXCG: "MappingProxyType[str, str]" = MappingProxyType({"03": "kosdaq"})
 MA_WINDOW = 60
 SLOPE_LOOKBACK = 20
 MIN_ROWS = MA_WINDOW + SLOPE_LOOKBACK          # 80
@@ -164,17 +175,46 @@ class Snapshot:
     sma60_prev: "float | None"
     above: "bool | None"
     rising: "bool | None"
+    #: cycle455 — 이 스냅샷의 시장(``kospi``|``kosdaq``). leaf 는 항상 명시한다.
+    market: str = DEFAULT_MARKET
 
 
 def _unavailable(
     as_of_date: date, preview: bool, *, reason: str, rows: int,
-    bar_date: "date | None", expected_head: "date | None",
+    bar_date: "date | None", expected_head: "date | None", market: str,
 ) -> Snapshot:
     return Snapshot(
         as_of=as_of_date, preview=preview, ok=False, state="unavailable", m=1.0,
         reason=reason, bar_date=bar_date, expected_head=expected_head, rows=rows,
-        close=None, sma60=None, sma60_prev=None, above=None, rising=None,
+        close=None, sma60=None, sma60_prev=None, above=None, rising=None, market=market,
     )
+
+
+def market_of(ticker: "str | None", market_map: Any) -> str:
+    """종목 → 시장(순수). 지도에 없음·지도 아님·``None`` = ``DEFAULT_MARKET``."""
+    if not ticker or not isinstance(market_map, dict):
+        return DEFAULT_MARKET
+    m = market_map.get(ticker)
+    return m if m in MARKETS else DEFAULT_MARKET
+
+
+async def load_market_map() -> "dict[str, str]":
+    """``stock_master`` 의 ``ticker → "kospi"|"kosdaq"``. never-raise(예외 = ``{}``).
+
+    seam = ``src.db.stock_master.get_market_map``(호출 시점 모듈 속성, ``{ticker: excg_dvsn_cd}``).
+    """
+    try:
+        import src.db.stock_master as _sm
+
+        raw = await _sm.get_market_map()
+        out: "dict[str, str]" = {}
+        for t, code in (raw or {}).items():
+            if not t:
+                continue
+            out[str(t)] = MARKET_OF_EXCG.get(str(code or "").strip(), DEFAULT_MARKET)
+        return out
+    except Exception:
+        return {}
 
 
 def _parse_bas_dd(raw: Any) -> "date | None":
@@ -197,37 +237,41 @@ def _is_stale(head: date, expected_head: "date | None", as_of_date: date) -> boo
     return (as_of_date - head).days > STALE_FALLBACK_MAX_CALENDAR_DAYS
 
 
-async def compute_snapshot(as_of_date: date, *, preview: bool) -> Snapshot:
-    """§1·§2 — 그 거래일의 시장 유닛 스냅샷. never-raise(실패 → m=1.0).
+async def compute_snapshot(
+    as_of_date: date, *, preview: bool, market: str = DEFAULT_MARKET,
+) -> Snapshot:
+    """§1·§2 — 그 거래일·그 시장의 시장 유닛 스냅샷. never-raise(실패 → m=1.0).
 
-    seam(함수 안 지연 import, 호출 시점 모듈 속성) = ``src.db.stock_master_daily
-    .get_recent_daily`` · ``src.engine.trading_calendar.previous_trading_day``.
+    seam(함수 안 지연 import, 호출 시점 모듈 속성) = ``src.db.domestic_index
+    .get_recent_closes`` · ``src.engine.trading_calendar.previous_trading_day``.
     판정 순서 = ① 행 수 → ② 신선도 → ③ 종가 품질(첫 실패에서 멈춘다).
     """
+    if market not in INDEX_CODE_BY_MARKET:
+        market = DEFAULT_MARKET
     try:
-        import src.db.stock_master_daily as _smd
+        import src.db.domestic_index as _di
 
-        rows = await _smd.get_recent_daily(SOURCE_TICKER, FETCH_ROWS)
+        rows = await _di.get_recent_closes(INDEX_CODE_BY_MARKET[market], limit=FETCH_ROWS)
     except Exception:
         return _unavailable(
             as_of_date, preview, reason="exception", rows=0,
-            bar_date=None, expected_head=None,
+            bar_date=None, expected_head=None, market=market,
         )
 
     try:
         filtered: "list[tuple[date, Any]]" = []
         for row in rows or []:
-            bd = _parse_bas_dd(row.get("bas_dd"))
+            bd = _parse_bas_dd(row[0])
             if bd is None or bd >= as_of_date:
                 continue
-            filtered.append((bd, row.get("close_price")))
+            filtered.append((bd, row[1]))
         filtered.sort(key=lambda item: item[0])
         rows_count = len(filtered)
 
         if rows_count < MIN_ROWS:
             return _unavailable(
                 as_of_date, preview, reason="rows_short", rows=rows_count,
-                bar_date=None, expected_head=None,
+                bar_date=None, expected_head=None, market=market,
             )
 
         head = filtered[-1][0]
@@ -239,7 +283,7 @@ async def compute_snapshot(as_of_date: date, *, preview: bool) -> Snapshot:
         if _is_stale(head, expected_head, as_of_date):
             return _unavailable(
                 as_of_date, preview, reason="stale_head", rows=rows_count,
-                bar_date=head, expected_head=expected_head,
+                bar_date=head, expected_head=expected_head, market=market,
             )
 
         window = filtered[-MIN_ROWS:]
@@ -247,7 +291,7 @@ async def compute_snapshot(as_of_date: date, *, preview: bool) -> Snapshot:
         if classification is None or reason != "ok":
             return _unavailable(
                 as_of_date, preview, reason=reason, rows=rows_count,
-                bar_date=head, expected_head=expected_head,
+                bar_date=head, expected_head=expected_head, market=market,
             )
 
         return Snapshot(
@@ -255,10 +299,10 @@ async def compute_snapshot(as_of_date: date, *, preview: bool) -> Snapshot:
             m=classification.m, reason="ok", bar_date=head, expected_head=expected_head,
             rows=rows_count, close=classification.close, sma60=classification.sma60,
             sma60_prev=classification.sma60_prev, above=classification.above,
-            rising=classification.rising,
+            rising=classification.rising, market=market,
         )
     except Exception:
         return _unavailable(
             as_of_date, preview, reason="exception", rows=0,
-            bar_date=None, expected_head=None,
+            bar_date=None, expected_head=None, market=market,
         )

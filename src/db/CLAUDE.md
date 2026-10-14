@@ -259,6 +259,7 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 - 호출 = 매수/매도 진입 직전 lazy(miss/stale → `inquire_stock_basics` 후 upsert) + 부팅 eager `scheduler._eager_refresh_stock_master_for_held_positions()`(보유 + `_pending_next_day_clear`, 24h fresh 는 skip) — lazy 만이면 첫 사이클 캐시 miss → SOR/NXT 발사 → KIS 거부다
 - **ticker 정규화**: `inquire_stock_basics` 가 `_normalize_ticker()` 로 KIS `pdno` 12자리의 마지막 6자리를 뽑고, `upsert_one` 이 6자리 미준수 입력도 정규화한다(이중 안전망, WARNING)
 - 조회·진단 보조: `count_active()` / `list_all(limit=100, offset=0)` / `list_history(ticker, limit=100)`(「DB 스키마」 절 `stock_master_history`) / `count_eager_refresh_today()`
+- **`get_market_map() -> dict[str, str]`**(cycle455) — 시장 유닛 시장 판정용 `{ticker: excg_dvsn_cd}` **전량**(`SELECT ticker, excg_dvsn_cd FROM stock_master` 1쿼리). `excg_dvsn_cd` 가 빈 행도 `""` 로 넣는다. 🔴 **예외는 전파한다** — 호출자 `engine/market_unit.load_market_map` 이 never-raise 로 감싸 `{}`(= 전 종목 코스피)로 접는다
 - **`get_etf_group_codes(tickers: list[str]) -> dict[str, str | None]`**(cycle411) — ETF/ETN 구분 코드 `raw->>'scty_grp_id_cd'` 일괄 조회. `pg.fetch` **1회**(`WHERE ticker = ANY($1::text[])`, `SELECT *` 아님). 요청 종목 **전부**를 키로 돌려준다(DB 에 없거나 코드가 없으면 `None`). 빈 입력은 쿼리를 생략하고 `{}`. 소비 = `engine/cost_overlay.stock_master_etf_flags`(실비용 매도세 판정)
 
 ### `master_raw` 컬럼 (migration 034)
@@ -325,7 +326,7 @@ list_paged_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
   - `get_recent_daily(ticker, days=20)` — 최근 N일(DESC). 🔴 **`days` 를 `max(1, min(days, _MAX_DAILY_ROWS))` 로 하드 클램프**한다. 행을 돌려주는 읽기 4함수(`get_donchian_high`·`get_atr`·`get_recent_daily_with_fallback`·`get_recent_daily_normalized`)가 전부 이 함수를 경유해 **어느 소비처도 상한을 넘겨 읽지 못한다**(나머지는 스칼라 집계). 예외 = `list_provisional_rows`(날짜 창 `[since, head]` 조회, 창 폭 `daily_bar_finalize.WINDOW_CAL_DAYS` 21일).
     - **`_MAX_DAILY_ROWS = 400`(cycle300)** — 보유 약 261 영업일과 VCP full 요청 285행을 자르지 않으면서, 오염된 파라미터가 `LIMIT` 에 실려 전체 스캔이 되는 것을 막는 폭주 방어선이다.
     - 🔴 **`min()` 구조 자체를 지우지 않는다** — 값은 바뀌어도 클램프가 방어선이다. 가드 `tests/unit/db/test_cycle299_retention_expansion.py::test_g299_7a_get_recent_daily_keeps_days_clamp`(구조) + `tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py`(숫자의 근거).
-    - ⚠️ 상한은 관문이지 읽는 양이 아니다. 100행 초과 요청 = VCP `daily_fetch_depth_mode="full"` · `market_unit`(`FETCH_ROWS = 120`) · 야간 `pyramid_shadow`(400)뿐이다.
+    - ⚠️ 상한은 관문이지 읽는 양이 아니다. 100행 초과 요청 = VCP `daily_fetch_depth_mode="full"` · 야간 `pyramid_shadow`(400)뿐이다.
   - `get_donchian_high(ticker, days=20)` — 직전 N일 최고가(당일 제외)
   - `get_atr(ticker, days=14)` — True Range = 와일더 3-way `max(고−저, |고−전종|, |저−전종|)`, 평활 = **단순평균(SMA) baseline**. Wilder 지수평활은 호출자 책임이고 실제 Wilder ATR 은 `kojiro_indicators.atr`(ewm α=1/N) 뿐
   - `count_all()` — 적재 진단 · `count_by_ticker(ticker)` — 깊은 backfill vs 증분 분기 키(스캐너 `existing_count`)
@@ -425,6 +426,21 @@ T7(120일선 20영업일 기울기)·R4(250일 고점 대비 하락률)를 계�
 전부 흡수(`[]`/`0`/`None` + `logger.exception`) — 호출자(`ndx2x_ingest.ensure_history`)가
 재시도·fail-closed 판단을 맡는다.
 
+## domestic_index.py — 국내 업종지수 일별 종가 (시장 유닛 원천, cycle455)
+
+테이블 `domestic_index_daily`(migration 053, 가산형 신규 테이블). PK `(index_code, bas_dd)`. 모양은 위 `overseas_index.py` 와 같다.
+KIS `FHKUP03500100` 종가를 쌓는다 — `index_code` = `0001`(코스피 종합) · `1001`(코스닥 종합). 코드의 정본은 `engine/market_unit.INDEX_CODE_BY_MARKET` 이다.
+쓰는 쪽 = `engine/domestic_index_ingest.ensure_fresh` · 읽는 쪽 = 그 적재 leaf(행 수·최신일) + `engine/market_unit.compute_snapshot`(종가열).
+
+| 함수 | 계약 |
+|---|---|
+| `upsert_many(index_code, rows, *, raw_by_date=None) -> int` | `rows` = `[(YYYYMMDD, 종가), ...]`. `ON CONFLICT (index_code, bas_dd) DO UPDATE`(`close_price`·`raw`·`updated_at`) — **멱등**. 반환 = 보낸 행 수 · 빈 목록·예외 = 0 |
+| `get_recent_closes(index_code, *, limit) -> list[tuple[date, float]]` | 최근 `limit` 행 — **오름차순**(오래된→최신). DB 는 `bas_dd DESC LIMIT` 로 가져온 뒤 뒤집는다. 예외 = `[]` |
+| `max_bas_dd(index_code) -> date \| None` | `MAX(bas_dd)`. 없음·예외 = `None` |
+| `count(index_code) -> int` | 그 지수 행 수. 예외 = 0 |
+
+DB 예외는 전부 흡수한다(`0`/`[]`/`None` + `logger.exception`) — fail-open 판단은 호출자 몫이다(적재 = 다음 실행이 다시 채운다 · 판정 = 행 부족이면 `rows_short` → 결측 규칙). `raw` 는 지금 적재가 넘기지 않아 기본값 `{}` 로 남는다.
+
 ## invest_opinion.py — 증권사 투자의견 이력 · 추정실적 월 스냅샷 (RS·재무)
 
 테이블 2종(migration 051, 가산형 신규 테이블) — 칸·PK 는 아래 「DB 스키마」 절. 쓰는 쪽 = `src/engine/fundamental_load_tasks.py`(16:40 재무 적재 뒤 추가 적재) · 읽는 쪽 = 같은 모듈(재개 지점) + `src/engine/rs_fundamental_observe.py`(부팅 관찰 기록). 매매 경로와 무관한 관찰 데이터라 아래 셋은 DB 예외를 흡수한다(`logger.exception` 후 `0`/`False`/`[]`) — 나머지 둘은 예외를 올려 보낸다(표).
@@ -491,6 +507,7 @@ T7(120일선 20영업일 기울기)·R4(250일 고점 대비 하락률)를 계�
 - **RS·재무 2표**(migration 051, 가산형 `CREATE TABLE IF NOT EXISTS` 만). 읽기·쓰기 = 위 `invest_opinion.py`. 쓰는 쪽 = 16:40 추가 적재 · 읽는 쪽 = 추가 적재(재개 지점) + 부팅 관찰 기록.
   - `invest_opinion_history` — PK `(ticker, bsop_date, mbcr_name)`. 칸 = `invt_opnn`·`rgbf_invt_opnn` TEXT · `hts_goal_prc`·`stck_prdy_clpr` BIGINT · `dprt` NUMERIC(10,2) · `raw` JSONB NOT NULL(기본 `{}`) · `fetched_at` TIMESTAMPTZ NOT NULL.
   - `estimate_perform_snapshot` — PK `(ticker, snapshot_month)`(DATE). 칸 = `settle_months` TEXT[] NOT NULL(기본 `{}`) · `raw` JSONB NOT NULL(기본 `{}`) · `fetched_at` TIMESTAMPTZ NOT NULL.
+- **`domestic_index_daily`**(migration 053, 가산형 `CREATE TABLE IF NOT EXISTS` + 인덱스 `idx_domestic_index_daily_code_bas_dd (index_code, bas_dd DESC)`) — PK `(index_code, bas_dd)` · NOT NULL = `index_code` TEXT · `bas_dd` DATE · `close_price` NUMERIC(18,4) · `raw` JSONB(기본 `{}`) · `created_at`·`updated_at` TIMESTAMPTZ(기본 `NOW()`). 읽기·쓰기 = 위 `domestic_index.py`.
 - **`candidate_score_snapshots`**(migration 052, 가산형 `CREATE TABLE IF NOT EXISTS` + 인덱스 `idx_candidate_score_snapshots_ticker (ticker, target_date)`) — 매일 부팅 때 4전략 후보·보유 종목별 점수 1행. 쓰기 = 위 `candidate_scores.py`.
   - PK `(target_date, strategy_id, ticker)` · NOT NULL = `target_date` DATE · `strategy_id`·`ticker`·`role` TEXT(`candidate`|`held`) · `computed_at` TIMESTAMPTZ.
   - 점수 칸(전부 NULL 허용 — 「모름」 = NULL, 0 으로 채우지 않는다) = RS `rs_raw` DOUBLE · `rs_pct` INT · `sector_key` TEXT · `vs_sector` DOUBLE · `sector_pct`·`in_sector_pct` INT · 목표가 `revision_breadth`·`target_median_change` DOUBLE · `opinion_brokers` INT · 재무 `fin_quarter` TEXT(YYYYMM) · `op_income_q`·`op_income_q_yoy` DOUBLE · `op_turnaround` BOOL · `op_yoy_growth`·`revenue_yoy_growth` DOUBLE · `net_turnaround` BOOL · `roe`·`debt_ratio_latest` DOUBLE · `debt_ratio_down_years` INT · `ttm_op_to_max_ratio` DOUBLE · `rs_population` INT.

@@ -828,6 +828,19 @@ async def get_nxt_tradable_map(tickers: list[str]) -> dict[str, bool | None]:
     return result
 
 
+async def get_market_map() -> dict[str, str]:
+    """cycle455 — 시장 유닛 시장 판정용 ``{ticker: excg_dvsn_cd}`` 전량(1쿼리).
+
+    ``excg_dvsn_cd`` 가 빈 행도 포함한다(호출자 ``market_unit.load_market_map`` 이 미상 =
+    코스피로 접는다). 예외는 전파한다(호출자가 never-raise 로 감싼다).
+    """
+    rows = await pg.fetch("SELECT ticker, excg_dvsn_cd FROM stock_master")
+    return {
+        str(r.get("ticker")): str(r.get("excg_dvsn_cd") or "")
+        for r in rows or [] if r.get("ticker")
+    }
+
+
 # cycle403 — etf_trend 유니버스 판정 코드. `etf_like.ETF_DOMESTIC_GROUP_CODE`(EF) 를 그대로
 # 가져간다 — 이 파일 어디에도 "EF" 를 다시 적지 않는다(cycle380 G6 — stock_master.py 전체에서
 # ETF_GROUP_CODES/ETF_KEYWORDS 값 재타이핑을 금지하는 전수 가드가 그 문자열을 그대로 찾는다).

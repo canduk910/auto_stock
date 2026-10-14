@@ -3210,3 +3210,18 @@ cycle359 조사). cycle368 이 파서 기준점을 고치고, VI 수명 600초(�
 ## 2026-10-10 — cycle428 F-422-1 (정본에서 걷어낸 문장, 원문)
 
 - 🔴 **enum docstring 의 옛 결정("비-KisApiError 는 enum 으로 표현하지 않는다")은 이 사이클이 뒤집었다** — 재도입 금지(이전 F-422-1 핀은 `test_cycle422_sell_fallback_net.py::test_f07_*`·`test_p06_*`가 이제 반대로 고정한다).
+
+
+## 「모듈 맵」 `market_unit.py` · 「전일 잠정 봉 확정」 · `strategy_base.py` 시장 유닛 헬퍼
+### 2026-10-14 cycle455 — 시장 유닛 원천을 069500 에서 종목 소속 시장 종합지수로 (정본에서 옮긴 원문)
+
+- **`market_unit.py`** — 시장 유닛(단계형) 판정 leaf(cycle382). KODEX 200(`SOURCE_TICKER="069500"`) 일봉 종가 → 거래일 장세 4단계. `MULTIPLIERS` = `up_rising` 1.0 · `up_falling` 0.75 · `down_rising` 0.5 · `down_falling` 0.0.
+  - 공개 = 순수 `classify(closes)` · `normalize_mode(raw)`(부재 = `("off", True)`, 오타·비문자열 = `("off", False)`) + never-raise 로더 `async compute_snapshot(as_of_date, *, preview) -> Snapshot` — `stock_master_daily.get_recent_daily("069500", FETCH_ROWS=120)`·`trading_calendar.previous_trading_day(as_of_date)` 를 **함수 안 지연 import**(monkeypatch seam · DB 전용 · KIS 폴백 없음).
+  - 최상위 import = 표준 라이브러리뿐, 8영역·`scheduler`·`boot_manager`·`market_regime` import 0(AST A01). 마커는 전부 이 모듈 `logger`(`"src.engine.market_unit"`), 호출·cap 판정은 `StrategyBase` 헬퍼(하단 `strategy_base.py` 절). ⚠️ `069500` 은 시총·거래대금 자격(`scanner._is_daily_load_universe`)으로 일봉 적재 대상 — 자격 상실 시 매일 `stale_head` → m=1.
+3. 순서 = ① `069500`·`229200`(시장 유닛·ETF 레짐 입력) ② DB `positions` 보유 종목(청산 입력 ATR·스테이지) ③ 나머지 `newest` 내림차순 → 종목코드순(예산 초과여도 헤드 먼저). 보유 조회 실패 = ② 생략.
+- 시장 유닛 = 4전략 prepare 안이라 확정값(`069500` = 순서 ①). ETF 레짐(관찰 전용)은 prepare **앞**(`_refresh_market_regime_and_persist`)이라 잠정 종가를 읽을 수 있다.
+  - **계산 = 4전략 `prepare()`** — `_resolve_prepare_as_of(as_of)` 바로 다음 줄, 어떤 조기 `return` 보다 앞에서 `await self._refresh_market_unit(as_of_date=, preview=)` 정확히 1회(AST A08). 결과는 `_market_unit_snaps: dict[date, Snapshot]` 에 **거래일별로**(오늘 · 다음 거래일, 과거 키 삭제 — 저녁 미리보기는 다음 거래일 칸만 쓴다). PV-1 상태(`_candidates`·`positions`·`_entry_atr`·`_position_setup`·`_position_atr`·`_breakout_high`)는 읽지도 쓰지도 않는다(AST A07). 같은 날짜의 `ok=True` 를 새 실패가 덮지 않는다(`kept=1`). 새 `ok=True` 는 항상 덮는다. 모드가 `off` 여도 계산한다. never-raise.
+  - **읽는 쪽은 순수다**(`await`·DB·HTTP 0, AST A05). `_market_unit_view()` 가 매 호출 모드와 **오늘 칸**을 다시 읽는다(PUT 즉시 반영). 모드 오타 = `off` + `[market_unit_config]`. 오늘 칸이 없으면 m=1 + `[market_unit_unavailable] where=view reason=not_computed`.
+  - **마커 6종**(로거 `src.engine.market_unit`) — INFO = `[market_unit]`(`where=calc|signal`, 1회/(ticker, where)/일) · `[market_unit_state]`((as_of, preview, state, m) 조합당 1회) · `[market_unit_daily]`(거래일마다 전략당 1줄). WARNING = `[market_unit_unavailable]` · `[market_unit_config]` · `[market_unit_error]`. cap = 인스턴스별 `KstDailyEmitCap` 3개(state·attempt·warn), `write_log` 별도 호출 없음. ⚠️ INFO 3종은 21:30 `top_patterns` 에 없고 INFO retention 2일 — 섀도 판독은 이틀 안에 `system_logs` 직접 조회. 일일 집계 `_market_unit_tally` 는 **더 뒤 날짜**가 올 때만 닫으며 `[market_unit_daily]` 를 낸다(`_market_unit_tally_roll` 의 `tally["date"] < day`). 메모리라 재시작하면 앞부분이 빠진다 — 정본은 `[market_unit]` 개별 줄.
+
+→ CHANGELOG: cycle455 행

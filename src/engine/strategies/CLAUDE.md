@@ -161,10 +161,12 @@
 
 장세에 따라 터틀 4전략(`kojiro`·`donchian_swing`·`bull_flag_breakout`·`vcp_breakout`)의 **신규 진입 설계 랏만** 줄인다. 🔴 **매크로 레짐과 다른 축이다** — 레짐 게이트가 아니라 전략 사이징이다. 헬퍼·마커 = [`src/engine/CLAUDE.md`](../CLAUDE.md) `strategy_base.py` 절 · 판정 leaf = 같은 문서 모듈 맵 `market_unit.py`.
 
-- **장세** = KODEX 200(`069500`) 일봉 종가의 **직전 영업일 봉** — 60일선 위·상승 **1** · 위·하락 **0.75** · 아래·상승 **0.5** · 아래·하락 **0**(그날 신규 진입 없음). 상승 = 60일선 > 20봉 전 60일선. 동률은 약한 쪽. 배수·창 길이는 leaf `src/engine/market_unit.py` 한 곳의 상수이고 파라미터로 열지 않는다.
+- **장세는 종목마다 소속 시장으로 판정한다**(cycle455 — 사용자 결정 2026-10-14) — 코스피 종목 = 코스피 종합지수(KIS 업종 `0001`) · 코스닥 종목(`stock_master.excg_dvsn_cd=="03"`) = 코스닥 종합지수(`1001`) · 시장을 모르면(지도에 없음·미적재·예외) 코스피. 같은 전략·같은 날에 코스피 종목 m=0, 코스닥 종목 m=0.75 가 함께 설 수 있다. 원천 표 = `domestic_index_daily`(적재 = `src/engine/CLAUDE.md` 모듈 맵 `domestic_index_ingest.py`).
+- **장세** = 그 지수 일봉 종가의 **직전 영업일 봉** — 60일선 위·상승 **1** · 위·하락 **0.75** · 아래·상승 **0.5** · 아래·하락 **0**(그날 신규 진입 없음). 상승 = 60일선 > 20봉 전 60일선. 동률은 약한 쪽. 배수·창 길이는 leaf `src/engine/market_unit.py` 한 곳의 상수이고 파라미터로 열지 않는다.
 - **무접촉** = `total_investment`·잔여 클램프·K축·ρ축·kojiro 오픈리스크 캡·`cash_usage_ratio`·보유분·청산 규약. 🔴 예산 경로(`cash_usage_ratio`·`total_investment` 축소)로 대신하지 않는다 — 전 전략과 일일 손실 분모·정산 기준선·비중 하한선 검증이 함께 흔들리고, 매크로 자동 조정과 같은 손잡이라 두 효과를 가를 수 없다(자문 `_workspace/domain_consult/cycle376_market_unit.md` §7.4).
 - **모드** `market_unit_mode ∈ off|shadow|enforce` — 네 전략 `DEFAULT_PARAMS` 에만 있다(기본 `"shadow"` = 계산·기록만, 수량 불변. 부재·오타 = `off`). VB·LTV·momentum 에는 키·헬퍼 호출이 없다(설계 랏이 1주 언저리 — 같은 자문 §4.4). 전략마다 `PUT {"params":{"market_unit_mode":"off"|"shadow"|"enforce"}}` 로 **즉시** 바뀐다(매 호출 읽는다). `PARAM_RANGES`/`INT_PARAMS`·AI 자문 자동 적용 경로 **편입 금지**(AST `test_cycle382_ast_market_unit.py` A03).
-- **결측·stale·예외 = m=1**(현행) + WARNING(`[market_unit_unavailable]`·`[market_unit_error]`) — 장세 데이터 결손이 매수를 조용히 줄이면 안 된다.
+- **결측·stale·예외** — 제 시장 지수가 결측이면 **다른 시장의 배수**를 쓴다(코스닥 결측 → 코스피 배수, 코스피 결측 → 코스닥 배수). 🔴 「한쪽 결측 → 그 시장 종목만 m=1」 로 바꾸지 않는다 — 약세장에서 결측 쪽만 풀배수로 열린다. 두 시장 모두 결측이면 **m=1**(현행) + WARNING(`[market_unit_unavailable]`·`[market_unit_error]`) — 장세 데이터 결손이 매수를 조용히 줄이면 안 된다.
+- **종목 없이 묻는 자리 = 코스피 판정** — etf_trend `check_buy_signal` 의 결손·m≤0 거름(`_market_unit_view()` 무인자)이 여기에 든다. 그 뒤의 `_market_unit_blocks_entry`·`_market_unit_sizing` 은 종목을 넘겨 종목 시장으로 본다.
 
 | 전략 | `_MARKET_UNIT_ATR_KEY` | 신호 필터 자리 (`_market_unit_blocks_entry`) | 축소 매수의 스탬프 |
 |---|---|---|---|

@@ -27,7 +27,7 @@ from freezegun import freeze_time
 
 from tests.unit.engine._cycle382_support import (
     DAY, F2, F3, F4, HEAD, NEXT, T, TURTLE4, Seams, field, fnum, lines, make, mu, need_base,
-    open_info, rows_for, seed,
+    kospi_only, open_info, rows_for, seed,
 )
 from tests.unit.engine.strategies import _cycle364_harness as H
 
@@ -79,7 +79,7 @@ async def test_r41_prepare_refreshes_once_even_when_universe_empty(monkeypatch, 
     snap = s._market_unit_snaps.get(DAY)
     assert snap is not None and snap.ok is True
     assert (snap.state, float(snap.m), snap.bar_date) == ("up_falling", 0.75, HEAD)
-    state_lines = lines(caplog, "[market_unit_state]")
+    state_lines = kospi_only(lines(caplog, "[market_unit_state]"))
     assert len(state_lines) == 1 and field(state_lines[0], "strategy") == sid
 
 
@@ -94,7 +94,7 @@ async def test_r41_four_strategies_agree_on_state_from_one_seam():
         snap = s._market_unit_snaps[DAY]
         got[sid] = (snap.state, float(snap.m))
     assert set(got.values()) == {("down_rising", 0.5)}, got
-    assert all(c == ("069500", c[1]) and c[1] >= 80 for c in seams.daily_calls), seams.daily_calls
+    assert all(c[0] in ("0001", "1001") and c[1] >= 80 for c in seams.daily_calls), seams.daily_calls
 
 
 @freeze_time(_BOOT)
@@ -258,7 +258,7 @@ async def test_r44_failure_does_not_overwrite_ok_same_day(monkeypatch, caplog, s
     await s._refresh_market_unit(as_of_date=DAY, preview=False)
     assert s._market_unit_snaps[DAY] is good, "실패가 같은 날 ok 스냅샷을 덮었다(M20)"
     assert float(s._market_unit_view().m) == 0.75
-    warns = lines(caplog, "[market_unit_unavailable]", min_level=logging.WARNING)
+    warns = kospi_only(lines(caplog, "[market_unit_unavailable]", min_level=logging.WARNING))
     assert len(warns) == 1 and field(warns[0], "kept") == "1" and field(warns[0], "reason") == "rows_short"
     # 새 ok 는 항상 덮는다
     Seams(rows_for(F3, HEAD), prev_day=_prev_day).install(monkeypatch)
@@ -424,11 +424,11 @@ async def test_r47_state_line_matches_hand_calculation(monkeypatch, caplog):
     Seams(rows_for(F2, HEAD), prev_day=_prev_day).install(monkeypatch)
     for _ in range(3):
         await s._refresh_market_unit(as_of_date=DAY, preview=False)
-    ls = lines(caplog, "[market_unit_state]")
+    ls = kospi_only(lines(caplog, "[market_unit_state]"))
     assert len(ls) == 1, ls
     ln = ls[0]
     assert field(ln, "strategy") == "kojiro" and field(ln, "as_of") == "2026-09-28"
-    assert field(ln, "preview") == "0" and field(ln, "source") == "069500"
+    assert field(ln, "preview") == "0" and field(ln, "source") == "0001"
     assert field(ln, "bar") == "2026-09-23" and field(ln, "expected_head") == "2026-09-23"
     assert fnum(ln, "close") == 12_500
     assert abs(fnum(ln, "sma60") - 11_526.50) < 0.006

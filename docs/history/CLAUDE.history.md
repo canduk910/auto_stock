@@ -1557,3 +1557,11 @@ EC2 사전 생성 규약의 `secrets/journal_worker.env` 문장(`env_file` 결�
 워커가 쓰는 표는 여전히 `_orders`·`_stops`·`_cursor` 셋이다.
 
 → CHANGELOG: cycle413 행
+
+
+## 「자금 관리」 — 시장 유닛 `market_unit_mode`
+### 2026-10-14 cycle455 — 시장 유닛 원천을 069500 에서 종목 소속 시장 종합지수로 (정본에서 옮긴 원문)
+
+- **시장 유닛 `market_unit_mode` (cycle382, 사용자 결정 2026-09-27)** — 장세(KODEX 200 `069500` 직전 영업일 봉의 60일선 위치·기울기)에 따라 터틀 4전략(`kojiro`·`donchian_swing`·`bull_flag_breakout`·`vcp_breakout`)의 **신규 진입 설계 랏만** 1 / 0.75 / 0.5 / 0 배로 줄인다(예산 경로·K축·ρ축·보유분·청산은 무접촉). 못 사는 종목은 수량 0 이 아니라 **신호 단계 `Signal.NONE`** 으로 거른다(수량 0 은 900s cooldown 으로 오귀인된다). 결측·예외 = **m=1** + WARNING. 모드 `off|shadow|enforce`(부재·오타 = `off`, 4전략 기본 `shadow`)는 PUT params 로 **즉시** 바뀐다. `PARAM_RANGES`/`INT_PARAMS`·AI 자문 자동 적용 경로 **편입 금지**. 🔴 **매크로 레짐과 다른 축이다**. 규칙 = `src/engine/strategies/CLAUDE.md` 「시장 유닛 — 터틀 4전략 (cycle382)」 절 · 계산 자리·마커 = `src/engine/CLAUDE.md` `strategy_base.py` 절
+
+→ CHANGELOG: cycle455 행
