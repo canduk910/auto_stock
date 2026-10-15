@@ -9,6 +9,7 @@
 | M1 | 가산형 — `CREATE TABLE/INDEX IF NOT EXISTS` 만, `ALTER/DROP/UPDATE/DELETE/INSERT/GRANT` 0 (docker 없이) |
 | M2 | 두 번 적용 오류 0 · PK `(target_date, strategy_id, ticker)` · 칸 타입 · 점수 칸 NULL 허용 · `computed_at` NOT NULL |
 | M3 | `candidate_scores.upsert_scores` 왕복 — NULL 은 NULL 로, 같은 PK 재기록은 덮기 |
+| M3b | 화면 읽기 `list_dates`·`list_snapshot` — 최근 날짜 먼저 · 전략 거르기 · 종목명 조인 · NULL 그대로 · KST 시각 |
 | M4 | `score_inputs.recent_closes_bulk` 왕복 — `bas_dd < before` · 최근 n봉 · 오래된→최신 |
 
 운영 DB 에는 실행하지 않는다 — 로컬 pg 하네스(docker) 또는 CI `DATABASE_URL_TEST` 만.
@@ -116,6 +117,35 @@ async def test_m3_upsert_scores_roundtrip_null_and_overwrite(pg_pool):
         assert rows[0]["rs_pct"] == 80 and rows[0]["role"] == "held" and rows[0]["rs_raw"] is None
     finally:
         await pg_pool.execute(f"DELETE FROM {_TABLE}")
+
+
+async def test_m3b_read_dates_and_snapshot(pg_pool):
+    from src.db import candidate_scores
+
+    await pg_pool.execute(f"DELETE FROM {_TABLE}")
+    await pg_pool.execute("DELETE FROM stock_master WHERE ticker IN ('005930', '000660')")
+    try:
+        await pg_pool.execute("INSERT INTO stock_master (ticker, name, nxt_tradable) VALUES ('005930', '삼성전자', TRUE)")
+        base = {c: None for c in _TYPES}
+        rows = []
+        for d, sid, t, pct in [(date(2026, 10, 13), "kojiro", "005930", 70),
+                               (date(2026, 10, 14), "kojiro", "005930", 90),
+                               (date(2026, 10, 14), "kojiro", "000660", None),
+                               (date(2026, 10, 14), "vcp_breakout", "005930", 50)]:
+            rows.append(dict(base, target_date=d, strategy_id=sid, ticker=t, role="candidate", rs_pct=pct,
+                             computed_at=datetime(2026, 10, 14, 7, 50, tzinfo=KST)))
+        await candidate_scores.upsert_scores(rows)
+        assert await candidate_scores.list_dates() == ["2026-10-14", "2026-10-13"]
+        snap = await candidate_scores.list_snapshot("2026-10-14", "kojiro")
+        assert [r["ticker"] for r in snap] == ["005930", "000660"], "rs_pct 높은 순 · NULL 맨 뒤"
+        assert snap[0]["name"] == "삼성전자" and snap[1]["name"] == "", "종목명 없으면 빈 문자열"
+        assert snap[1]["rs_pct"] is None and snap[0]["roe"] is None, "NULL 그대로"
+        assert snap[0]["target_date"] == "2026-10-14"
+        assert snap[0]["computed_at"] == "2026-10-14T07:50:00+09:00"
+        assert len(await candidate_scores.list_snapshot("2026-10-14")) == 3
+    finally:
+        await pg_pool.execute(f"DELETE FROM {_TABLE}")
+        await pg_pool.execute("DELETE FROM stock_master WHERE ticker IN ('005930', '000660')")
 
 
 async def test_m4_recent_closes_bulk_roundtrip(clean_stock_master_daily):

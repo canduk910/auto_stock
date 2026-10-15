@@ -25,6 +25,7 @@ const MarketState = lazy(() => import('./pages/MarketState'))
 const MacroPage = lazy(() => import('./macro/MacroPage'))
 // 2026-10-06 — 30년 전략 성적표 연구 보고서(iframe) 신규 페이지
 const Backtest = lazy(() => import('./pages/Backtest'))
+const RsObserve = lazy(() => import('./pages/RsObserve'))
 
 // cycle288 (2026-09-12) — 나브 항목 구조(그룹 묶음 포함)는 components/NavBar.tsx 로 이전.
 // 여기 남는 것은 라우트·레이아웃뿐이다. 화면 폭 슬라이더 상태(useContentWidth)는 나브(슬라이더)와
@@ -92,6 +93,7 @@ function AppShell() {
             {/* 사이클 103 (2026-06-11) — 실시간 건강 + 전략 현황 */}
             <Route path="/realtime-health" element={<RealtimeHealth />} />
             <Route path="/strategies" element={<Strategies />} />
+            <Route path="/rs-observe" element={<RsObserve />} />
             {/* cycle282 (2026-09-11) — 장운영상태 */}
             <Route path="/market-state" element={<MarketState />} />
           </Routes>

@@ -455,11 +455,12 @@ DB 예외는 전부 흡수한다(`0`/`[]`/`None` + `logger.exception`) — fail-
 | `latest_bsop_dates(tickers) -> dict[str, date]` | 종목별 `max(bsop_date)` 일괄 1쿼리 — 행 없는 종목은 키 없음. 🔴 **예외를 올려 보낸다** — 빈 결과로 삼키면 추가 적재가 전 종목을 400일치 다시 받는다 |
 | `estimate_snapshot_tickers(snapshot_month) -> set[str]` | 그 달 추정실적 스냅샷 행이 있는 종목. 🔴 **예외를 올려 보낸다**(같은 이유 — 빈 집합이면 전 종목 재조회) |
 
-## candidate_scores.py — 후보·보유 점수 관찰 스냅샷 쓰기 (RS·재무 2단계, cycle453)
+## candidate_scores.py — 후보·보유 점수 관찰 스냅샷 쓰기·읽기 (RS·재무 2단계, cycle453)
 
-- 테이블 `candidate_score_snapshots`(migration 052) — 칸·PK 는 아래 「DB 스키마」 절. 쓰는 쪽 = `src/engine/rs_fundamental_observe.py` 하나(부팅 관찰 기록). 매매 경로 무관.
+- 테이블 `candidate_score_snapshots`(migration 052) — 칸·PK 는 아래 「DB 스키마」 절. 쓰는 쪽 = `src/engine/rs_fundamental_observe.py` 하나(부팅 관찰 기록) · 읽는 쪽 = `src/routes/rs_observe.py` 하나(화면). 매매 경로 무관.
 - `upsert_scores(rows) -> int` — `pg.executemany` 일괄 `INSERT … ON CONFLICT (target_date, strategy_id, ticker) DO UPDATE SET`(PK 밖 전 칸 덮기). 반환 = 보낸 행 수(빈 입력 = 0, DB 호출 없음). `target_date` = `to_date()` · `computed_at` 은 `None` 이면 지금(KST)·문자열이면 `datetime.fromisoformat`. 🔴 **예외를 올려 보낸다** — 호출자가 `[rs_observe_failed] stage=upsert` 로 단계별 기록한다.
 - 칸 순서 정본 = 모듈 상수 `COLUMNS`(26칸).
+- **읽기(화면 「RS·재무 관찰」 — `GET /api/rs-observe`)** — `list_dates(limit=60) -> list[str]`(기록이 있는 날짜, 최근 먼저, `YYYY-MM-DD`) · `list_snapshot(target_date, strategy_id=None) -> list[dict]`(그 날짜 행, 전략 지정 시 그 전략만. `stock_master` LEFT JOIN 으로 `name`(없으면 `""`) · `target_date` = `YYYY-MM-DD` · `computed_at` = KST ISO 문자열. 정렬 = 전략 → `role` → `rs_pct DESC NULLS LAST` → 종목). 점수 칸 NULL 은 None 그대로다. 🔴 예외를 올려 보낸다(라우트가 `success=false` 로 바꾼다).
 
 ## score_inputs.py — RS·재무 관찰 입력 일괄 읽기 (RS·재무 2단계, cycle453)
 

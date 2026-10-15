@@ -47,6 +47,8 @@ const NAV_STRUCTURE: NavEntry[] = [
     children: [
       { to: '/strategies', label: '전략 현황' },
       { to: '/recommendations', label: '전략수정 AI자문' },
+      // 2026-10-15 — RS·재무 점수 관찰 기록(관찰 전용, 사용자 결정 「전략 밑에 두자」).
+      { to: '/rs-observe', label: 'RS·재무 관찰' },
     ],
   },
   // cycle303 (2026-09-18) — 매크로 분석. 전략 그룹과 설정 사이(팀장 명세 §6).

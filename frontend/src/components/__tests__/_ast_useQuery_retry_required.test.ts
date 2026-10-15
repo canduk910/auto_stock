@@ -88,6 +88,7 @@ const TARGET_PAGES = [
   'RealtimeHealth.tsx',
   'Strategies.tsx',
   'MarketState.tsx',
+  'RsObserve.tsx',
 ]
 
 describe('사이클 65 hotfix H3 + 사이클 75 Q4 확장 — useQuery retry 옵션 영구 가드', () => {
