@@ -38,6 +38,7 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 
 - 코드 변경 → `auto-trading-orchestrator` 스킬 (TDD 사이클: `tdd-engineer` Red → `backend-dev`/`frontend-dev` Green → `tester` 검증)
 - 매매 의사결정 자문 (신규 전략·파라미터·보드 행태·시장 레짐·KIS 거부 해석) → `domain-consult` 스킬 (`domain-expert` 에이전트) — Phase 2.5 명세 분해 *전* 또는 사이클 중 행위 영향 평가 시
+- 위험 노출 점검·주간 자문 리스크 검토 (목요일 주간 자문 산출물 뒤 · 「리스크 점검/리뷰」 요청) → `risk-review` 스킬 (`risk-manager` 에이전트 — 리스크관리부서 역할, 권고만 하고 채택은 team-leader·사용자). 산출물 `_workspace/risk/YYYY-MM-DD_weekly_risk.md`
 - 주기적 리팩토링 검토 (사이클 5회 누적 또는 명시 요청) → `refactor-review` 스킬 (`refactor-expert` 에이전트) — Phase 4.5
 - 긴 작업 주기의 마무리 보고 (트리거 4 = `cycle-report` 스킬 정본: 사이클 3회 이상 연속 · 자율 진행 구간 종료 · 사용자 "리포트/보고서" 요청 · 세션 종료 전 미보고 누적; 결정 항목 3개 이상이면 사이클 1~2회도) → `cycle-report` 스킬 (`report-writer` 에이전트) — Phase 5. 쉬운 말 아티팩트 보고서 + 원문 md(`_workspace/reports/`) + 결정 카드
 - 단위/회귀 테스트 → `tdd-cycle` (백엔드 pytest+respx+freezegun / 프론트엔드 vitest+RTL+MSW)
@@ -55,7 +56,7 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 | 작업 유형 | 모델 | 적용 |
 |----------|------|------|
 | 구현 계획·검수·리팩토링 검토·마무리 보고서 | **opus** | `team-leader`, `tester`, `refactor-expert`, `report-writer` — ⚠️ **모델은 에이전트 정의에 명시한다**(지우면 Fable 상속으로 해석돼 그 크레딧이 마를 때 넷이 함께 막힌다). 세션 모델이 바뀌면 이 네 줄도 바꾼다 |
-| 테스트 설계·도메인 자문 | **opus** | `domain-expert`, `tdd-engineer` |
+| 테스트 설계·도메인 자문·리스크 검토 | **opus** | `domain-expert`, `tdd-engineer`, `risk-manager` |
 | 일반 구현 (코드 작성·리팩터·버그 수정) | **sonnet** | `backend-dev`, `frontend-dev` |
 | 명령어 작성 (bash/슬래시/스크립트) | **haiku** | 메인 세션 단발 작업 — fork 또는 `claude-haiku-4-5-20251001` 위임 |
 
