@@ -88,9 +88,8 @@ class Position:
 
     # 멀티데이 보유 전략 — 시간 청산 개념 없음 (ATR 트레일링/하드 손절만).
     # is_next_day 프로퍼티에서 항상 False 반환 → OrderMonitor "청산" 배지 노출 차단.
-    # 확장 시 frozenset 멤버만 추가 (Position 시그니처 변경 금지). 3 전략 모두 이 리터럴에 명시
-    # (import-order 독립 단일 진실원). vcp_breakout 은 과거 import 시점 동적 side-effect 로
-    # 자기를 추가하던 취약 패턴(리뷰어 오판 유발)을 2026-07 에 리터럴로 통합.
+    # 확장 시 frozenset 멤버만 추가 (Position 시그니처 변경 금지). 멤버 전부를 이 리터럴에 명시한다
+    # (import-order 독립 단일 진실원) — 전략 모듈이 import 시점에 자기를 추가하는 방식 금지.
     _MULTIDAY_STRATEGIES: ClassVar[frozenset[str]] = frozenset(
         {"donchian_swing", "vcp_breakout", "kojiro", "etf_trend", "ndx2x_riskoff"}
     )

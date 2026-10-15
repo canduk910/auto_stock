@@ -600,3 +600,8 @@ H0NXCNT0 행의 「NXT 단독 연속 구간(09-15 = 15:40~16:00)의 보유(HIGH)
 
 → CHANGELOG: 사이클 88 행.
 의견서 원문 = `_workspace/external_llm_reviews/2026-06-09_realtime_review.md`.
+
+### 2026-10-15 문서 정리 — 코호트 근거 문장의 전략 수 정정
+
+- 정본에서 걷어낸 원문: 「(사이클 156 Q0 · 전략 3파일 주석, 5전략 전부 `list_by_filter(nxt_tradable=None)`)」
+- 실제로 `list_by_filter` 를 쓰는 전략은 VB·LTV·donchian·BFB·VCP·kojiro 6개다(루트 `CLAUDE.md` 「6전략」 과 같다). 승인 도장 = `tests/unit/ast/test_cycle222a3_ast_followup_fixes.py::_APPROVED_CONTENT_SHA`. CHANGELOG 행 없음(문서 정리).

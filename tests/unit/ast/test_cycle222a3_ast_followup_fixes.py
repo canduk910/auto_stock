@@ -472,8 +472,8 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle399(2026-10-03, 10-02 R1) — update_weights 섀도 전략 켜짐 유지 한 줄, 8영역 승인",
     ),
     "src/realtime/CLAUDE.md": (
-        "77fcf0aaaf1042a2fa6d441c624cac7f3a785dc00bb3bf61f1990aeb537700d6",
-        "cycle444(2026-10-11) — 「우선순위 정책」 을 실제 순서(breakout → momentum → swing → shadow)로 정정, 사용자 승인",
+        "720578bd86dfa8ccf44046853af3f87ef1a65dcb582226cd941ef82ba3053519",
+        "2026-10-15 문서 정리 — 코호트 근거 문장 「5전략」 → 「list_by_filter 를 쓰는 6전략」 정정, 사용자 승인(「남은 것 까지 계속 진행해」)",
     ),
     "src/realtime/__init__.py": (
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
