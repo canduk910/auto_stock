@@ -115,6 +115,8 @@ export const handlers = [
         holdings: [makeHolding()],
         summary: {
           deposit: 10_000_000,
+          deposit_d1: 10_000_000,
+          deposit_d2: 10_000_000,
           stock_eval_amount: 720_000,
           total_eval_amount: 10_720_000,
           net_asset: 10_720_000,

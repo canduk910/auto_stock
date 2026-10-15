@@ -96,6 +96,19 @@ function formatKRW(value: number): string {
   return value.toLocaleString('ko-KR')
 }
 
+/** cycle459 — 숫자·숫자 문자열만 유한 수로, 그 밖(null·빈 문자열·비숫자)은 null. */
+function toSafeWon(value: unknown): number | null {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null
+  if (typeof value === 'string' && value.trim() !== '') {
+    const n = Number(value)
+    return Number.isFinite(n) ? n : null
+  }
+  return null
+}
+
+const DEPOSIT_D2_TITLE =
+  'D+2 결제 후 예수금(가수도정산금액) — 매도대금이 들어오고 매수대금이 빠진 뒤 금액'
+
 /**
  * cycle397 — 매입일 칸 표시. 백엔드가 이미 KST 기준 `YYYY-MM-DD` 순수 날짜
  * 문자열을 준다(타임존 정보가 없는 영업일 값) — `new Date(iso)` 로 다시 파싱해
@@ -222,13 +235,24 @@ export default function BalanceTable({ selectedStrategy }: Props) {
   if (!data) return null
 
   const { summary } = data
+  const depositD2 = toSafeWon(summary.deposit_d2)
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white rounded-lg shadow p-4">
           <p className="text-sm text-gray-500 mb-1">예수금</p>
           <p className="text-lg font-bold text-gray-900">{formatKRW(summary.deposit)}원</p>
+        </div>
+        <div
+          className="bg-white rounded-lg shadow p-4"
+          data-testid="balance-summary-deposit-d2"
+          title={DEPOSIT_D2_TITLE}
+        >
+          <p className="text-sm text-gray-500 mb-1">D+2 예수금</p>
+          <p className="text-lg font-bold text-gray-900">
+            {depositD2 === null ? '—' : `${formatKRW(depositD2)}원`}
+          </p>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
           <p className="text-sm text-gray-500 mb-1">총 평가금</p>
