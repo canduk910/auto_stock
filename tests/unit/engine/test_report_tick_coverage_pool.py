@@ -74,9 +74,8 @@ async def test_report_tick_coverage_reads_pool_union(caplog):
     assert "fresh=25" in msg
     assert "stale=0" in msg
 
-    mock_write_log.assert_called_once()
-    log_payload = mock_write_log.call_args.args[1]
-    assert "subscribed=25" in log_payload
+    # cycle458 — 영속은 로거 경로 단일(`_DbLogHandler`), write_log 0
+    mock_write_log.assert_not_called()
 
 
 # ===========================================================================

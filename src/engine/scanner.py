@@ -258,11 +258,6 @@ async def emit_price_filter_scanner_daily_summary() -> None:
             f"reasons={{below_min: {below}, above_max: {above}}}"
         )
         logger.info(msg)
-        try:
-            from src.db.system_logs import write_log
-            await write_log("INFO", msg)
-        except Exception:
-            logger.debug("[price_filter_scanner_daily_summary] write_log 실패", exc_info=True)
     except Exception:
         logger.debug("[price_filter_scanner_daily_summary] emit 실패", exc_info=True)
 
@@ -435,11 +430,9 @@ async def emit_trade_amount_filter_scanner_daily_summary() -> None:
     H-2 NO_TRY: scheduler 가 try/except 없이 직접 호출 — AttributeError 가 silent skip 되면
     운영 가시화 무력화 (사이클 64 hotfix 영구 패턴 답습).
     """
-    from src.db.system_logs import write_log
     total = _trade_amount_filter_scanner_skip_count_today.get("total", 0)
     msg = f"[trade_amount_filter_scanner_daily_summary] block_count={total}"
     logger.info(msg)
-    await write_log("INFO", msg)
 
 
 # 스캔 결과 캐시

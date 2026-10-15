@@ -395,17 +395,12 @@ class DonchianSwingStrategy(StrategyBase):
                 pass
                 if len(candles) < long_ma_period + 1:
                     if not short_candles_logged:
-                        from src.db.system_logs import write_log
                         msg = (
                             f"도치안 일봉 길이 부족 — {ticker}: "
                             f"received {len(candles)}, required {long_ma_period + 1} "
                             f"(요청 {fetch_days}일). KIS 응답 불충분 가능"
                         )
                         logger.warning(msg)
-                        try:
-                            await write_log("WARNING", msg)
-                        except Exception:
-                            pass
                         short_candles_logged = True
                     continue
 
@@ -643,7 +638,6 @@ class DonchianSwingStrategy(StrategyBase):
           - nxt_tradable=None — donchian MAIN 단독 (사이클 26 영속)
         """
         from src.db import stock_master as _sm_mod
-        from src.db.system_logs import write_log
         from src.engine.etf_like import is_etf_like
         from src.engine.scanner import ticker_names
 
@@ -715,10 +709,6 @@ class DonchianSwingStrategy(StrategyBase):
                 f"{min_trade // 100_000_000}억+ / ETF 제외 후 통과 없음"
             )
             logger.error(msg)
-            try:
-                await write_log("ERROR", msg)
-            except Exception:
-                logger.exception("system_logs 기록 실패")
 
         # 사이클 151 — PriceFilter 후처리 (사이클 148 VB 영역 답습, Q2=C 단일 source 영속)
         filtered = await self._apply_price_filter_in_prepare(filtered)

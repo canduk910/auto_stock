@@ -30,7 +30,7 @@ from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
 
 from src.api import trade_profit
-from src.db import system_config, system_logs
+from src.db import system_config
 from src.db import trade_cost as trade_cost_db
 
 logger = logging.getLogger(__name__)
@@ -263,10 +263,6 @@ async def _check_alerts(end: date) -> list[dict]:
         msg = (f"{_MARKER_HIGH} strategy={a['strategy']} cost_bp={a['cost_bp']:g} "
                f"threshold_bp={a['threshold_bp']:g} window={window_start.isoformat()}~{end.isoformat()}")
         logger.warning(msg)
-        try:
-            await system_logs.write_log("WARNING", msg)
-        except Exception:
-            logger.debug("[trade_cost] system_logs 기록 실패", exc_info=True)
     return alerts
 
 

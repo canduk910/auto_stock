@@ -22,6 +22,7 @@ Red 상태:
 """
 from __future__ import annotations
 
+import logging
 from datetime import date, datetime, timedelta, timezone
 
 _KST_TEST = timezone(timedelta(hours=9))  # 사이클 68 hotfix
@@ -445,6 +446,7 @@ async def test_c5_when_insufficient_qty_then_reconciliation_log_and_balance_inqu
     mock_stock_master,
     mock_get_balance: AsyncMock,
     monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
 ):
     """C-5 → cycle429(D1 안A, 사용자 승인 2026-10-10) 로 재조준.
 
@@ -468,14 +470,20 @@ async def test_c5_when_insufficient_qty_then_reconciliation_log_and_balance_inqu
     )
     assert history[0].reason == "insufficient_quantity"
 
-    # (2) [sell_insufficient_unexplained] ERROR 로그 (D1 안A 신규 마커)
-    unexplained_calls = [
-        c for c in mock_write_log.await_args_list
-        if len(c.args) >= 2 and "[sell_insufficient_unexplained]" in str(c.args[1])
+    # (2) [sell_insufficient_unexplained] ERROR 로그 (D1 안A 신규 마커) — cycle458:
+    #     영속은 로거 경로(`_DbLogHandler`) 단일, write_log 로 또 남기지 않는다.
+    unexplained_logs = [
+        r for r in caplog.records
+        if r.levelno == logging.ERROR
+        and "[sell_insufficient_unexplained]" in r.getMessage()
     ]
-    assert len(unexplained_calls) >= 1, (
+    assert len(unexplained_logs) >= 1, (
         "cycle429 D1 안A: [sell_insufficient_unexplained] 로그 미발화"
     )
+    assert not [
+        c for c in mock_write_log.await_args_list
+        if "[sell_insufficient_unexplained]" in str(c.args)
+    ], "같은 사건을 write_log 로 또 남기지 않는다(cycle458)"
 
     # (3) get_balance() 1회 호출(관측 전용 — held 값만 로그에 남긴다)
     assert mock_get_balance.await_count >= 1, (

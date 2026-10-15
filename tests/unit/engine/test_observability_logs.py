@@ -100,9 +100,9 @@ async def test_tick_coverage_warning_when_stale_ratio_high(caplog):
     warning_msgs = [r for r in caplog.records
                     if r.levelno == logging.WARNING and "[tick_coverage]" in r.getMessage()]
     assert len(warning_msgs) == 1, f"stale_ratio>30% 시 WARNING 1행 노출 필요"
-    # system_logs 도 WARNING 으로
+    # system_logs 는 위 WARNING 을 `_DbLogHandler` 가 옮긴 한 줄뿐 — write_log 0 (cycle458)
     write_calls = [c for c in mock_write_log.call_args_list if "[tick_coverage]" in str(c)]
-    assert any(c.args[0] == "WARNING" for c in write_calls)
+    assert write_calls == []
 
 
 # ===========================================================================
