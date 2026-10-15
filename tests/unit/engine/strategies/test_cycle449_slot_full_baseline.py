@@ -347,7 +347,8 @@ def test_latched_ticker_untouched_while_full_above_low(kit, caplog):
 
 
 def test_latched_ticker_released_while_full_below_low(kit):
-    """T4c (cycle460) — 만석 중 하단 아래 틱은 래치를 해제하고 그 틱부터 직전 가격을 추적한다."""
+    """T4c (cycle460) — 만석 중 하단 아래 틱은 래치를 해제한다. 해제 틱은 비만석과 같이 직전
+    가격을 쓰지 않고, 다음 틱부터 추적한다."""
     strat = kit.make()
     with freeze_time(IN_WINDOW):
         tick_volume.record_acml_vol(kit.ticker, kit.short_vol)
@@ -358,8 +359,10 @@ def test_latched_ticker_released_while_full_below_low(kit):
         _fill_slots(strat)
         assert _tick(strat, kit, kit.low - 1) == Signal.NONE
 
-    assert kit.ticker not in strat._vol_latch, "만석 중 하단 이탈인데 래치가 남았다"
-    assert strat._prev_price[kit.ticker] == kit.low - 1
+        assert kit.ticker not in strat._vol_latch, "만석 중 하단 이탈인데 래치가 남았다"
+        assert strat._prev_price[kit.ticker] == kit.line + 100, "해제 틱이 직전 가격을 썼다"
+        assert _tick(strat, kit, kit.line - 50) == Signal.NONE
+    assert strat._prev_price[kit.ticker] == kit.line - 50, "해제 다음 틱부터 추적되지 않는다"
 
 
 def test_stale_yesterday_latch_does_not_freeze_tracking_while_full(kit):

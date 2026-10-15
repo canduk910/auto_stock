@@ -12,8 +12,9 @@
 
 `_track_baseline_while_full` 이 오늘자 래치를 만나면 비만석 래치 블록과 **같은 해제 규칙**을
 적용한다 — `level_moved`(돌파선·하단이 래치 값과 다름) 먼저, 그다음 `stop_line`(하단 > 0
-이고 현재가 < 하단, 엄격). 둘 다 아니면 지금처럼 래치·직전 가격 무접촉. 해제되면 그 틱부터
-래치 없는 종목과 같고 만석 추적을 이어 `_prev_price = 현재가`.
+이고 현재가 < 하단, 엄격). 둘 다 아니면 지금처럼 래치·직전 가격 무접촉. 해제 틱은 비만석
+해제 틱과 같이 해제만 한다(`_prev_price` 무접촉 — 코디네이터 결정 2026-10-15, 자문 R1 글자
+그대로). 다음 틱부터 래치 없는 종목처럼 만석 추적(`_prev_price = 현재가`).
 
 마커 = 기존 `[bfb|vcp_latch_released] ticker= reason=` 에 만석 경로만 끝 ` where=full`.
 cap 키는 그대로 `latch_released:<reason>`.
@@ -109,8 +110,8 @@ def test_r1_stop_line_while_full_releases_and_no_stale_latch_buy(kit, caplog):
         assert kit.ticker not in strat._vol_latch, (
             "만석 중 하단 이탈인데 래치가 그대로다 — 슬롯이 빈 뒤 낡은 래치로 산다"
         )
-        assert strat._prev_price.get(kit.ticker) == kit.low - 1, (
-            "해제 뒤 만석 추적이 이어지지 않았다(직전 가격 미갱신)"
+        assert strat._prev_price.get(kit.ticker) == kit.line + 100, (
+            "해제 틱이 직전 가격을 썼다 — 비만석 해제 틱은 쓰지 않는다"
         )
         recs = _release_records(caplog, kit)
         assert len(recs) == 1, [r.getMessage() for r in caplog.records]
@@ -130,14 +131,11 @@ def test_r1_stop_line_while_full_releases_and_no_stale_latch_buy(kit, caplog):
     assert kit.ticker not in strat._vol_latch
 
 
-def test_r1b_release_then_direct_jump_after_free_is_fresh_cross(kit):
-    """해제 틱은 직전 가격을 그 틱 값(하단 아래)으로 둔다(자문 「경계」 표). 그래서 슬롯이
-    빈 뒤 바로 돌파선 위로 온 틱은 「선 아래 → 위」 진짜 교차로 fresh 경로에서 평가된다
-    (래치 경로가 아니다 — 새 교차 · retention · 거래량 게이트를 그대로 거친다).
+def test_r1b_release_then_direct_jump_after_free_is_not_buy(kit):
+    """자문 R1 글자 그대로 — 하단−1(해제) → 슬롯 빔 → 바로 선+100 은 BUY 아님.
 
-    자문 R1 표의 「하단−1 → 슬롯 빔 → 선+100 = BUY 아님」 은 사이에 틱이 없을 때 이 규칙과
-    어긋난다 — 실제 시세에서는 하단 아래에서 돌파선 위까지 가는 동안 틱이 있고, 그 틱이
-    만석 중이면 R1·R6(BUY 아님), 슬롯이 빈 뒤면 R2(진짜 재교차 BUY)가 된다.
+    해제 틱은 비만석 해제 틱과 같이 `_prev_price` 를 쓰지 않아(무장 틱 값 = 선 위 그대로),
+    다음 선 위 틱은 교차가 아니다. 그날 손절선을 깬 셋업은 선 아래를 거친 새 교차(R2)로만 산다.
     """
     strat = kit.make()
     with freeze_time(IN_WINDOW):
@@ -148,7 +146,8 @@ def test_r1b_release_then_direct_jump_after_free_is_fresh_cross(kit):
         tick_volume.record_acml_vol(kit.ticker, kit.enough_vol)
         sig = _tick(strat, kit, kit.line + 100)
 
-    assert sig == Signal.BUY
+    assert sig == Signal.NONE, f"하단을 깬 셋업을 해제 직후 선 위 점프로 {sig} 했다"
+    assert kit.ticker not in strat._bought_today
     assert kit.ticker not in strat._vol_latch
 
 
@@ -234,7 +233,7 @@ def test_r5_level_moved_while_full_releases(kit, caplog, which):
         assert _tick(strat, kit, price) == Signal.NONE
 
     assert kit.ticker not in strat._vol_latch
-    assert strat._prev_price.get(kit.ticker) == price
+    assert strat._prev_price.get(kit.ticker) == kit.line + 100, "해제 틱이 직전 가격을 썼다"
     msgs = [r.getMessage() for r in _release_records(caplog, kit)]
     assert msgs == [
         f"{_release_marker(kit)} ticker={kit.ticker} reason=level_moved where=full"
@@ -269,6 +268,7 @@ def test_r6_after_release_cross_while_full_is_skipped_cycle449_semantics(kit, ca
         held = _fill_slots(strat)
         _tick(strat, kit, kit.low - 1)
         assert _marker_records(caplog, kit) == [], "해제 틱에 교차 스킵 로그가 찍혔다"
+        _tick(strat, kit, kit.line - 100)          # 해제 뒤 첫 추적 틱(선 아래)
         _tick(strat, kit, kit.line + 100)
         assert len(_marker_records(caplog, kit)) == 1
 
@@ -337,31 +337,46 @@ def test_r9_second_stop_line_while_full_logs_once(kit, caplog):
 # ###########################################################################
 
 _PARITY_CASES = {
-    "equal_low": dict(price=lambda k: k.low, low=None, shift=None),
-    "zero_low": dict(price=lambda k: 1, low=0, shift=None),
-    "level_moved": dict(price=lambda k: k.line - 300, low=None, shift="line"),
-    "below_low": dict(price=lambda k: k.low - 1, low=None, shift=None),
-    "inside_flag": dict(price=lambda k: k.line - 1, low=None, shift=None),
-    "above_line": dict(price=lambda k: k.line + 100, low=None, shift=None),
+    "equal_low": dict(prices=lambda k: [k.low], low=None, shift=None),
+    "zero_low": dict(prices=lambda k: [1], low=0, shift=None),
+    "level_moved": dict(prices=lambda k: [k.line - 300], low=None, shift="line"),
+    "below_low": dict(prices=lambda k: [k.low - 1], low=None, shift=None),
+    "inside_flag": dict(prices=lambda k: [k.line - 1], low=None, shift=None),
+    "above_line": dict(prices=lambda k: [k.line + 100], low=None, shift=None),
+    # 해제 틱 직후 바로 선 위로 점프(만석 쪽은 그 사이 슬롯이 빈다, 거래량 충족) — 두 경로
+    # 모두 교차 아님(직전 가격 = 무장 틱 값) → 래치 재무장·매수 없음
+    "release_then_jump": dict(
+        prices=lambda k: [k.low - 1, k.line + 100], low=None, shift=None,
+        free_before_last=True, enough_vol=True,
+    ),
 }
 
 
-def _parity_outcome(kit: Kit, case: dict, *, full: bool) -> tuple[bool, frozenset]:
+def _parity_outcome(kit: Kit, case: dict, *, full: bool) -> tuple:
     strat = kit.make()
     low = kit.low if case["low"] is None else case["low"]
     strat._candidates[kit.ticker][_low_key(kit)] = low
     _seed_today_latch(strat, kit, low=low)
     if case["shift"] == "line":
         strat._candidates[kit.ticker][kit.line_key] += 10
-    tick_volume.record_acml_vol(kit.ticker, kit.short_vol)
-    if full:
-        _fill_slots(strat)
-    _tick(strat, kit, case["price"](kit))
+    strat._prev_price[kit.ticker] = kit.line + 100      # 무장 틱이 남긴 직전 가격
+    tick_volume.record_acml_vol(
+        kit.ticker, kit.enough_vol if case.get("enough_vol") else kit.short_vol
+    )
+    held = _fill_slots(strat) if full else []
+    prices = case["prices"](kit)
+    for i, price in enumerate(prices):
+        if full and case.get("free_before_last") and i == len(prices) - 1:
+            _free_one_slot(strat, held)
+        _tick(strat, kit, price)
     reasons = frozenset(
         k for (t, k) in strat._gate_emit_capped
         if t == kit.ticker and k.startswith("latch_released:")
     )
-    return kit.ticker in strat._vol_latch, reasons
+    return (
+        kit.ticker in strat._vol_latch, reasons,
+        strat._prev_price.get(kit.ticker), kit.ticker in strat._bought_today,
+    )
 
 
 @pytest.mark.parametrize("case_id", list(_PARITY_CASES))

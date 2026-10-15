@@ -1510,17 +1510,19 @@ class VcpBreakoutStrategy(StrategyBase):
             if latch is not None:
                 # cycle460 — 오늘자 래치에 비만석 래치 블록과 같은 해제 규칙을 적용한다
                 # (`level_moved` 먼저 → `stop_line`, 하단 > 0 ∧ 엄격 부등호). 둘 다 아니면
-                # 래치·직전 가격 무접촉. 해제되면 그 틱부터 래치 없는 종목처럼 추적한다.
-                # 낡은 래치는 `_latch_entry` 가 읽으며 지운다.
+                # 래치·직전 가격 무접촉. 해제 틱도 비만석 해제 틱과 같이 해제만 하고
+                # 반환한다(`_prev_price`·`_breakout_first_seen`·교차 로그 무접촉) — 다음
+                # 틱부터 래치 없는 종목처럼 추적한다. 낡은 래치는 `_latch_entry` 가 지운다.
                 self._roll_gate_day_if_needed()
                 line = info["base_high"]
                 low = info.get("base_low", 0)
                 if latch["base_high"] != line or latch["base_low"] != low:
                     self._release_latch(ticker, "level_moved", where="full")
+                    return
                 elif low > 0 and current_price < low:
                     self._release_latch(ticker, "stop_line", where="full")
-                else:
                     return
+                return
             self._roll_gate_day_if_needed()
             prev = self._prev_price.get(ticker, 0)
             try:
