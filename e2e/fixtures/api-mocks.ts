@@ -18,6 +18,7 @@ import { STOCK_CHART_RESPONSES, type StockChartPeriodKey } from "./stock-chart.f
 // cycle413 보완 1차 — 거래일지 응답. MSW 목과 **같은 파일**을 쓴다(키 정본 = tests/fixtures/cycle413_journal_shape.json,
 // `frontend/src/components/__tests__/handlers.honesty.cycle413.test.ts` 가 그 파일과 대조한다 — 사본을 두지 않는다).
 import { JOURNAL_FIXTURE } from "../../frontend/src/test/fixtures/journal.fixture";
+import { RS_OBSERVE_FIXTURE } from "../../frontend/src/test/fixtures/rsObserve.fixture";
 
 type AnyJson = Record<string, unknown>;
 
@@ -538,6 +539,13 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     if (route.request().resourceType() === "script") return route.continue();
     const sid = new URL(route.request().url()).searchParams.get("strategy") ?? "";
     return route.fulfill({ json: envelope(JOURNAL_CHART_FIXTURE[sid] ?? JOURNAL_CHART_FIXTURE.kojiro) });
+  });
+  // RS·재무 관찰(전략 메뉴, 읽기 전용) — MSW 와 같은 고정 응답 파일. 글롭이 vite 모듈
+  // `/src/api/rs-observe.ts` 와 겹치므로 경로·resourceType 가드를 둔다.
+  await page.route("**/api/rs-observe*", (route) => {
+    if (!isRealApiCall(route.request().url())) return route.continue();
+    if (route.request().resourceType() === "script") return route.continue();
+    return route.fulfill({ json: envelope(RS_OBSERVE_FIXTURE) });
   });
   await page.route("**/api/realtime/subscriptions", (route) =>
     route.fulfill({ json: envelope({ sessions: [], total_count: 0 }) }),

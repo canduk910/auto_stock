@@ -23,14 +23,15 @@ function withProviders(children: ReactNode, route = "/") {
 // cycle288 — 메뉴바 2단 카테고리화. 사용자 지정 묶음(바꾸지 않음):
 //   단독: 대시보드 / 거래 내역 / 로그 / 설정
 //   그룹 종목: 조건검색 추적, 종목마스터
-//   그룹 전략: 전략 현황, 전략수정 AI자문
+//   그룹 전략: 전략 현황, 전략수정 AI자문, RS·재무 관찰
 //   그룹 운영상태: 장운영상태, 실시간 상태
 // cycle303 — 매크로(단독 leaf, `/macro`)가 전략 그룹과 설정 사이에 추가되어 경로 10→11개.
 // 2026-10-06 — 백테스팅(단독 leaf, `/backtest`)이 매크로와 설정 사이에 추가되어 경로 11→12개.
+// 2026-10-15 — RS·재무 관찰(`/rs-observe`)이 전략 그룹 셋째 세부로 추가되어 경로 12→13개.
 const STANDALONE_LABELS = ["대시보드", "거래 내역", "로그", "매크로", "백테스팅", "설정"];
 const GROUPS: Array<{ id: string; trigger: string; children: string[] }> = [
   { id: "stock", trigger: "종목", children: ["조건검색 추적", "종목마스터"] },
-  { id: "strategy", trigger: "전략", children: ["전략 현황", "전략수정 AI자문"] },
+  { id: "strategy", trigger: "전략", children: ["전략 현황", "전략수정 AI자문", "RS·재무 관찰"] },
   { id: "ops", trigger: "운영상태", children: ["장운영상태", "실시간 상태"] },
 ];
 const ALL_HREFS = [
@@ -41,6 +42,7 @@ const ALL_HREFS = [
   "/stock-master",
   "/strategies",
   "/recommendations",
+  "/rs-observe",
   "/macro",
   "/backtest",
   "/settings",
@@ -132,7 +134,7 @@ describe("AppShell — 상단 메뉴바 sticky", () => {
     ).toBe(true);
   });
 
-  it("B4 (cycle288 → cycle303 → 2026-10-06): 12개 라우트 href 집합이 정확히 일치한다 (URL 불변 — 라우트 누락·추가 차단)", () => {
+  it("B4 (cycle288 → cycle303 → 2026-10-06 → 2026-10-15): 13개 라우트 href 집합이 정확히 일치한다 (URL 불변 — 라우트 누락·추가 차단)", () => {
     setup();
     const nav = screen.getByRole("navigation", { name: "기본 네비게이션" });
     const hrefs = new Set<string>();
@@ -304,7 +306,7 @@ describe("AppShell — 모바일 햄버거 메뉴 (사이클 81 → cycle288)", 
     expect(btn.getAttribute("aria-expanded")).toBe("true");
   });
 
-  it("M-5 (cycle288 → cycle303 → 2026-10-06): 드로어 안에 12개 leaf 링크가 그룹 접힘과 무관하게 전부 존재한다", () => {
+  it("M-5 (cycle288 → cycle303 → 2026-10-06 → 2026-10-15): 드로어 안에 13개 leaf 링크가 그룹 접힘과 무관하게 전부 존재한다", () => {
     setup();
     fireEvent.click(screen.getByTestId("mobile-menu-button"));
     const drawer = screen.getByTestId("mobile-menu-drawer");
@@ -346,8 +348,8 @@ describe("AppShell — 모바일 햄버거 메뉴 (사이클 81 → cycle288)", 
     expect(screen.queryByTestId("mobile-menu-drawer")).toBeNull();
   });
 
-  // 사이클 85 L-CYCLE81-MOBILE → cycle288 → cycle303 → 2026-10-06: 12개 leaf 링크 + main 독립 DOM 영속
-  it("L-CYCLE81-MOBILE (cycle288 → cycle303 → 2026-10-06): 12개 leaf 링크 전부 존재 + nav-sticky-wrapper 와 main 별도 영역", () => {
+  // 사이클 85 L-CYCLE81-MOBILE → cycle288 → cycle303 → 2026-10-06 → 2026-10-15: 13개 leaf 링크 + main 독립 DOM 영속
+  it("L-CYCLE81-MOBILE (cycle288 → cycle303 → 2026-10-06 → 2026-10-15): 13개 leaf 링크 전부 존재 + nav-sticky-wrapper 와 main 별도 영역", () => {
     setup();
     fireEvent.click(screen.getByTestId("mobile-menu-button"));
     const drawer = screen.getByTestId("mobile-menu-drawer");
@@ -355,7 +357,7 @@ describe("AppShell — 모바일 햄버거 메뉴 (사이클 81 → cycle288)", 
     const main = document.querySelector("main");
 
     const allLinks = Array.from(drawer.querySelectorAll("a"));
-    expect(allLinks.length).toBeGreaterThanOrEqual(11);
+    expect(allLinks.length).toBeGreaterThanOrEqual(ALL_HREFS.length);
 
     // main 이 sticky wrapper 의 자식이 아닌지 (사이클 81 M-8 영속)
     expect(main).not.toBeNull();
@@ -415,8 +417,8 @@ describe("AppShell — 모바일 햄버거 메뉴 (사이클 81 → cycle288)", 
     }
   });
 
-  // 사이클 103 영역 0 M-11 → cycle288 → cycle303 → 2026-10-06: 12개 leaf 링크 영구 영속 + main 독립 DOM 영속
-  it("M-11 (cycle288 → cycle303 → 2026-10-06): 모바일 드로어 12개 leaf 링크 + main 별도 영역 영속", () => {
+  // 사이클 103 영역 0 M-11 → cycle288 → cycle303 → 2026-10-06 → 2026-10-15: 13개 leaf 링크 영구 영속 + main 독립 DOM 영속
+  it("M-11 (cycle288 → cycle303 → 2026-10-06 → 2026-10-15): 모바일 드로어 13개 leaf 링크 + main 별도 영역 영속", () => {
     setup();
     fireEvent.click(screen.getByTestId("mobile-menu-button"));
     const drawer = screen.getByTestId("mobile-menu-drawer");
@@ -424,9 +426,9 @@ describe("AppShell — 모바일 햄버거 메뉴 (사이클 81 → cycle288)", 
     const allLinks = Array.from(drawer.querySelectorAll("a"));
     expect(
       allLinks.length,
-      `[12개 leaf 링크 영구 영속 실패] 모바일 드로어 영역 메뉴 수 = ${allLinks.length} ` +
-        `(2026-10-06 = 12개 영역 영속 의무).`,
-    ).toBeGreaterThanOrEqual(11);
+      `[13개 leaf 링크 영구 영속 실패] 모바일 드로어 영역 메뉴 수 = ${allLinks.length} ` +
+        `(2026-10-15 = 13개 영역 영속 의무).`,
+    ).toBeGreaterThanOrEqual(ALL_HREFS.length);
   });
 
   // 사이클 103 영역 1 M-12 → cycle288: `전략 현황` 메뉴가 전략 그룹 하위로 드로어에 등록된다

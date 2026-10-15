@@ -44,7 +44,7 @@ TanStack Query (서버 상태) · TanStack Table (그리드) · Recharts (차트
 
 ## 페이지 lazy 로딩
 
-Dashboard 만 즉시 import. 나머지 11 페이지(History · Recommendations · Logs · Settings · StrategyFunnel · StockMaster · RealtimeHealth · Strategies · MarketState · `macro/MacroPage` · Backtest)는 `React.lazy()` + Suspense skeleton. `/log-reports` 는 `<Navigate to="/logs?tab=daily-report" replace />` 로 북마크 호환.
+Dashboard 만 즉시 import. 나머지 12 페이지(History · Recommendations · Logs · Settings · StrategyFunnel · StockMaster · RealtimeHealth · Strategies · RsObserve · MarketState · `macro/MacroPage` · Backtest)는 `React.lazy()` + Suspense skeleton. `/log-reports` 는 `<Navigate to="/logs?tab=daily-report" replace />` 로 북마크 호환.
 
 ## AppShell 레이아웃 — 화면 폭 슬라이더
 
@@ -58,7 +58,7 @@ Dashboard 만 즉시 import. 나머지 11 페이지(History · Recommendations �
 
 나브 = **`src/components/NavBar.tsx`**(`App.tsx` 는 라우트·레이아웃·`useContentWidth` 소유만). 공유 상수·훅(`CONTENT_WIDTH_*`·`contentMaxWidth`·`useContentWidth`)의 단일 출처 = **`src/utils/contentWidth.ts`**.
 
-leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — 바꾸지 않는다):
+leaf 13개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — 바꾸지 않는다):
 
 | 상위 | 세부 | 경로 |
 |---|---|---|
@@ -66,7 +66,7 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 | 거래 내역 | (단독) | `/history` |
 | 로그 | (단독) | `/logs` |
 | **종목** | 조건검색 추적 · 종목마스터 | `/strategy-funnel` · `/stock-master` |
-| **전략** | 전략 현황 · 전략수정 AI자문 | `/strategies` · `/recommendations` |
+| **전략** | 전략 현황 · 전략수정 AI자문 · RS·재무 관찰 | `/strategies` · `/recommendations` · `/rs-observe` |
 | 매크로 | (단독) | `/macro` |
 | 백테스팅 | (단독, 30년 전략 성적표 연구 보고서) | `/backtest` |
 | 설정 | (단독) | `/settings` |
@@ -77,8 +77,8 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 - 그룹 트리거 = **disclosure 패턴**(`aria-expanded` 만). `aria-haspopup` 을 두지 않는다 — `role=menu`/`menuitem` 이 없어 스크린리더에 거짓 약속이 된다.
 - 키보드: Enter/Space 열기 · ArrowDown/Up 이동 · Escape 로 닫고 트리거 포커스 복귀 · 항목 선택 뒤에도 트리거로 복원(`<body>` 로 떨어지지 않게). 포커스 트랩 없음.
 - 닫힘 3: 바깥 클릭 · 포커스 이탈(`onBlur`/focusout) · 라우트 이동(뒤로가기 포함). `openGroup` 단일 상태라 하나만 열린다.
-- 모바일 드로어는 **접지 않는다** — 그룹 제목(링크 아님) + 들여쓴 하위로 leaf 12개를 늘 보인다.
-- 🔴 **경로 12/12 이 메뉴에서 도달 가능해야 한다** — 묻힌 메뉴는 URL 을 직접 쳐야만 보인다. `AppShell.test.tsx` 가 href 12개 집합을 단언한다. `/log-reports` 는 구 북마크 리다이렉트라 메뉴가 아니다.
+- 모바일 드로어는 **접지 않는다** — 그룹 제목(링크 아님) + 들여쓴 하위로 leaf 13개를 늘 보인다.
+- 🔴 **경로 13/13 이 메뉴에서 도달 가능해야 한다** — 묻힌 메뉴는 URL 을 직접 쳐야만 보인다. `AppShell.test.tsx` 가 href 13개 집합(`ALL_HREFS`)을 단언한다. `/log-reports` 는 구 북마크 리다이렉트라 메뉴가 아니다.
 - 보존 testid 4: `nav-sticky-wrapper` · `content-width-slider` · `mobile-menu-button` · `mobile-menu-drawer`. 그룹용 = `nav-inner` · `nav-mobile-group-{id}` 등.
 - ⚠️ e2e: 접힌 그룹의 하위 라벨은 DOM 에 없다. 본문 제목은 `getByRole("heading", {name})`(`getByText` 는 모바일 헤더의 숨은 span 을 집는다), 그룹 트리거는 `getByRole("button", {name, exact: true})`.
 
@@ -669,6 +669,18 @@ Dashboard `MarketRegimeLabelCard` 바로 아래. 시장 유닛 배수가 정해�
 - **표본 게이트 3분기**: `sample_tier='insufficient'`(N<20) → TE·배지 회색 + "판정 유보" + 게이지·구조 숨김 / `'low'`(20-49)+rr_available → amber "표본 적음" / `'low'`+!rr_available → 게이지 "RR 참고 불가" / `'normal'`(50+) → 정상(single_trade_dominant 시 "RR 과대 가능")
 - **오독 방지**: verdict(TE 부호)와 structure_tag(사분면)는 독립 — **verdict 배지가 지배 색**, structure_tag 는 중립 회색(`text-gray-600`) + 형태 병기("견고형 (저승률·고RR)")
 - 하단 1회: 참조표(`te-reference-table` 승률 10~90% → 필요RR 9.00~0.11) + 교육 캡션(`te-education-caption`). TE 실패해도 4임계 카드 정상(격리). **관찰 전용, 매매 무관**. 가드 `StrategiesTeRr.test.tsx`
+
+## RsObserve (`/rs-observe`) — RS·재무 관찰
+
+전략 메뉴 세 번째 세부. 매일 아침 부팅 때 4전략(donchian·VCP·kojiro·etf_trend)의 후보·보유 종목마다 남기는 RS·재무·목표가 점수 기록(`candidate_score_snapshots`)을 날짜·전략별 표로 보인다. **읽기 전용 · 매매에 쓰이지 않는다.** 데이터 = `getRsObserve(date)`(`api/rs-observe.ts`) → `GET /api/rs-observe`(래퍼째 받는다 — `success=false` 면 서버 `message` 그대로), queryKey `['rsObserve', date]` · `staleTime` 1분 · `retry: 1`. 타입 = `types/rs-observe.ts`(라우트 응답 1:1).
+
+- 상단 띠 `rs-observe-banner` = 「관찰 전용 — 매매에 쓰이지 않습니다 … 2027-04 사전 등록 기준으로 판정 예정 … 빈 칸(—)은 0 이 아니라 「모름」」.
+- 기록일 `rs-observe-date`(응답 `dates`, 바꾸면 그 날짜로 다시 묻는다) · 전략 버튼 `rs-observe-strategy-{all|sid}`(`aria-pressed`, 화면 안에서만 거른다 — 요청은 전략 없이 한 번).
+- 전략 구역 `rs-observe-section-{sid}` — 머리 `rs-observe-summary-{sid}`(후보·보유 수 · RS 모집단 · 계산 시각 `formatKstDateTime`) · 표 `rs-observe-table-{sid}`(`ScrollPane`, `min-w-[1400px]`) · 행 `rs-observe-row-{sid}-{ticker}` · 칸 `data-key` = 응답 칸 이름 · 기록 없음 `rs-observe-section-empty-{sid}` · etf 안내 `rs-observe-etf-note`. 칸 묶음 = 상대강도(RS) 6 · 증권사 목표가 3 · 재무 9, 머리글 `title` 에 뜻.
+- 🔴 **「모름」(null·NaN·숫자로 못 읽는 값)은 `—` 다. 0 으로 채우지 않는다** — 0 은 0 으로 보인다. 서식 순수 함수 = `utils/rsObserve.ts`(`toNum`·`fmtRatioPct`(비율 ×100 + 부호)·`fmtPercent`(이미 % — ROE·부채비율)·`fmtInt`·`fmtBool`·`fmtQuarter`·`sortRows`). 정렬 = 보유 먼저 → RS 백분위 높은 순(모름 뒤) → 종목코드. 부호 있는 비율 칸만 손익색(`pnlColorClass`).
+- 상태 = `rs-observe-loading` · `rs-observe-error`(+ `rs-observe-retry`) · `rs-observe-failed`(서버 사유) · `rs-observe-empty`(기록 0).
+- 목 = 픽스처 `test/fixtures/rsObserve.fixture.ts`(실제 라우트를 로컬 Postgres 에서 돌린 출력, MSW·e2e 공용) · MSW `/rs-observe` · e2e `**/api/rs-observe*`(경로·resourceType 가드).
+- 회귀 = `pages/__tests__/RsObserve.test.tsx`(P1~P5) · `utils/__tests__/rsObserve.test.ts`(O1~O5) · `e2e/rs-observe.spec.ts`(G-E2E-RS1 — 나브에서 진입).
 
 ## MarketState (`/market-state`) — 장운영상태
 
