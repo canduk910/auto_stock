@@ -53,6 +53,16 @@ export function fmtQuarter(v: unknown): string {
 }
 
 /** 부호 색(이익색·손실색)을 고를 숫자 — 모름이면 null. */
+/** 섹터 칸 — 업종명 그대로 · `미분류-종목코드` → 「미분류」 · 10-16 전 기록의 `업종-/중분류-코드` → 「옛 기준」 표시. */
+export function fmtSector(v: unknown): string {
+  if (typeof v !== 'string' || !v.trim()) return '—'
+  const s = v.trim()
+  if (s.startsWith('미분류')) return '미분류'
+  const m = /^(업종|중분류)-(\w+)$/.exec(s)
+  if (m) return `${m[1] === '업종' ? '대분류' : '중분류'} ${m[2]} (옛 기준)`
+  return s
+}
+
 export function signOf(v: unknown): number | null {
   return toNum(v)
 }

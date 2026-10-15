@@ -19,6 +19,7 @@ import {
   fmtPercent,
   fmtQuarter,
   fmtRatioPct,
+  fmtSector,
   signOf,
   sortRows,
   toNum,
@@ -42,10 +43,10 @@ interface Column {
 const COLUMNS: Column[] = [
   { key: 'rs_pct', label: 'RS 백분위', title: '전 종목 중 상대강도 순위(0~99, 높을수록 강함)', fmt: fmtInt, tone: 'none', group: 'rs' },
   { key: 'rs_raw', label: 'RS 수익', title: '3·6·9개월 수익률 가중합(0.4·0.3·0.3)', fmt: (v) => fmtRatioPct(v), tone: 'sign', group: 'rs' },
-  { key: 'sector_key', label: '섹터', title: '업종 분류', fmt: (v) => (typeof v === 'string' && v ? v : '—'), tone: 'none', group: 'rs' },
+  { key: 'sector_key', label: '섹터', title: 'KIS 업종명(2026-10-16 기록부터). 그 전 기록은 업종 대분류 코드라 「옛 기준」 으로 표시', fmt: fmtSector, tone: 'none', group: 'rs' },
   { key: 'vs_sector', label: '섹터 대비', title: '같은 섹터 평균 RS 수익과의 차이', fmt: (v) => fmtRatioPct(v), tone: 'sign', group: 'rs' },
-  { key: 'sector_pct', label: '섹터 순위', title: '섹터끼리 비교한 그 섹터의 백분위', fmt: fmtInt, tone: 'none', group: 'rs' },
-  { key: 'in_sector_pct', label: '섹터 내 순위', title: '같은 섹터 안에서 이 종목의 백분위', fmt: fmtInt, tone: 'none', group: 'rs' },
+  { key: 'sector_pct', label: '섹터 백분위', title: '섹터 평균 RS 끼리 비교한 그 섹터의 백분위 (0~99, 99 = 가장 강한 섹터)', fmt: fmtInt, tone: 'none', group: 'rs' },
+  { key: 'in_sector_pct', label: '섹터 내 백분위', title: '같은 섹터 안에서 이 종목의 백분위 (0~99, 99 = 섹터 1등)', fmt: fmtInt, tone: 'none', group: 'rs' },
   { key: 'revision_breadth', label: '목표가 상향 폭', title: '최근 60영업일 (상향 증권사 − 하향 증권사) ÷ 의견 낸 증권사', fmt: (v) => fmtRatioPct(v, 0), tone: 'sign', group: 'target' },
   { key: 'target_median_change', label: '목표가 중앙 변화', title: '증권사별 직전 대비 목표가 변화율의 중앙값', fmt: (v) => fmtRatioPct(v), tone: 'sign', group: 'target' },
   { key: 'opinion_brokers', label: '증권사 수', title: '최근 60영업일 안에 의견을 낸 증권사 수', fmt: fmtInt, tone: 'none', group: 'target' },
@@ -262,7 +263,8 @@ export default function RsObserve() {
 
       <p className="text-xs text-gray-500" data-testid="rs-observe-legend">
         칸 이름에 마우스를 올리면 뜻이 보입니다. 정렬 = 보유 먼저, 그다음 RS 백분위 높은 순. 재무는 그날 알 수 있던 값만
-        씁니다(공시 지연 반영) · 목표가는 기록일 전날까지의 증권사 의견입니다.
+        씁니다(공시 지연 반영) · 목표가는 기록일 전날까지의 증권사 의견입니다. 섹터 = KIS 업종명(2026-10-16 기록부터 — 그 전은
+        업종 대분류 코드라 섹터 비교 값이 「제조업 평균 대비」 에 가깝습니다).
       </p>
     </div>
   )

@@ -59,6 +59,24 @@ async def master_raw_map(tickers) -> dict[str, dict]:
     return out
 
 
+async def sector_name_map(tickers) -> dict[str, str]:
+    """KIS 업종 한글명 `stock_master.raw.bstp_kor_isnm` 일괄 — 행이 없거나 이름이 비면 키 없음."""
+    tickers = list(tickers)
+    if not tickers:
+        return {}
+    rows = await pg.fetch(
+        "SELECT ticker, raw->>'bstp_kor_isnm' AS isnm FROM stock_master "
+        "WHERE ticker = ANY($1::text[])",
+        tickers,
+    )
+    out: dict[str, str] = {}
+    for r in rows or []:
+        name = str(r.get("isnm") or "").strip()
+        if name:
+            out[r["ticker"]] = name
+    return out
+
+
 async def financial_rows_bulk(tickers) -> dict[str, list[dict]]:
     """`stock_master_financial` 분기("1")·연간("0") 행 일괄 — 종목별 list."""
     tickers = list(tickers)

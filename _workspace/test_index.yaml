@@ -232873,7 +232873,7 @@ frontend:
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-15T13:11:51.961Z'
+generated_at: '2026-10-15T14:11:46.604Z'
 stats:
   backend_modules: 212
   backend_tests: 1408

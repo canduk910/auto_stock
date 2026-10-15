@@ -235,6 +235,11 @@ async def _compute_and_write(ready: list[Any], today: date) -> None:
         _failed("master", e)
         master = {}
     try:
+        sector_names = await si_db.sector_name_map(list(closes))
+    except Exception as e:
+        _failed("sector", e)
+        sector_names = {}
+    try:
         fin_rows = await si_db.financial_rows_bulk(fin_tickers)
     except Exception as e:
         _failed("fin", e)
@@ -247,7 +252,9 @@ async def _compute_and_write(ready: list[Any], today: date) -> None:
 
     scores = {t: rs_score.ibd_lite_return(c) for t, c in closes.items()}
     pct = rs_score.percentile_ranks(scores)
-    sector_of = {t: _kojiro_sector_key(master.get(t), t) for t in closes}
+    # 섹터 = KIS 업종 한글명(2026-10-16 기록부터) · 없으면 kojiro 섹터 키. 업종 대분류 코드는
+    # 코스피·코스닥 제조업처럼 너무 넓어 섹터 비교가 「제조업 대비」 가 된다(10-15 사용자 결정).
+    sector_of = {t: sector_names.get(t) or _kojiro_sector_key(master.get(t), t) for t in closes}
     rel = rs_score.sector_relative(scores, sector_of)
     population = sum(v is not None for v in scores.values())
     computed_at = datetime.fromisoformat(now_kst_iso())

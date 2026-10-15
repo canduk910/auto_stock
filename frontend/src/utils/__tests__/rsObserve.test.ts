@@ -3,7 +3,7 @@
  * 🔴 「모름」 = `—` (0 으로 채우지 않는다). 0 은 0 으로 보인다.
  */
 import { describe, expect, it } from 'vitest'
-import { fmtBool, fmtInt, fmtPercent, fmtQuarter, fmtRatioPct, sortRows, toNum } from '../rsObserve'
+import { fmtBool, fmtInt, fmtPercent, fmtQuarter, fmtRatioPct, fmtSector, sortRows, toNum } from '../rsObserve'
 
 describe('rsObserve 표시', () => {
   it('O1 — 모름(null·undefined·NaN·빈 문자열·글자)은 전부 —', () => {
@@ -49,5 +49,17 @@ describe('rsObserve 표시', () => {
     const before = rows.map((r) => r.ticker)
     expect(sortRows(rows).map((r) => r.ticker)).toEqual(['H', 'A', 'B', 'D', 'C'])
     expect(rows.map((r) => r.ticker)).toEqual(before)
+  })
+})
+
+describe('fmtSector — 섹터 칸 (2026-10-15 사용자 지적: 코드·종목코드가 그대로 보였다)', () => {
+  it('S1 — 업종명은 그대로, 「미분류-종목코드」 는 「미분류」, 모름은 —', () => {
+    expect(fmtSector('전기·전자')).toBe('전기·전자')
+    expect(fmtSector('미분류-052460')).toBe('미분류')
+    for (const v of [null, undefined, '', '  ', 3]) expect(fmtSector(v)).toBe('—')
+  })
+  it('S2 — 10-16 전 기록의 업종 코드는 「옛 기준」 으로 표시한다(이름을 지어내지 않는다)', () => {
+    expect(fmtSector('업종-0027')).toBe('대분류 0027 (옛 기준)')
+    expect(fmtSector('중분류-1027')).toBe('중분류 1027 (옛 기준)')
   })
 })

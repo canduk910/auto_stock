@@ -469,6 +469,7 @@ DB 예외는 전부 흡수한다(`0`/`[]`/`None` + `logger.exception`) — fail-
 | 함수 | 계약 |
 |---|---|
 | `recent_closes_bulk(before, n=200) -> dict[str, list[float]]` | `stock_master_daily` 에서 `before − 320일 <= bas_dd < before` 범위 종목별 최근 `n` 봉 종가(창 함수 `row_number()` 1쿼리) — 오래된→최신 순. 종가 NULL 행은 뺀다. 320일 하한(`_LOOKBACK_CAL_DAYS`)은 오래된 봉 스캔을 줄이는 장치 |
+| `sector_name_map(tickers) -> dict[str, str]` | KIS 업종 한글명 `stock_master.raw->>'bstp_kor_isnm'` 일괄(`ticker = ANY($1)`, cycle463). 앞뒤 공백 제거 · 빈 이름·행 없음 = 키 없음 |
 | `master_raw_map(tickers) -> dict[str, dict]` | `stock_master.master_raw` 일괄(`ticker = ANY($1)`). 행 없음·raw 비었음·JSON 파싱 실패 = 키 없음 |
 | `financial_rows_bulk(tickers) -> dict[str, list[dict]]` | `stock_master_financial` 분기("1")·연간("0") 행 일괄 — 종목별 `stac_yymm` 오름차순 list. 칸 = `ticker`·`stac_yymm`·`div_cls`·`sale_account`·`bsop_prti`·`thtr_ntin`·`lblt_rate` |
 

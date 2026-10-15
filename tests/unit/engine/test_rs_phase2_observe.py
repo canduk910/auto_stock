@@ -26,6 +26,7 @@ import asyncio
 import copy
 import logging
 import math
+import sys
 from datetime import date, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
@@ -134,6 +135,11 @@ MASTER = {t: {"krx_smcn_yn": "Y"} for t in _SECTOR}
 MASTER["000010"] = {"krx_smcn_yn": "Y", "roe": "12.5"}
 MASTER["000070"] = {"roe": "8.0"}
 
+# KIS 업종 한글명(stock_master.raw.bstp_kor_isnm) — 섹터 묶음의 1순위(2026-10-15 사용자 결정).
+# 000080 은 없다 → kojiro 섹터 키(미분류-000080)로 대신한다.
+SECTOR_NAMES = {t: "전기·전자" for t in _SECTOR}
+SECTOR_NAMES["000070"] = "유통"
+
 
 def _q(stac, div, **v):
     return {"stac_yymm": stac, "div_cls": div, **v}
@@ -193,12 +199,15 @@ class Env:
         self.config = dict(config or {})
         self.closes = AsyncMock(side_effect=self._closes)
         self.master = AsyncMock(side_effect=lambda tickers: {t: MASTER[t] for t in tickers if t in MASTER})
+        self.sector_names = AsyncMock(
+            side_effect=lambda tickers: {t: SECTOR_NAMES[t] for t in tickers if t in SECTOR_NAMES})
         self.fin = AsyncMock(side_effect=lambda tickers: {t: FIN[t] for t in tickers if t in FIN})
         self.opinions = AsyncMock(side_effect=lambda t, a, b: list(OPINIONS.get(t, [])))
         self.upsert = AsyncMock(side_effect=lambda rows: len(list(rows)))
         mp = monkeypatch
         mp.setattr(si_db, "recent_closes_bulk", self.closes, raising=False)
         mp.setattr(si_db, "master_raw_map", self.master, raising=False)
+        mp.setattr(si_db, "sector_name_map", self.sector_names, raising=False)
         mp.setattr(si_db, "financial_rows_bulk", self.fin, raising=False)
         mp.setattr(io_db, "get_opinions", self.opinions)
         mp.setattr(cs_db, "upsert_scores", self.upsert, raising=False)
@@ -280,9 +289,10 @@ async def test_rs_and_sector_match_phase1_pure_functions(monkeypatch):
 
     scores = {t: rs_score.ibd_lite_return(c) for t, c in CLOSES.items()}
     pct = rs_score.percentile_ranks(scores)
-    sector_of = {t: _kojiro_sector_key(MASTER.get(t), t) for t in CLOSES}
+    sector_of = {t: SECTOR_NAMES.get(t) or _kojiro_sector_key(MASTER.get(t), t) for t in CLOSES}
     rel = rs_score.sector_relative(scores, sector_of)
     population = sum(v is not None for v in scores.values())
+    assert sector_of["000070"] == "유통" and sector_of["000080"] == "미분류-000080"
     for (sid, t), r in rows.items():
         assert r["rs_population"] == population, (sid, t, r["rs_population"])
         if t not in CLOSES:
@@ -292,7 +302,31 @@ async def test_rs_and_sector_match_phase1_pure_functions(monkeypatch):
         assert r["sector_key"] == sector_of[t]
         for c in ("vs_sector", "sector_pct", "in_sector_pct"):
             assert _close(r[c], rel[t][c]), (t, c, r[c], rel[t][c])
-    assert rows[("donchian_swing", "000010")]["sector_pct"] is not None, "반도체 6종목 = 섹터 자격"
+    assert rows[("donchian_swing", "000010")]["sector_pct"] is not None, "전기·전자 6종목 = 섹터 자격"
+
+
+async def test_sector_groups_follow_kis_name_not_kojiro_flag(monkeypatch):
+    """같은 kojiro 키(반도체 플래그 6종목)라도 KIS 업종명이 갈리면 다른 섹터다 — 3+3 은 둘 다 5 미만."""
+    names = {t: ("전기·전자" if i < 3 else "기계·장비") for i, t in enumerate(_SECTOR)}
+    monkeypatch.setattr(sys.modules[__name__], "SECTOR_NAMES", names)
+    env = Env(monkeypatch, _default_strategies())
+    await env.run()
+    rows = _by(env.rows())
+    r10 = rows[("donchian_swing", "000010")]
+    assert r10["sector_key"] == "전기·전자"
+    assert rows[("vcp_breakout", "000040")]["sector_key"] == "기계·장비"
+    assert r10["vs_sector"] is None and r10["sector_pct"] is None, "구성 3 < 5 = 자격 없음"
+
+
+async def test_sector_name_lookup_failure_falls_back_to_kojiro_key(monkeypatch, caplog):
+    env = Env(monkeypatch, _default_strategies())
+    env.sector_names.side_effect = RuntimeError("db down")
+    with caplog.at_level(logging.WARNING, logger="src.engine.rs_fundamental_observe"):
+        await env.run()
+    rows = _by(env.rows())
+    assert rows[("donchian_swing", "000010")]["sector_key"] == _kojiro_sector_key(MASTER["000010"], "000010")
+    assert rows[("donchian_swing", "000010")]["rs_pct"] is not None, "업종명 실패가 RS 를 지우지 않는다"
+    assert any("[rs_observe_failed] stage=sector" in m for m in caplog.messages)
 
 
 async def test_target_revision_matches_phase1_and_dates(monkeypatch):

@@ -127,6 +127,31 @@ async def test_master_raw_map_one_query_any_array():
     assert "999990" not in out
 
 
+async def test_sector_name_map_reads_kis_industry_name_one_query():
+    """KIS 업종 한글명 `stock_master.raw.bstp_kor_isnm` 일괄 — 공백·빈 값·행 없음 = 키 없음."""
+    si = _si()
+    with patch.object(si, "pg", create=True) as pg_mod:
+        pg_mod.fetch = AsyncMock(return_value=[
+            {"ticker": "005930", "isnm": " 전기·전자 "},
+            {"ticker": "000660", "isnm": "   "},
+            {"ticker": "035720", "isnm": None},
+        ])
+        out = await si.sector_name_map(["005930", "000660", "035720", "999990"])
+    assert pg_mod.fetch.await_count == 1
+    sql = pg_mod.fetch.await_args.args[0]
+    assert re.search(r"ANY\s*\(\s*\$1::text\[\]\s*\)", sql)
+    assert "bstp_kor_isnm" in sql and "stock_master" in sql
+    assert out == {"005930": "전기·전자"}
+
+
+async def test_sector_name_map_empty_no_query():
+    si = _si()
+    with patch.object(si, "pg", create=True) as pg_mod:
+        pg_mod.fetch = AsyncMock()
+        assert await si.sector_name_map([]) == {}
+    pg_mod.fetch.assert_not_called()
+
+
 async def test_master_raw_map_empty_no_query():
     si = _si()
     with patch.object(si, "pg", create=True) as pg_mod:
