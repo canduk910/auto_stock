@@ -23,6 +23,7 @@ from src.engine.param_validation import BUDGET_KEYS, MAX_BUDGET_PRODUCT, validat
 from src.engine.scheduler import trading_scheduler
 from src.engine.strategy_core_metrics import collect_strategy_core_metrics
 from src.engine.te_metrics import compute_te_rr
+from src.engine.unknown_holding_policy import is_unknown_strategy_id
 from src.models.response import ApiResponse
 
 logger = logging.getLogger(__name__)
@@ -343,11 +344,20 @@ async def update_weights(req: WeightsRequest):
             ),
         )
 
+    # cycle461 — 비식별 보유(`unknown`)는 비중 0 고정 · 항상 켜짐이다. 비중이 생기면 Σ 정규화로
+    # 다른 전략 예산을 깎는다 → 422(저장 전). 비중 0 은 아래 비중 0 가드에서 면제된다(끄지 않는다).
+    _unknown_bad = [sid for sid, w in weights.items() if is_unknown_strategy_id(sid) and w > 0]
+    if _unknown_bad:
+        raise HTTPException(
+            status_code=422,
+            detail="비식별 보유(unknown) 전략은 비중을 0 보다 크게 둘 수 없습니다",
+        )
+
     # 🔴 비중 0 가드 (cycle325) — **아래 `if total_asset > 0` 게이트보다 앞**이다.
     # 그 게이트 안에 넣으면 부팅 전(예산 합 0)에 통째로 건너뛰어져 고친 것이 아무 일도
     # 하지 않는다. 비중 0 = 비활성화 = 손절 정지이므로 예산과 무관하게 판정해야 한다.
     for sid, new_weight in weights.items():
-        if new_weight > 0:
+        if new_weight > 0 or is_unknown_strategy_id(sid):
             continue
         strat = registry.get(sid)
         if not strat:

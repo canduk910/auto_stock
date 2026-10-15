@@ -72,7 +72,7 @@ def _cfg_lines(caplog, sid: str | None = None, *, min_level: int = logging.INFO)
 
 def test_t00_behaviour_matrix_covers_the_census():
     """행위 표본(ALL7)이 전략 명부와 같다 — 여덟째 전략이 생기면 여기서 붉고 `Buyable` 에 입력을 더한다."""
-    assert set(ALL7) == set(census.STRATEGY_IDS), (
+    assert set(ALL7) == set(census.BUYING_STRATEGY_IDS), (  # cycle461 — 매수 안 하는 unknown 제외
         f"전략 명부 {census.STRATEGY_IDS} ≠ 행위 표본 {ALL7} — tests/unit/engine/_cycle384_support.py "
         "Buyable 에 새 전략의 「사는 순간」 입력을 더하라"
     )

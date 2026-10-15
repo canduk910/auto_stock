@@ -51,13 +51,13 @@ def test_boot_manager_no_supabase_reference():
 # 3 사이트 헬퍼 위임 (boot 함수 스코프 한정)
 # ---------------------------------------------------------------------------
 def test_boot_uses_get_recent_buy_strategy():
-    """최근 BUY strategy 조회는 trade_history.get_recent_buy_strategy(ticker) 위임."""
+    """KIS 잔고 보완 복구의 주인 판정은 leaf `unknown_holding_policy.resolve_owner` 위임
+    (cycle461 — 그 안에서 trade_history.get_open_roundtrip_owner 를 부른다)."""
     src = _boot_source()
     assert src, "boot() 함수 소스 추출 실패."
     assert "supabase" not in src, "boot() 내 supabase 잔존 금지."
-    assert "get_recent_buy_strategy" in src, (
-        "최근 BUY strategy 조회는 trade_history.get_recent_buy_strategy(ticker) 위임."
-    )
+    assert "_uhp.resolve_owner(" in src, "주인 판정은 unknown_holding_policy.resolve_owner 위임."
+    assert "get_recent_buy_strategy" not in src, "옛 왕복을 상속하는 조회로 주인을 정하지 않는다(cycle461)."
 
 
 def test_boot_uses_mark_pending_buys_completed():

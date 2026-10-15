@@ -382,6 +382,50 @@ async def get_recent_buy_strategy(ticker: str) -> str | None:
         return None
 
 
+_OPEN_ROUNDTRIP_BUY_STATUSES = ("COMPLETED", "PARTIAL", "PENDING")
+_OPEN_ROUNDTRIP_SELL_STATUSES = ("COMPLETED", "PARTIAL")
+
+
+async def get_open_roundtrip_owner(ticker: str) -> tuple[str, str | None]:
+    """그 종목의 **열린 왕복** 주인 전략 (cycle461 ⑦-F1 안 U).
+
+    열린 왕복 = 마지막 BUY(상태 COMPLETED·PARTIAL·PENDING) 시각 > 마지막 SELL(COMPLETED·PARTIAL)
+    시각. 이미 끝난 왕복(마지막 BUY 가 마지막 SELL 보다 오래됨)의 전략은 주인으로 잡지 않는다 —
+    `get_recent_buy_strategy` 는 상태·순서 무관 마지막 BUY 를 돌려줘 옛 왕복을 상속한다.
+
+    Returns:
+        ``("found", strategy)`` · ``("none", None)``.
+
+    🔴 **DB 예외를 삼키지 않는다** — 「조회 실패」 와 「0건」 을 가르는 것이 이 함수의 존재 이유다
+    (호출자 `engine/unknown_holding_policy.resolve_owner` 가 실패를 「판정 보류」 로 받는다).
+    """
+    row = await pg.fetchrow(
+        """
+        SELECT
+          (SELECT strategy FROM trade_history
+             WHERE ticker = $1 AND trade_type = 'BUY' AND status = ANY($2::text[])
+             ORDER BY timestamp DESC LIMIT 1) AS buy_strategy,
+          (SELECT max(timestamp) FROM trade_history
+             WHERE ticker = $1 AND trade_type = 'BUY' AND status = ANY($2::text[])) AS buy_ts,
+          (SELECT max(timestamp) FROM trade_history
+             WHERE ticker = $1 AND trade_type = 'SELL' AND status = ANY($3::text[])) AS sell_ts
+        """,
+        ticker,
+        list(_OPEN_ROUNDTRIP_BUY_STATUSES),
+        list(_OPEN_ROUNDTRIP_SELL_STATUSES),
+    )
+    if not row:
+        return ("none", None)
+    buy_strategy = row.get("buy_strategy")
+    buy_ts = row.get("buy_ts")
+    sell_ts = row.get("sell_ts")
+    if not buy_strategy or buy_ts is None:
+        return ("none", None)
+    if sell_ts is not None and not (buy_ts > sell_ts):
+        return ("none", None)
+    return ("found", str(buy_strategy))
+
+
 async def get_today_buys_ticker_strategy() -> list[dict]:
     """오늘(KST) BUY row 의 (ticker, strategy) 목록을 조회한다 (사이클 M5, boot_manager 전용).
 

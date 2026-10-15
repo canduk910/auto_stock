@@ -17,6 +17,7 @@ const REASON_CODE_LABELS: Record<string, string> = {
   FORCE_CLEAR: '15:20 청산',
   NEXT_DAY_CLEAR: '익일 청산',
   STATUS_EXIT: '종목상태 청산',
+  UNKNOWN_EXIT: '비식별 보유 청산',
   MANUAL: '수동 매도',
 }
 

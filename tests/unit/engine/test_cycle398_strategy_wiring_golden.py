@@ -62,6 +62,8 @@ _MOMENTUM_SCAN = ["900001", "900002"]
 _SID_INDEX = {
     "momentum": 0, "volatility_breakout": 1, "long_tail_volatility": 2, "donchian_swing": 3,
     "bull_flag_breakout": 4, "vcp_breakout": 5, "kojiro": 6, "etf_trend": 7, "ndx2x_riskoff": 8,
+    # cycle461 — 비식별 보유. config 가 enabled 대입을 무시해 mask 와 무관하게 늘 켜짐이다.
+    "unknown": 9,
 }
 
 # 전략 id 판정용 — 등록 표와 별개로 고정(골든 대상을 고르는 체이므로 등록에서 뽑지 않는다).
@@ -705,10 +707,11 @@ def test_g1b_registry_literal():
     """G1 의 리터럴 사본 — 골든 파일을 다시 만들어 G1 을 덮어도 이 줄은 남는다."""
     assert [r[0] for r in snap_registry()] == [
         "momentum", "volatility_breakout", "long_tail_volatility", "donchian_swing",
-        "bull_flag_breakout", "vcp_breakout", "kojiro", "etf_trend", "ndx2x_riskoff",
+        "bull_flag_breakout", "vcp_breakout", "kojiro", "etf_trend", "ndx2x_riskoff", "unknown",
     ]
     # ndx2x_riskoff(cycle443) 는 섀도 시작이라 다른 7개(꺼짐·비중0)와 달리 켜짐·비중0 이다.
-    assert [(r[2], r[3]) for r in snap_registry()] == [(True, 1.0)] + [(False, 0.0)] * 7 + [(True, 0.0)]
+    # unknown(cycle461) 은 항상 켜짐·비중 0.
+    assert [(r[2], r[3]) for r in snap_registry()] == [(True, 1.0)] + [(False, 0.0)] * 7 + [(True, 0.0)] * 2
 
 
 @pytest.mark.parametrize("name", sorted(json.loads(GOLDEN.read_text(encoding="utf-8"))["constants"])

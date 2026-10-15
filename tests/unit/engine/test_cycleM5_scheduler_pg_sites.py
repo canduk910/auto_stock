@@ -95,7 +95,7 @@ def test_sync_positions_uses_get_recent_buy_strategy():
     """_sync_positions_from_balance 내 최근 BUY strategy 조회는 trade_history 헬퍼 위임."""
     src = _sync_positions_source()
     assert src, "_sync_positions_from_balance 함수 소스 추출 실패."
-    assert "get_recent_buy_strategy" in src, (
-        "최근 BUY strategy 조회는 trade_history.get_recent_buy_strategy(ticker) 위임 "
-        "(supabase select(strategy).order(timestamp desc).limit(1) 대체)."
-    )
+    # cycle461 — 주인 판정·채택은 leaf `unknown_holding_policy.adopt_balance_only_holding` 위임
+    # (그 안에서 trade_history.get_open_roundtrip_owner). 옛 상속 조회는 쓰지 않는다.
+    assert "adopt_balance_only_holding(" in src
+    assert "get_recent_buy_strategy" not in src

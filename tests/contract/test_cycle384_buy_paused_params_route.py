@@ -189,7 +189,7 @@ def test_r05_params_schema_lists_buy_paused_for_all_seven(contract_env):
     row = rows[0]
     assert (row["type"], row["risk"], row["editable"], row["group"], row["auto_tunable"]) == (
         "bool", "identity", True, "entry", False)
-    assert sorted(row["applies_to"]) == sorted(ALL7)
+    assert sorted(row["applies_to"]) == sorted(ALL7 + ("unknown",))  # cycle461 — 공통 키라 unknown 도 갖는다
     by_sid = {s["strategy_id"]: s for s in data["strategies"]}
     for sid in ALL7:
         if sid in by_sid:

@@ -1201,3 +1201,10 @@ BFB·VCP 는 `_prev_price` 가 이미 이번 틱으로 갱신된 뒤라 끈 뒤 
 - `_MULTIDAY_STRATEGIES` 리터럴 = `frozenset({"donchian_swing", "vcp_breakout", "kojiro", "etf_trend"})`
 
 → CHANGELOG: cycle403 · cycle443 행
+
+## 머리말
+### 2026-10-15 cycle461 — 전략 수 9 → 10 (정본에서 옮긴 원문)
+
+- `StrategyBase` 서브클래스 9개. · 코드 등록 기본값(`scheduler.py` `__init__`)은 `momentum` … `ndx2x_riskoff` 가 `enabled=True`·`weight=0.0`(섀도 전략 규약), 나머지 7전략은 `enabled=False`·`weight=0.0` 이다.
+
+→ CHANGELOG: cycle461 행

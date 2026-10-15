@@ -28,6 +28,9 @@ _DICT_DECL = re.compile(r"self\.(_[a-zA-Z0-9_]+)\s*:\s*dict\[")
 # `on_scale_event` 가 옮긴다 — 그 밖(거래량·무차원·구조)은 눈금 사건과 무관해
 # 건드리지 않는다(바꾸면 비율·불·날짜·문자열이 오염된다).
 _CLASSIFICATION: dict[tuple[str, str], str] = {
+    # unknown.py (cycle461 — 비식별 보유. 사유·발사 횟수 — 가격 차원 아님)
+    ("unknown.py", "_reasons"): "skip_structural",
+    ("unknown.py", "_fires"): "skip_structural",
     # bull_flag_breakout.py
     ("bull_flag_breakout.py", "_candidates"): "transient_skip",
     ("bull_flag_breakout.py", "_prev_price"): "price_simple",

@@ -73,6 +73,7 @@ class Signal(str, Enum):
     TIME_EXIT = "TIME_EXIT"      # 보유 기간 초과(BFB max_hold_days · donchian breakout_fail_n_days)
     TAKE_PROFIT = "TAKE_PROFIT"  # 목표가 익절(BFB 측정된 이동)
     TREND_EXIT = "TREND_EXIT"    # 추세 종료·이탈(kojiro 스테이지3 · VCP 50일 EMA)
+    UNKNOWN_EXIT = "UNKNOWN_EXIT"  # cycle461 — 비식별 보유(unknown 전략) 청산
 
 
 @dataclass

@@ -25,6 +25,7 @@ describe('strategyMeta — STRATEGY_DISPLAY_NAMES 정본 9종(cycle403 etf_trend
       kojiro: '고지로 대순환',
       etf_trend: 'ETF 추세',
       ndx2x_riskoff: '나스닥2배-위험회피',
+      unknown: '비식별 보유',
     })
   })
 })
@@ -40,6 +41,7 @@ describe('strategyMeta — strategyLabel()', () => {
     expect(strategyLabel('kojiro')).toBe('고지로 대순환')
     expect(strategyLabel('etf_trend')).toBe('ETF 추세')
     expect(strategyLabel('ndx2x_riskoff')).toBe('나스닥2배-위험회피')
+    expect(strategyLabel('unknown')).toBe('비식별 보유')
   })
 
   it('9 전략은 API 가 다른 이름을 줘도 정본이 우선한다 (백엔드 name 무시)', () => {

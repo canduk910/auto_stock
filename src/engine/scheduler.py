@@ -3513,13 +3513,8 @@ class TradingScheduler:
 
     async def _sync_positions_from_balance(self) -> None:
         """KIS 잔고를 조회하여 체결통보 누락된 포지션을 보완한다."""
-        from src.engine.strategy_base import Position
-        from src.engine.scanner import ticker_names
-        from src.db.trade_history import (
-            mark_pending_buys_completed,
-            get_recent_buy_strategy,
-        )
-        from src.models.trade import TradeType, TradeStatus
+        from src.db.trade_history import mark_pending_buys_completed
+        from src.engine import unknown_holding_policy as _uhp
 
         holdings, _ = await get_balance()
 
@@ -3536,27 +3531,8 @@ class TradingScheduler:
             # 이미 어떤 전략에 포지션이 있으면 건너뜀
             if self.registry.is_ticker_held_by_any(h.ticker):
                 continue
-            # 체결통보 누락 — KIS 잔고에는 있지만 내부 포지션에 없음
-            # strategy 매핑: trade_history의 직전 BUY 행에서 상속
-            # (이전엔 무조건 'momentum' 하드코딩이라 BUY=VB / SELL=momentum strategy 어긋남 — 알루코 사례 재발 차단)
-            strategy_id = await get_recent_buy_strategy(h.ticker) or "momentum"
-
-            target = self.registry.get(strategy_id) or self.registry.get("momentum")
-            if target:
-                actual_sid = target.strategy_id
-                target.state.positions[h.ticker] = Position(
-                    ticker=h.ticker,
-                    buy_price=int(h.avg_price),
-                    quantity=h.quantity,
-                    order_no="",
-                    strategy_id=actual_sid,
-                )
-                if h.name:
-                    ticker_names[h.ticker] = h.name
-                logger.warning(
-                    "포지션 동기화 (체결통보 누락 보완): %s %d주 @ %d (전략: %s)",
-                    h.name or h.ticker, h.quantity, int(h.avg_price), actual_sid,
-                )
+            # 체결통보 누락·권리 입고 — 열린 왕복 주인(켜진 전략) 또는 `unknown`(cycle461 ⑦-F1 안 U).
+            await _uhp.adopt_balance_only_holding(self.registry, h, path="sync")
 
         # 잔고 동기화 후 모든 전략의 매수 락/캐시 해제 — 가용액이 회복됐을 가능성 반영
         for s in self.registry.all():
@@ -3583,6 +3559,7 @@ class TradingScheduler:
         # cycle431 — 액면병합 등 수량 불일치 관측(쓰지 않는다, 사용자 결정 ①). leaf 위임.
         from src.engine.corporate_action_reconcile import observe_mid_session_sync
         await observe_mid_session_sync(self.registry, holdings)
+        await _uhp.sync_pass(self.registry, self.order_engine)  # cycle461 — unknown 재판정·백업 청산
 
     async def _settle(self) -> None:
         """일일 정산: 잔고 조회 후 전략별 + 합산 daily_performance 기록.

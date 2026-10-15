@@ -145,6 +145,7 @@ STRATEGY_IDS: tuple[str, ...] = (
     "kojiro",
     "etf_trend",
     "ndx2x_riskoff",
+    "unknown",
 )
 
 #: 화면 아코디언 순서 — (group_id, 한글 라벨, 한 줄 설명)
@@ -403,6 +404,12 @@ _AFTER_EXIT_DIVISION_CHOICES: tuple[Choice, ...] = (
 )
 
 #: cycle382 — 시장 유닛(단계형). 값 집합의 정본은 `market_unit.MODES`.
+_UNKNOWN_EXIT_MODE_CHOICES: tuple[Choice, ...] = (
+    Choice("off", "끄기 (기록도 주문도 없음)"),
+    Choice("observe", "관찰 (기본·부재·오타 포함 — 기록만, 주문 없음)"),
+    Choice("enforce", "적용 (KRX 정규장 창에서 시장가 청산)"),
+)
+
 _MARKET_UNIT_MODE_CHOICES: tuple[Choice, ...] = (
     Choice("off", "끄기 (부재·오타 포함 — 매수 수량·신호에 관여하지 않는다. "
                   "장세 계산·기록(prepare)은 계속된다)"),
@@ -1390,6 +1397,19 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
              " 매수를 조용히 줄이지 않는다. `PUT /api/strategies/{id}/params` 로"
              " 즉시 반영되는 킬스위치다. AI 자동 튜닝 대상이 아니다(`PARAM_RANGES`"
              "/`INT_PARAMS` 편입 금지 — 리스크 정체성 상수).",
+    ),
+
+    _s(
+        key="unknown_exit_mode", label_ko="비식별 보유 청산 모드", group="exit",
+        type="enum", min=None, max=None, step=None, unit="",
+        editable=True, risk="identity", auto_tunable=False, deprecated=False,
+        applies_to=("unknown",), range_src="enum", choices=_UNKNOWN_EXIT_MODE_CHOICES,
+        help="cycle461 ⑦-F1 안 U — 출처 모를 보유(KIS 잔고에만 있는 종목)를 맡은 비식별 보유"
+             " 전략이 KRX 정규장 09:00:30~15:28 에 시장가로 파는지. `observe`(기본·부재·오타"
+             " 포함) = `[unknown_exit_would_fire]` 기록만, 주문 없음. `enforce` = 시장가 청산"
+             "(종목당 하루 3회, 5분 간격). `off` = 기록도 주문도 없음. 판정 보류(DB 조회 실패)"
+             " 보유는 어느 모드에서도 팔지 않는다. `PUT /api/strategies/unknown/params` 로 즉시"
+             " 반영된다. AI 자동 튜닝 대상이 아니다(`PARAM_RANGES`/`INT_PARAMS` 편입 금지).",
     ),
 
     # ── 스캔·유니버스 (5) ───────────────────────────────────────────────────

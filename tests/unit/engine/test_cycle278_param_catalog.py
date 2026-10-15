@@ -96,6 +96,8 @@ _BRIEF_IDENTITY_KEYS = frozenset({
     "shadow_mode",
     # cycle405 — donchian 깡토식 청산·사이징 신규 7키. 전부 리스크 정체성 상수
     # (R·시간청산·하루상한)라 화면에서 바꾸려면 2단계 확인을 받아야 한다.
+    # cycle461 — 비식별 보유 청산 모드. 출처 모를 보유를 실제로 파는 스위치라 2단계 확인.
+    "unknown_exit_mode",
     "kk_r_floor_pct",
     "kk_r_atr_mult",
     "kk_breakeven_r",
@@ -224,11 +226,11 @@ def test_catalog_when_counted_then_102_specs_no_duplicates():
     cycle352 15:20 상한가 유지 확인 킬스위치로 102→103, cycle382 시장 유닛 모드로 103→104,
     cycle384 신규 매수 멈춤 `buy_paused` 로 104→105, cycle399 섀도 모드 `shadow_mode` 로 105→106,
     cycle403 ETF 추세 전략 신설로 106→118, cycle405 donchian 깡토식 신규 7키로 118→125), 키 중복 0."""
-    assert len(pc.PARAM_SPECS) == 125, f"스펙 {len(pc.PARAM_SPECS)}개 (기대 125)"
+    assert len(pc.PARAM_SPECS) == 126, f"스펙 {len(pc.PARAM_SPECS)}개 (기대 126)"  # cycle461 +unknown_exit_mode
     keys = [s.key for s in pc.PARAM_SPECS]
     dupes = sorted({k for k in keys if keys.count(k) > 1})
     assert not dupes, f"중복 키: {dupes}"
-    assert len(pc.SPEC_BY_KEY) == 125
+    assert len(pc.SPEC_BY_KEY) == 126
 
 
 def test_catalog_when_key_missing_from_default_params_then_fails():

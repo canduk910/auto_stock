@@ -85,7 +85,7 @@ _PINNED_DIRS = ("src/engine/strategies", "src/engine")
 _PINNED_DIR_FILE_COUNTS = {
     # cycle403 — 신규 전략 파일 `etf_trend.py` 로 8 → 9.
     # cycle443 — 신규 전략 파일 `ndx2x_riskoff.py` 로 9 → 10.
-    "src/engine/strategies": 10,
+    "src/engine/strategies": 11,  # cycle461 +unknown.py
     # cycle351 — 신규 leaf `pyramid_shadow.py` 로 77 → 78.
     # cycle363 — 신규 leaf `trading_calendar.py` 로 78 → 79.
     # cycle364 — 신규 leaf `funnel_capture.py` 로 79 → 80.
@@ -119,7 +119,7 @@ _PINNED_DIR_FILE_COUNTS = {
     # RS·재무 2단계(2026-10-13) — 신규 leaf `fundamental_load_tasks.py`(추가 적재 3갈래)·
     # `rs_fundamental_observe.py`(부팅 점수 관찰 기록) 로 104 → 106.
     # cycle455 — 신규 leaf `domestic_index_ingest.py`(종합지수 일봉 적재) 로 106 → 107.
-    "src/engine": 107,
+    "src/engine": 109,  # cycle461 +unknown_holding_policy.py +strategies/unknown.py
 }
 
 #: `scheduler.py` cycle257 영구 상한.

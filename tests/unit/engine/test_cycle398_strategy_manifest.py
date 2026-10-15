@@ -71,6 +71,7 @@ def test_manifest_eval_driver_columns_match_current_literals():
                            e.close_at_1520, e.market_unit_policy) for e in STRATEGY_MANIFEST}
     assert got == {
         "momentum": ("tick_scan", None, False, False, "none"),
+        "unknown": ("tick_scan", None, False, False, "none"),  # cycle461 비식별 보유
         "volatility_breakout": ("tick_breakout", 2, True, True, "none"),
         "long_tail_volatility": ("tick_breakout", 3, True, True, "none"),
         "donchian_swing": ("swing_poll", None, False, True, "scale"),   # cycle405 — 15:20 시간 청산

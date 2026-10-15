@@ -18,7 +18,7 @@ STATUS_EXIT = "src.engine.status_exit_watch"
 STRAT_PREFIX = "src.engine.strategies."
 
 _SIGNAL_NAMES = {"STOP_LOSS", "TRAILING_STOP", "TIME_EXIT", "TAKE_PROFIT", "TREND_EXIT",
-                 "FORCE_CLEAR", "NEXT_DAY_CLEAR", "STATUS_EXIT"}
+                 "FORCE_CLEAR", "NEXT_DAY_CLEAR", "STATUS_EXIT", "UNKNOWN_EXIT"}
 
 _LINE_RE = re.compile(
     r"^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) \[(\S+)\s*\] (\S+) — (.*)$"

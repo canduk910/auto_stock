@@ -47,6 +47,9 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 ### 전략 I: 나스닥2배-위험회피 (strategy_id: ndx2x_riskoff)
 고정 종목 418660(TIGER 미국나스닥100레버리지(합성))을 나스닥100 종가의 두 지표로 켜고 끈다 — T7 = 120일선의 20영업일 기울기, R4 = 250일 최고 종가 대비 낙폭. 기울기 하락 ∧ 낙폭 −20% 이하일 때만 현금, 그 밖은 2배 100%. 이력 부족·결측은 매매하지 않는다(fail-closed). 집행창 KST 09:30~10:30(양끝 포함) 밖에서는 평가 자체가 없다. **손절이 없다** — 노출 크기는 비중 상한이 정한다. 코드 기본 `shadow_mode=True`, 등록 `enabled=True, weight=0`, 시장 유닛 비대상. 실매수 경로는 미완성이다 — 섀도 해제 전 8영역(`order_engine.py`) 승인 + domain-consult 선행. 상세 = 6-I 절.
 
+### 전략 J: 비식별 보유 (strategy_id: unknown)
+매수하지 않는 전용 전략이다. KIS 잔고에는 있는데 어느 전략 장부에도 없는 보유(체결통보 누락 · 권리 입고 · 사람이 산 것)를 맡아 KRX 정규장 09:00:30~15:28 에 시장가로 판다. 비중 0 · 항상 켜짐 · 청산 모드 `unknown_exit_mode`(기본 `observe` = 기록만). 상세 = 6-J 절.
+
 ### 전략별 자금 비중
 - 프론트엔드 Settings 페이지에서 비중 조절. **단위 = 비율 0.0~1.0** (`PUT /api/strategies/weights` — 퍼센트 0~100 을 보내면 422). Σ > 1.0 이면 저장 전 거부(`success=false`). **진실 원천은 DB `strategy_config`**(9 전략) — 코드 기본값도 이 문서의 예시도 아니다. 운영값은 `GET /api/strategies` 로 읽는다.
 - ⚠️ **보유 중인 전략의 weight 를 0 으로 내리지 않는다** — weight 0 은 `registry.enabled()` 에서 이탈해 그 전략 보유 종목의 손절 평가가 멈춘다(`risk.py` `on_tick` 이 `enabled()` 를 단일 순회한다). 비활성화가 목적이면 `enabled` 축을 쓴다.
@@ -916,6 +919,40 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
   신호가 나면 CRITICAL 로 멈추고 주문을 내지 않는다(안전 측 — 시장가로 새지 않는다).
   매도(현금 전환)는 `execute_sell` 의 기존 `limit_price` 경로로 지정가가 이미 가능하다.
   실매수 전환 전 추가 확인 = 418660 레버리지 ETF 매수 자격(사전교육·기본예탁금, 자문 §1(c)).
+
+## 6-J. 전략 J: 비식별 보유 (unknown) 상세
+
+사용자 결정 2026-10-10(① 전용 전략 · ② 계좌(끝 5334) 자동매매 전용 → 무관 보유 없음 → 즉시 청산 허용 · ③ 권리 입고도 즉시 매도 · ④ 주인 전략이 꺼져 있으면 같은 청산 경로 · ⑤ `observe` 로 시작) + 2026-10-15 착수. 자문 = `_workspace/domain_consult/2026-10-10_f1_unknown_holding_liquidation.md`. 코드 = `src/engine/strategies/unknown.py` · `src/engine/unknown_holding_policy.py`.
+
+### 누가 맡나 — 감지 자리 둘
+- 07:45 부팅의 KIS 잔고 보완 복구 · 15분 잔고 동기화. 두 자리가 같은 판정을 쓴다.
+- 주인 = `trade_history` 의 **열린 왕복**(마지막 BUY(COMPLETED·PARTIAL·PENDING) 시각 > 마지막 SELL(COMPLETED·PARTIAL) 시각)의 전략.
+
+| 판정 | 맡는 전략 | 사유 | 판다 |
+|---|---|---|---|
+| 주인이 켜진 전략 | 그 전략 | — | 그 전략 규칙대로 |
+| 주인이 꺼진 전략 | `unknown` | `owner_disabled` | 예 |
+| 주인이 미등록 전략 id | `unknown` | `owner_unregistered` | 예 |
+| 열린 왕복 없음(0건 · 끝난 왕복뿐 · 권리 입고) | `unknown` | `no_owner` | 예 |
+| DB 조회 실패 | `unknown` | `lookup_failed` | **아니오** — 판정 보류, 15분마다 재판정 |
+
+- momentum 폴백은 이 경로에서 없어졌다. 권리 입고는 CTRGA 를 보지 않고 `no_owner` 로 판다(결정 ③).
+- 15분 경로도 DB `positions` 에 저장한다 — 재시작해도 `unknown` 표시가 남는다. 다만 채택 사유는 메모리라 재시작 뒤에는 사유가 없어 팔지 않고, 부팅·15분 동기화가 다시 판정한다(주인이 켜진 전략으로 확인되면 그 전략으로 옮긴다).
+
+### 청산
+- 창 = `status_exit_watch.FIRE_WINDOW_START`(09:00:30) ≤ t < `FIRE_WINDOW_END`(15:28). 프리장은 평가 보류(`risk._PRE_MARKET_EXIT_EVAL_STRATEGIES` 밖), 15:28~20:00(마감 동시호가·애프터)은 쏘지 않는다 — 다음 영업일.
+- `enforce` = `Signal.UNKNOWN_EXIT` → `order_engine.execute_sell` 시장가(거부 처리·지정가 5호가 폴백·TTL·수량 부족 보존 규약 그대로). 종목당 하루 3회(`status_exit_watch.MAX_FIRES_PER_DAY`), 발사 간격 300초(`SELL_INTERVAL_S` — 5분 거부 TTL 과 같은 폭). 다 쓰고도 남으면 `[unknown_exit_giveup]` CRITICAL 1회/일, 다음 영업일 다시.
+- 틱이 안 오는 종목은 15분 동기화가 같은 판정으로 직접 판다(같은 횟수·간격을 나눠 쓴다).
+- `observe` = `[unknown_exit_would_fire]` WARNING 1회/(종목)/일, 주문 0. `off` = 기록도 주문도 없음.
+
+### 모드·비중
+- `unknown_exit_mode` ∈ `off|observe|enforce`. 부재·오타·비문자열 = `observe`(주문이 아니라 기록 쪽으로 낙하). `PUT /api/strategies/unknown/params` 로 즉시 바뀐다. `PARAM_RANGES`/`INT_PARAMS`·AI 자문 편입 금지.
+- 비중 0 고정 · 항상 켜짐 — `config` 객체가 `enabled = False` 대입을 무시한다. `PUT /api/strategies/weights` 는 `unknown` > 0 을 422 로 거부하고, `unknown` 0 은 보유가 있어도 막지 않는다(끄지 않으니까). AI 자문(20:00)·외부 백테스트·funnel 캡처 대상이 아니다.
+
+### 알려진 한계
+- 「계좌 전용」 전제가 틀리면 사람 주식을 판다 — `observe` 기간과 끄기 장치가 이것을 줄인다.
+- 부팅 DB 복구에서 등록 안 된 전략 id 를 가진 행은 여전히 `FALLBACK_OWNER_ID`(momentum)로 떨어진다(이번 범위 밖).
+- 보유가 이미 장부에 있는 꺼진 전략(DB 1차 복구분)은 이 경로가 아니다 — 그 보유는 지금처럼 감시 0 이다.
 
 ## 7. 공통 규칙
 

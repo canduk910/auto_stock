@@ -145,7 +145,7 @@ def test_p04_params_schema_lists_shadow_mode(contract_env):
     assert len(rows) == 1, "[Red] params-schema 에 shadow_mode 없음"
     row = rows[0]
     assert (row["type"], row["risk"], row["editable"], row["auto_tunable"]) == ("bool", "identity", True, False)
-    assert sorted(row["applies_to"]) == sorted(ALL7)
+    assert sorted(row["applies_to"]) == sorted(ALL7 + ("unknown",))  # cycle461 — 공통 키라 unknown 도 갖는다
 
 
 # ===========================================================================

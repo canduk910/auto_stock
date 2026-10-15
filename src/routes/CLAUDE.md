@@ -189,6 +189,7 @@ body `{ticker, quantity}`, 시장가. 보유 전략이 있으면 그 전략 id·
 - **Σ 가드** — Σ(payload) > `1.0 + _WEIGHT_SUM_TOLERANCE`(1e-3) = **`success=false` + 저장 미수행** + `[weight_unit_violation]`
   WARNING. `registry.update_weights`/`save_weights` **전** early return 이라 메모리/DB split-brain 이 없다. **초과만** 잡는다
   (Σ<1 부분 payload 허용 — 전략 하나만 되돌리는 복구 저장을 막지 않는다).
+- 🔴 **비식별 보유 `unknown`(cycle461)** — 비중 0 고정 · 항상 켜짐 전략이다. payload 에 `unknown` > 0 이 있으면 저장 전 **422**(비중이 생기면 Σ 정규화로 다른 전략 예산을 깎는다). `unknown` 0 은 아래 비중 0 가드에서 **면제**한다(끄지 않으니 보유가 있어도 막을 이유가 없다 — 화면이 전 전략 비중을 보낼 때 막히지 않게). AI 자문 적용(`POST /api/recommendations/{id}/apply`)도 `unknown` 에 비중 > 0 이면 `success=false`, 비중 0 가드에서 면제(자문 엔진은 이 전략을 권고하지 않는다).
 - 🔴 **비중 0 가드**(cycle325) — 보유 종목을 든 전략(DB `positions` ∪ 메모리)에 비중 0 = `success=false` + `[weight_zero_guard]`.
   비중 0 은 `enabled` 자동 해제 = 그 보유분의 손절 정지다(루트 `CLAUDE.md` 「핵심 안전 규칙」). 하한선 검증보다 **앞**이라 부팅
   전(예산 합 0)에도 돈다. DB 보유 조회 실패 = 메모리로 판정 + `[weight_zero_probe_degraded]`.

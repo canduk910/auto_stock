@@ -459,9 +459,9 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle444 섀도 후보 구독 최후순위 사용자 승인 2026-10-11",
     ),
     "src/engine/scheduler.py": (
-        "6396743ff289c135e94592d54f83225fa498572aee516a493b49f7d23c1ac1ee",
-        "cycle450(2026-10-13) — _ndx2x_poll_loop NameError(_datetime·_KST 미정의) 수정, "
-        "사용자 승인 2026-10-13(「응 고쳐서 15:40에 함께 배포하자」)",
+        "c33709d5010db4b45d5d34ce1cbeda82eb45fbd003c83de189210ea55811890e",
+        "cycle461 ⑦-F1 안 U, 사용자 승인 2026-10-10·10-15 — _sync_positions_from_balance 의 "
+        "주인 판정·채택을 unknown_holding_policy 로 위임 + 끝 sync_pass 1줄",
     ),
     "src/engine/session.py": (
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",

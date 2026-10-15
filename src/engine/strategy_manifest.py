@@ -47,6 +47,7 @@ from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 from src.engine.strategy_base import StrategyBase
 from src.engine.strategies.etf_trend import EtfTrendStrategy
 from src.engine.strategies.ndx2x_riskoff import Ndx2xRiskoffStrategy
+from src.engine.strategies.unknown import UnknownHoldingStrategy
 
 #: 매수 평가 방식 — `tick_breakout` = 돌파 구독 그룹으로 후보를 구독하고 틱으로 평가(BFB·VCP·VB·LTV) ·
 #: `tick_scan` = 자기 스캔(`scan_stocks`) 결과로 구독하고 틱으로 평가(momentum) ·
@@ -138,6 +139,14 @@ STRATEGY_MANIFEST: tuple[StrategyEntry, ...] = (
     StrategyEntry(
         Ndx2xRiskoffStrategy, "ndx2x_riskoff", "나스닥2배-위험회피", True, 0.0,
         eval_driver="swing_poll", breakout_rank=None, open_price_target=False,
+        close_at_1520=False, market_unit_policy="none",
+    ),
+    # 비식별 보유(2026-10) — cycle461 ⑦-F1 안 U(사용자 결정 2026-10-10·10-15). 출처 모를 보유를
+    # 맡아 청산만 한다 — 비중 0 · 항상 켜짐(config 가 지킨다) · 매수 없음. `tick_scan` 은 소비처가
+    # 없는 분류라(후보 구독·폴·시가·15:20 어디에도 안 걸린다) 등록만 한다. 맨 끝 = 평가 순서 맨 뒤.
+    StrategyEntry(
+        UnknownHoldingStrategy, "unknown", "비식별 보유", True, 0.0,
+        eval_driver="tick_scan", breakout_rank=None, open_price_target=False,
         close_at_1520=False, market_unit_policy="none",
     ),
 )

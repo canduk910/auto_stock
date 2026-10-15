@@ -172,6 +172,8 @@ async def live_prepare_many(strategies, *, as_of, phase: str) -> dict:
 
 def capture_skip_reason(strategy, label: date, today: date, *, is_provisional: bool) -> str | None:
     """cycle364 §2.5 · R3 — 캡처가 이 전략 행을 저장해도 되는지 판정한다."""
+    if getattr(strategy, "strategy_id", "") == "unknown":
+        return "no_funnel"  # cycle461 — 비식별 보유는 후보 깔때기가 없다(매수하지 않는다)
     meta = getattr(strategy, "_live_prepare_meta", None)
     if not isinstance(meta, dict):
         return None if label == today else "no_meta"

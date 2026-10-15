@@ -3247,3 +3247,13 @@ cycle359 조사). cycle368 이 파서 기준점을 고치고, VI 수명 600초(�
 - `Position.is_next_day` 리터럴 정본 = `{donchian_swing, vcp_breakout, kojiro}`
 
 → CHANGELOG: cycle403 · cycle405 · cycle443 행
+
+## boot_manager.py 절 · 모듈 맵
+### 2026-10-15 cycle461 ⑦-F1 안 U — KIS 잔고 보완 복구의 momentum 폴백 폐지 (정본에서 옮긴 원문)
+
+- 출처 모를 주문·보유의 폴백 소유 — `FALLBACK_OWNER_ID = "momentum"` 단일 정본 — DB positions 복구 · KIS 잔고 보완 복구(기본값 + trade_history 조회로 덮어쓰기) 두 경로가 같은 상수와 헬퍼 `_resolve_fallback_owner` 를 공유한다. 값·행위는 그대로다.
+- ⑦ 관측 — 출처를 모르는 보유가 `FALLBACK_OWNER_ID` 로 떨어질 때(KIS 잔고 보완 복구에서 trade_history 미스) `[boot_recover_strategy_unknown] path=kis_supplement` WARNING. KIS 잔고 보완 복구의 trade_history 조회 예외는 `[boot_recover_trade_history_lookup_failed]` WARNING + 기본값(momentum) 유지.
+- 15분 잔고 동기화(`scheduler._sync_positions_from_balance`)는 `get_recent_buy_strategy(ticker) or "momentum"` 으로 주인을 정했고 DB 에 저장하지 않았다(메모리만).
+- 전략 등록 9행 / `strategies/` 9 전략 / `param_catalog.py` 9 전략 합집합 125 키.
+
+→ CHANGELOG: cycle461 행

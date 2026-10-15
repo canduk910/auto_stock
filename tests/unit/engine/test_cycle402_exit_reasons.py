@@ -79,7 +79,8 @@ def test_signal_when_cycle402_then_member_order_appends_after_existing():
     assert names[:7] == [
         "NONE", "BUY", "STOP_LOSS", "NEXT_DAY_CLEAR", "TRAILING_STOP", "FORCE_CLEAR", "STATUS_EXIT",
     ]
-    assert set(names[7:]) == {"TIME_EXIT", "TAKE_PROFIT", "TREND_EXIT"}
+    assert names[7:10] == ["TIME_EXIT", "TAKE_PROFIT", "TREND_EXIT"]
+    assert names[10:] == ["UNKNOWN_EXIT"]  # cycle461 — 끝에 덧붙였다
 
 
 # ═══════════════════════════════════════════════════════════════════════════

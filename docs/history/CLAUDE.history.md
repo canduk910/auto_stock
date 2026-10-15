@@ -1579,3 +1579,10 @@ EC2 사전 생성 규약의 `secrets/journal_worker.env` 문장(`env_file` 결�
 - 7 전략 공통 `DEFAULT_PARAMS["buy_paused"]=False` / `DEFAULT_PARAMS["shadow_mode"]=False` / `calc_buy_quantity()` 7 전략 / 폴·래치형 5전략
 
 → CHANGELOG: cycle403 · cycle443 · cycle446 행
+
+## 다중 전략 (요약)
+### 2026-10-15 cycle461 — 전략 수 9 → 10 (정본에서 옮긴 원문)
+
+- 9 전략: `momentum` / … / `ndx2x_riskoff`(나스닥2배-위험회피, cycle443 — 섀도 시작).
+
+→ CHANGELOG: cycle461 행
