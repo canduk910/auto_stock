@@ -35,6 +35,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
       - tests/unit/api/test_cycleC1_finance_fetch.py
@@ -95,6 +96,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -1437,6 +1439,7 @@ backend:
       - tests/unit/api/test_cycle385r_daily_orders_pdno.py
       - tests/unit/api/test_cycle430_daily_orders_pagination.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_insufficient_classification.py
       - tests/unit/api/test_quote_pool.py
       - tests/unit/api/test_rejection_classifier_pre_market_priority.py
@@ -1478,6 +1481,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -3015,6 +3019,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -3054,6 +3059,7 @@ backend:
       - tests/unit/api/test_cycle431_corporate_actions_api.py
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycleC1_finance_fetch.py
       - tests/unit/ast/test_ast_weight_no_magnitude_heuristic.py
@@ -4325,6 +4331,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -4445,6 +4452,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -5705,6 +5713,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -5840,6 +5849,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -7125,6 +7135,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -7261,6 +7272,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -8546,6 +8558,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -8682,6 +8695,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -9966,6 +9980,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -10102,6 +10117,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -11387,6 +11403,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -11521,6 +11538,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -12809,6 +12827,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -12943,6 +12962,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -14237,6 +14257,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -14372,6 +14393,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -15653,6 +15675,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -15789,6 +15812,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -17066,6 +17090,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -17201,6 +17226,7 @@ backend:
       - tests/unit/api/test_cycle431_corporate_actions_api.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -18486,6 +18512,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -18565,6 +18592,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -18701,6 +18729,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -19978,6 +20007,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -20114,6 +20144,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -21418,6 +21449,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -21554,6 +21586,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -22860,6 +22893,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -22988,6 +23022,7 @@ backend:
       - tests/unit/api/test_cycle431_corporate_actions_api.py
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -24297,6 +24332,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -24424,6 +24460,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -25677,6 +25714,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -25813,6 +25851,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -27121,6 +27160,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -27252,6 +27292,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -28523,6 +28564,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -28657,6 +28699,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -29941,6 +29984,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -30076,6 +30120,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -31362,6 +31407,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -31496,6 +31542,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -32780,6 +32827,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -32915,6 +32963,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -34199,6 +34248,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -34289,6 +34339,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -34425,6 +34476,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -35719,6 +35771,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -35853,6 +35906,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -37126,6 +37180,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -37262,6 +37317,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -38556,6 +38612,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -38688,6 +38745,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -39972,6 +40030,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -40105,6 +40164,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -41386,6 +41446,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -41522,6 +41583,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -42813,6 +42875,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -42947,6 +43010,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -44230,6 +44294,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -44364,6 +44429,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -45668,6 +45734,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -45798,6 +45865,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -47179,6 +47247,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -47234,6 +47303,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -48488,6 +48558,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -48623,6 +48694,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -49971,6 +50043,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -50098,6 +50171,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -51363,6 +51437,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -51495,6 +51570,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -52750,6 +52826,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -52885,6 +52962,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -54164,6 +54242,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -54306,6 +54385,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -55605,6 +55685,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -55734,6 +55815,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -57009,6 +57091,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -57145,6 +57228,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -58455,6 +58539,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -58584,6 +58669,7 @@ backend:
       - tests/unit/api/test_cycle431_corporate_actions_api.py
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
       - tests/unit/api/test_cycleC1_finance_allowlist.py
@@ -59853,6 +59939,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -59987,6 +60074,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -61297,6 +61385,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -61430,6 +61519,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -62690,6 +62780,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -62763,6 +62854,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -62899,6 +62991,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -64184,6 +64277,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -64320,6 +64414,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -65605,6 +65700,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -65741,6 +65837,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -67047,6 +67144,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -67183,6 +67281,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -68445,6 +68544,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -68524,6 +68624,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -68660,6 +68761,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -69943,6 +70045,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -70077,6 +70180,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -71360,6 +71464,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -71496,6 +71601,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -72798,6 +72904,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -72934,6 +73041,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -74198,6 +74306,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -74334,6 +74443,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -75624,6 +75734,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -75760,6 +75871,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -77043,6 +77155,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -77128,6 +77241,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -77264,6 +77378,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -78574,6 +78689,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -78710,6 +78826,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -79970,6 +80087,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -80106,6 +80224,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -81398,6 +81517,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -81534,6 +81654,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -82808,6 +82929,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -82944,6 +83066,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -84232,6 +84355,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -84367,6 +84491,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -85651,6 +85776,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -85787,6 +85913,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -87072,6 +87199,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -87208,6 +87336,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -88492,6 +88621,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -88628,6 +88758,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -89916,6 +90047,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -90051,6 +90183,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -91329,6 +91462,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -91407,6 +91541,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -91543,6 +91678,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -92827,6 +92963,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -92963,6 +93100,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -94247,6 +94385,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -94383,6 +94522,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -95666,6 +95806,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -95802,6 +95943,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -97086,6 +97228,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -97222,6 +97365,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -98504,6 +98648,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -98592,6 +98737,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -98728,6 +98874,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -100012,6 +100159,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -100148,6 +100296,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -101419,6 +101568,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -101494,6 +101644,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -101630,6 +101781,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -102919,6 +103071,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -103055,6 +103208,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -104351,6 +104505,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -104483,6 +104638,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -105752,6 +105908,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -105836,6 +105993,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -105972,6 +106130,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -107248,6 +107407,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -107383,6 +107543,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -108666,6 +108827,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -108802,6 +108964,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -110090,6 +110253,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -110226,6 +110390,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -111506,6 +111671,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -111642,6 +111808,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -112935,6 +113102,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -113071,6 +113239,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -114349,6 +114518,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -114485,6 +114655,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -115768,6 +115939,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -115904,6 +116076,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -117192,6 +117365,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -117327,6 +117501,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -118604,6 +118779,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -118740,6 +118916,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -120045,6 +120222,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -120129,6 +120307,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -120265,6 +120444,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -121552,6 +121732,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -121639,6 +121820,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -121775,6 +121957,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -123056,6 +123239,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -123143,6 +123327,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -123230,6 +123415,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -123366,6 +123552,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -124649,6 +124836,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -124785,6 +124973,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -126077,6 +126266,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -126213,6 +126403,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -127548,6 +127739,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -127681,6 +127873,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -128911,6 +129104,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -129047,6 +129241,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -130333,6 +130528,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -130469,6 +130665,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -131747,6 +131944,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -131883,6 +132081,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -133169,6 +133368,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -133305,6 +133505,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -134590,6 +134791,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -134726,6 +134928,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -136007,6 +136210,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -136436,6 +136640,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -137427,6 +137632,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -137757,6 +137963,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -138852,6 +139059,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -138988,6 +139196,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -140271,6 +140480,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -140407,6 +140617,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -141692,6 +141903,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -141828,6 +142040,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -143107,6 +143320,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -143243,6 +143457,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -144537,6 +144752,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -144673,6 +144889,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -145985,6 +146202,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -146121,6 +146339,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -147372,6 +147591,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -147508,6 +147728,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -148817,6 +149038,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -148953,6 +149175,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -150211,6 +150434,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -150347,6 +150571,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -151627,6 +151852,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -151763,6 +151989,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -153047,6 +153274,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -153183,6 +153411,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -154469,6 +154698,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -154605,6 +154835,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -155890,6 +156121,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -156026,6 +156258,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -157309,6 +157542,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -157445,6 +157679,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -158738,6 +158973,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -158874,6 +159110,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -160228,6 +160465,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -160364,6 +160602,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -161743,6 +161982,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -161798,6 +162038,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -163026,6 +163267,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -163162,6 +163404,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -164488,6 +164731,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -164624,6 +164868,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -165982,6 +166227,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -166037,6 +166283,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -167390,6 +167637,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -167445,6 +167693,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -168704,6 +168953,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -168840,6 +169090,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -170168,6 +170419,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -170304,6 +170556,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -171668,6 +171921,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -171723,6 +171977,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -173311,6 +173566,7 @@ backend:
       - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -173365,6 +173621,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -174381,6 +174638,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -174517,6 +174775,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -175807,6 +176066,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -175943,6 +176203,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -177385,6 +177646,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -177440,6 +177702,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -178640,6 +178903,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -178776,6 +179040,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -180066,6 +180331,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -180202,6 +180468,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -181485,6 +181752,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -181572,6 +181840,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -181708,6 +181977,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -182995,6 +183265,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -183131,6 +183402,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -184411,6 +184683,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -184547,6 +184820,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -185852,6 +186126,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -185988,6 +186263,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -187250,6 +187526,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -187385,6 +187662,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -188668,6 +188946,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -188804,6 +189083,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -190087,6 +190367,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -190223,6 +190504,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -191513,6 +191795,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -191649,6 +191932,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -192930,6 +193214,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -193066,6 +193351,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -194363,6 +194649,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -194499,6 +194786,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -195777,6 +196065,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -195911,6 +196200,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -197190,6 +197480,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -197263,6 +197554,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -197399,6 +197691,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -198683,6 +198976,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -198819,6 +199113,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -200111,6 +200406,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -200245,6 +200541,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -201526,6 +201823,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -201630,6 +201928,7 @@ backend:
       - tests/integration/test_trackc_trade_cost_pg.py
       - tests/integration/test_vb_board_stop_loss_fallback.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/engine/test_cycle271_execute_buy_fill_during_insert.py
       - tests/unit/engine/test_cycle276_order_time_hook.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
@@ -202949,6 +203248,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -203027,6 +203327,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -203162,6 +203463,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -204448,6 +204750,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -204582,6 +204885,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -205862,6 +206166,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -206043,6 +206348,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -206098,6 +206404,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -207355,6 +207662,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -207433,6 +207741,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -207585,6 +207894,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -207714,6 +208024,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -208969,6 +209280,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -209073,6 +209385,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -209203,6 +209516,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -210511,6 +210825,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -210642,6 +210957,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -211903,6 +212219,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -212039,6 +212356,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -213345,6 +213663,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -213476,6 +213795,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -214778,6 +215098,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -214908,6 +215229,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -216173,6 +216495,7 @@ backend:
       - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle420_weight_realloc_budget.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
@@ -216238,6 +216561,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_balance_perf.py
@@ -216311,6 +216635,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -216395,6 +216720,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -216470,6 +216796,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -216543,6 +216870,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -216616,6 +216944,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -216689,6 +217018,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -216765,6 +217095,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -216842,6 +217173,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -216916,6 +217248,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -216995,6 +217328,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -217067,6 +217401,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -217140,6 +217475,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -217213,6 +217549,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -217292,6 +217629,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -217365,6 +217703,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -217442,6 +217781,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -217525,6 +217865,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -217595,6 +217936,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -217668,6 +218010,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -217748,6 +218091,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -217829,6 +218173,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -217905,6 +218250,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -217978,6 +218324,7 @@ backend:
       - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle420_weight_realloc_budget.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
@@ -218056,6 +218403,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -218132,6 +218480,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -218216,6 +218565,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
@@ -218298,6 +218648,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_balance_perf.py
@@ -218431,6 +218782,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -219709,6 +220061,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -219845,6 +220198,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -221134,6 +221488,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -221269,6 +221624,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -222550,6 +222906,7 @@ backend:
       - tests/contract/test_cycle434_routes_system_alerts.py
       - tests/contract/test_cycle446_balance_ai_verdict.py
       - tests/contract/test_cycle446_routes_system_alerts_exit_ai.py
+      - tests/contract/test_cycle459_balance_deposit_d2_route.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
@@ -222685,6 +223042,7 @@ backend:
       - tests/unit/api/test_cycle443_overseas_quote.py
       - tests/unit/api/test_cycle447_balance_5xx_base.py
       - tests/unit/api/test_cycle447_balance_cache.py
+      - tests/unit/api/test_cycle459_balance_deposit_d2.py
       - tests/unit/api/test_cycle76_error_preservation_matrix.py
       - tests/unit/api/test_cycle76_recovered_collector.py
       - tests/unit/api/test_cycle76_request_5xx_dedupe.py
@@ -223974,6 +224332,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -224006,6 +224366,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -224381,6 +224743,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -224437,6 +224801,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -224485,6 +224851,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -224659,6 +225027,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -224850,6 +225220,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -225026,6 +225398,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -225056,6 +225430,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -225246,6 +225622,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -225381,6 +225759,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -225493,6 +225873,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -225612,6 +225994,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -225729,6 +226113,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -225847,6 +226233,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -225964,6 +226352,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -226083,6 +226473,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -226201,6 +226593,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -226335,6 +226729,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -226439,6 +226835,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -226537,6 +226935,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -226675,6 +227075,8 @@ frontend:
       - frontend/src/api/__tests__/trading.params.test.ts
       - frontend/src/api/__tests__/trading.test.ts
       - frontend/src/components/__tests__/AlertLight.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
       - frontend/src/components/__tests__/DailyReportTab.cycle445.test.tsx
       - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
@@ -226788,6 +227190,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -226927,6 +227331,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -227081,6 +227487,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -227214,6 +227622,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -227345,6 +227755,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -227468,6 +227880,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -227627,6 +228041,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -227768,6 +228184,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -227875,6 +228293,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -228029,6 +228449,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -228154,6 +228576,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -228214,6 +228638,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -228278,6 +228704,8 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.cycle411b.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411c.test.tsx
       - frontend/src/components/__tests__/BalanceTable.cycle411d.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.depositD2.cycle459.test.tsx
       - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - >-
@@ -228385,12 +228813,12 @@ frontend:
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-15T03:17:06.440Z'
+generated_at: '2026-10-15T06:46:32.133Z'
 stats:
   backend_modules: 209
-  backend_tests: 1401
+  backend_tests: 1403
   frontend_modules: 168
-  frontend_tests: 177
+  frontend_tests: 178
   unmapped_modules:
     - frontend/src/api/backtest.ts
     - frontend/src/api/journal-chart.ts

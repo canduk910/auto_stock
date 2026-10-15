@@ -172,6 +172,19 @@ def is_insufficient_quantity(err: KisApiError) -> bool:
     return False
 
 
+def _optional_won(value: object) -> int | None:
+    """KIS 금액 문자열 → 정수 원. 없음·빈 값·숫자 아님은 None(0 으로 채우지 않는다)."""
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    try:
+        return int(float(text))
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
 async def get_balance(afhr_flpr: str = "N") -> tuple[list[StockHolding], AccountSummary]:
     """주식 잔고 및 계좌 요약을 조회한다.
 
@@ -214,6 +227,8 @@ async def get_balance(afhr_flpr: str = "N") -> tuple[list[StockHolding], Account
     s = summary_data[0] if summary_data else {}
     summary = AccountSummary(
         deposit=int(s.get("dnca_tot_amt", 0)),
+        deposit_d1=_optional_won(s.get("nxdy_excc_amt")),
+        deposit_d2=_optional_won(s.get("prvs_rcdl_excc_amt")),
         stock_eval_amount=int(s.get("scts_evlu_amt", 0)),
         total_eval_amount=int(s.get("tot_evlu_amt", 0)),
         net_asset=int(s.get("nass_amt", 0)),

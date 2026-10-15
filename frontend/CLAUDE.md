@@ -564,6 +564,8 @@ testid = `strategy-summary-table` · `strategy-summary-row-{sid}` · `strategy-s
 
 ## BalanceTable
 
+**계좌 요약 카드 (cycle459)**: 표 위 카드 줄 순서 = 예수금 → **D+2 예수금** → 총 평가금 → 순자산 → 총 평가손익(`lg:grid-cols-5`). D+2 예수금 = `summary.deposit_d2`(`/api/balance` 와 같은 응답이라 잔고 폴링마다 같이 바뀐다). testid `balance-summary-deposit-d2`, `title` = 「D+2 결제 후 예수금(가수도정산금액) — 매도대금이 들어오고 매수대금이 빠진 뒤 금액」. 값은 `toSafeWon`(숫자·숫자 문자열만) 을 거친 뒤에만 그리고, `null`·칸 없음(구 서버)은 「—」 다(0원으로 접지 않는다). `deposit_d1`(D+1)은 타입에만 있고 표시하지 않는다. 회귀 = `components/__tests__/BalanceTable.depositD2.cycle459.test.tsx`.
+
 **행 더블클릭 → 종목 차트**(「종목 차트 모달」 절). 행 testid `balance-row-{ticker}`.
 
 **섹터 컬럼**: 헤더 순서 `종목명 → 섹터 → 거래시장 → (전략) → …`. `Holding.sector`, 없으면 `-`. `data-testid="sector-{ticker}"`. `/api/balance` 가 **이미 조회한 stock_master basics 를 재사용**한다(추가 DB 호출 0) — `sector_naming` 단일 진실원(`bstp_kor_isnm` → `_kojiro_sector_key(master_raw)` → `미분류-{ticker}`).

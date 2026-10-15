@@ -13,7 +13,7 @@
  *         세후 ≤ 세전, 첫 행의 「창 이전 누적」 이 세전·세후 같다
  *         (`(1+누적)/(1+당일)` 이 두 축에서 같아야 한다 — 비용은 창 안에만 있다).
  *  - MH9: `/api/performance/summary` 세후 ≤ 세전(가드).
- *  - MH10: `/api/balance` 기본 목은 실제 모양 `{holdings: [...], summary: {7키}}` — 구 `positions`·`total_eval`
+ *  - MH10: `/api/balance` 기본 목은 실제 모양 `{holdings: [...], summary: {9키 — cycle459 deposit_d1·d2 포함}}` — 구 `positions`·`total_eval`
  *          `total_asset` 모양 금지. 보유가 있으면 각 행에 실비용 칸(`sell_cost_rate`·`cost_status`·`buy_fee_paid`·`buy_fee_status`).
  *  - MH11: `/api/history` 기본 행은 실제 모양 — `fee`·`cost_status`·`order_price` 키(SELL 이면 `tax`·`net_profit_loss` 도).
  */
@@ -93,8 +93,8 @@ describe('cycle411c — MSW 기본 목 산수 정합 (F13)', () => {
     expect(Object.keys(d).sort()).toEqual(['holdings', 'summary'])
     expect(Array.isArray(d.holdings)).toBe(true)
     expect(Object.keys(d.summary as Row).sort()).toEqual([
-      'deposit', 'eval_total', 'net_asset', 'profit_loss_total', 'purchase_total',
-      'stock_eval_amount', 'total_eval_amount',
+      'deposit', 'deposit_d1', 'deposit_d2', 'eval_total', 'net_asset', 'profit_loss_total',
+      'purchase_total', 'stock_eval_amount', 'total_eval_amount',
     ])
     for (const h of d.holdings as Row[]) {
       for (const k of [

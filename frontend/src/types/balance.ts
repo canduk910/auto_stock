@@ -52,6 +52,10 @@ export interface Holding {
 
 export interface BalanceSummary {
   deposit: number
+  // cycle459 — 같은 잔고 응답(TTTC8434R output2)의 결제 예정 예수금. 정수 원.
+  // null = 모름(KIS 응답에 칸이 없거나 숫자가 아님), 칸 자체가 없으면 구 서버.
+  deposit_d1?: number | null // nxdy_excc_amt (익일정산금액 = D+1)
+  deposit_d2?: number | null // prvs_rcdl_excc_amt (가수도정산금액 = D+2)
   stock_eval_amount: number
   total_eval_amount: number
   net_asset: number

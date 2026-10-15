@@ -161,6 +161,8 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
         holdings: [],
         summary: {
           deposit: 10_000_000,
+          deposit_d1: 10_000_000,
+          deposit_d2: 10_000_000,
           stock_eval_amount: 0,
           total_eval_amount: 10_000_000,
           net_asset: 10_000_000,
