@@ -1565,3 +1565,8 @@ EC2 사전 생성 규약의 `secrets/journal_worker.env` 문장(`env_file` 결�
 - **시장 유닛 `market_unit_mode` (cycle382, 사용자 결정 2026-09-27)** — 장세(KODEX 200 `069500` 직전 영업일 봉의 60일선 위치·기울기)에 따라 터틀 4전략(`kojiro`·`donchian_swing`·`bull_flag_breakout`·`vcp_breakout`)의 **신규 진입 설계 랏만** 1 / 0.75 / 0.5 / 0 배로 줄인다(예산 경로·K축·ρ축·보유분·청산은 무접촉). 못 사는 종목은 수량 0 이 아니라 **신호 단계 `Signal.NONE`** 으로 거른다(수량 0 은 900s cooldown 으로 오귀인된다). 결측·예외 = **m=1** + WARNING. 모드 `off|shadow|enforce`(부재·오타 = `off`, 4전략 기본 `shadow`)는 PUT params 로 **즉시** 바뀐다. `PARAM_RANGES`/`INT_PARAMS`·AI 자문 자동 적용 경로 **편입 금지**. 🔴 **매크로 레짐과 다른 축이다**. 규칙 = `src/engine/strategies/CLAUDE.md` 「시장 유닛 — 터틀 4전략 (cycle382)」 절 · 계산 자리·마커 = `src/engine/CLAUDE.md` `strategy_base.py` 절
 
 → CHANGELOG: cycle455 행
+
+### 2026-10-15 — 장외 배포 창에 아침 예외 추가
+
+- 계기: cycle457 이 10-15 08:15 에 배포됐다(장외 창 07:45 밖, 보유 0 · LTV 섀도라 프리장 매수 불가 · 피해 없음, `pre_market_blind_secs=111`). 로컬 세션 점검이 이를 이상으로 보고했고, 사용자가 「보유 0 이고 프리장 매수 창이 열린 전략이 없으면 07:45~09:00 배포 허용」 규칙 추가를 결정(「응 넣자」).
+- 정본 반영 = 루트 `CLAUDE.md` 「Docker / 배포」 운영 가이드 + 자율 진행 「사전 승인 범위」 (b).
