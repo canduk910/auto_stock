@@ -950,13 +950,17 @@ class BullFlagBreakoutStrategy(StrategyBase):
                 ticker, flag_high, flag_low,
             )
 
-    def _release_latch(self, ticker: str, reason: str) -> None:
+    def _release_latch(self, ticker: str, reason: str, where: str | None = None) -> None:
         self._vol_latch.pop(ticker, None)
         # tester D-3 — cap 키에 reason 포함(cycle225 교훈: 같은 날 level_moved →
         # 재래치 → stop_line 이중 해제 시 사유별 대응이 갈리는데 한 사유가 다른
         # 사유를 삼키면 안 된다). 최대 2행/(ticker)/일.
         if self._gate_should_emit(ticker, f"latch_released:{reason}"):
-            logger.info("[bfb_latch_released] ticker=%s reason=%s", ticker, reason)
+            if where:
+                # cycle460 — 만석 경로만 끝 필드 ` where=full`(비만석 줄은 바이트 그대로).
+                logger.info("[bfb_latch_released] ticker=%s reason=%s where=%s", ticker, reason, where)
+            else:
+                logger.info("[bfb_latch_released] ticker=%s reason=%s", ticker, reason)
 
     def _check_extension_cap_invariant(self) -> None:
         """cycle228 (A4) — 추격 상한 리터럴 ↔ 손절 도출 관계 관찰 (fail-open).
@@ -994,16 +998,32 @@ class BullFlagBreakoutStrategy(StrategyBase):
         """cycle449 — 만석(`is_max_positions`)인 동안에도 직전 가격(`_prev_price`)을 따라간다.
 
         얼려 두면 슬롯이 빈 첫 틱에 이미 `flag_high` 위에 있던 종목이 `prev < flag_high <=
-        current` 로 읽혀 거짓 돌파로 산다(VB·LTV 09:00 진입 보류와 같은 규약). 래치 무장
-        종목은 건드리지 않는다(`_prev_price` 는 fresh 경로에서만 read-then-write). 만석이
+        current` 로 읽혀 거짓 돌파로 산다(VB·LTV 09:00 진입 보류와 같은 규약). 오늘자 래치
+        무장 종목은 비만석과 같은 해제 규칙(`level_moved` → `stop_line`)만 보고, 안 풀리면
+        건드리지 않는다(cycle460 — `_prev_price` 는 fresh 경로에서만 read-then-write). 만석이
         지운 돌파 대기는 「후퇴」가 아니라 카운터·로그 없이 버린다. 동기·순수 메모리·never-raise.
         """
         try:
             info = self._candidates.get(ticker)
             if not info or current_price <= 0:
                 return
-            if ticker in self._vol_latch and self._latch_entry(ticker) is not None:
-                return  # 오늘자 래치만 불가침 — 낡은 래치는 `_latch_entry` 가 읽으며 지운다
+            latch = self._latch_entry(ticker) if ticker in self._vol_latch else None
+            if latch is not None:
+                # cycle460 — 오늘자 래치에 비만석 래치 블록과 같은 해제 규칙을 적용한다
+                # (`level_moved` 먼저 → `stop_line`, 하단 > 0 ∧ 엄격 부등호). 둘 다 아니면
+                # 래치·직전 가격 무접촉. 해제 틱도 비만석 해제 틱과 같이 해제만 하고
+                # 반환한다(`_prev_price`·`_breakout_first_seen`·교차 로그 무접촉) — 다음
+                # 틱부터 래치 없는 종목처럼 추적한다. 낡은 래치는 `_latch_entry` 가 지운다.
+                self._roll_gate_day_if_needed()
+                line = info["flag_high"]
+                low = info.get("flag_low", 0)
+                if latch["flag_high"] != line or latch["flag_low"] != low:
+                    self._release_latch(ticker, "level_moved", where="full")
+                    return
+                elif low > 0 and current_price < low:
+                    self._release_latch(ticker, "stop_line", where="full")
+                    return
+                return
             self._roll_gate_day_if_needed()
             self._breakout_first_seen.pop(ticker, None)
             prev = self._prev_price.get(ticker, 0)

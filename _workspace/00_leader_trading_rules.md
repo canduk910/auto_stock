@@ -567,7 +567,7 @@ donchian_swing 은 멀티데이 보유 + ATR×2 Chandelier + 하드 손절 전�
 ### 매수 규칙
 - **진입 조건**: 현재가가 `flag_high`(플래그 상단) 돌파 순간 + **실측 거래량 게이트 통과**
   - 돌파 순간: `이전 틱 < flag_high AND 현재 틱 ≥ flag_high` (VB 컨벤션 — `_prev_price[ticker]` 추적)
-  - **슬롯이 찬 동안에도 이전 틱을 따라간다(cycle449)**: `is_max_positions()` 로 막힌 틱도 `_prev_price` 는 갱신하고, 유지 대기(`_breakout_first_seen`)는 버린다. 슬롯이 비는 순간 이미 `flag_high` 위에 있던 종목은 돌파가 아니다 — 선 아래로 내려갔다 다시 넘어야 산다. 오늘자 거래량 래치가 무장된 종목은 건드리지 않는다. 관측 `[bfb_full_cross_skipped]`(INFO, 1회/종목/일). 순서·알려진 한계 = `src/engine/strategies/CLAUDE.md` 각주 ①.
+  - **슬롯이 찬 동안에도 이전 틱을 따라간다(cycle449)**: `is_max_positions()` 로 막힌 틱도 `_prev_price` 는 갱신하고, 유지 대기(`_breakout_first_seen`)는 버린다. 슬롯이 비는 순간 이미 `flag_high` 위에 있던 종목은 돌파가 아니다 — 선 아래로 내려갔다 다시 넘어야 산다. 오늘자 거래량 래치가 무장된 종목은 만석 중에도 비만석과 같은 해제 규칙을 본다(cycle460) — 레벨 이동 또는 `flag_low` 이탈(엄격, 동가 유지)이면 풀고(`[bfb_latch_released] … where=full`, 그 틱은 비만석 해제 틱처럼 직전 가격을 쓰지 않는다) 다음 틱부터 래치 없는 종목처럼 따라가며, 아니면 건드리지 않는다. 관측 `[bfb_full_cross_skipped]`(INFO, 1회/종목/일). 순서·알려진 한계 = `src/engine/strategies/CLAUDE.md` 각주 ①.
   - **거래량 컷**: `tick_volume.get_observed_acml_vol(ticker)` 실측 누적거래량 ≥ `flag_avg_volume × breakout_volume_mult`. **소스는 `tick_volume` 뿐이고 미관측(`None`)은 fail-closed** 다 — `0` sentinel 금지 계약은 `tick_volume` 자체가 보장한다. 읽기 실패도 미관측과 같이 다뤄 예외가 `check_buy_signal` 밖으로 새지 않게 한다(on_tick 이 죽으면 그 종목의 청산 평가까지 멈춘다).
   - **충족 래치**: 돌파 후 거래량이 아직 모자라면 `_vol_latch` 에 무장해 두고 같은 날 재평가한다(entry 별 `armed_date` 로 자기 무효화).
   - **추격 상한**: 거래량을 채워도 `(현재가 − flag_high) / flag_high × 100 > max_breakout_extension_pct`(기본 **5.0**)면 진입하지 않는다. 판정은 `current_price` 단독이다 — `daily_high`/`ticker_prices` 를 쓰지 않는다(donchian 이식 시 그 커플링이 딸려온다).
@@ -724,7 +724,7 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 - **진입 조건**: 현재가가 `base_high`(베이스 상단, `pivot_high`) 돌파 순간 + **실측 거래량 게이트 통과**
   - **거래량 컷**: `tick_volume.get_observed_acml_vol(ticker)` 실측 누적거래량 ≥ `avg_volume_20 × breakout_volume_mult`. BFB 와 **동형**이다 — 소스는 `tick_volume` 뿐, 미관측은 fail-closed, 충족 래치, 추격 상한(`max_breakout_extension_pct` 기본 **7.5**), 마커 `[vcp_vol_gate_*]`.
   - 돌파 순간: `이전 틱 < base_high AND 현재 틱 ≥ base_high` (VB 컨벤션)
-  - **슬롯이 찬 동안에도 이전 틱을 따라간다(cycle449)**: BFB 와 **동형**이다 — `is_max_positions()` 로 막힌 틱도 `_prev_price` 를 갱신해, 슬롯이 비는 순간 이미 `base_high` 위에 있던 종목을 돌파로 읽지 않는다. 관측 `[vcp_full_cross_skipped]`(INFO, 1회/종목/일). 순서·알려진 한계 = `src/engine/strategies/CLAUDE.md` 각주 ①.
+  - **슬롯이 찬 동안에도 이전 틱을 따라간다(cycle449)**: BFB 와 **동형**이다 — `is_max_positions()` 로 막힌 틱도 `_prev_price` 를 갱신해, 슬롯이 비는 순간 이미 `base_high` 위에 있던 종목을 돌파로 읽지 않는다. 만석 중 래치 해제(레벨 이동 · `base_low` 이탈, `[vcp_latch_released] … where=full`)도 BFB 와 같다(cycle460). 관측 `[vcp_full_cross_skipped]`(INFO, 1회/종목/일). 순서·알려진 한계 = `src/engine/strategies/CLAUDE.md` 각주 ①.
 - **진입 시간대**: **09:05 ~ 14:30 KRX 메인** (`entry_start=09:05` / `entry_end=14:30`)
   - `tradable_boards=("main",)`
 - **거래소 라우팅**: 기본 `KRX`

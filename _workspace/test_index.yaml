@@ -754,6 +754,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
       - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
@@ -2173,6 +2174,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -3608,6 +3610,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
       - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
@@ -5007,6 +5010,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
       - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
@@ -6415,6 +6419,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -7838,6 +7843,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -9260,6 +9266,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -10682,6 +10689,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -12104,6 +12112,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -13526,6 +13535,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -14956,6 +14966,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -16376,6 +16387,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -17792,6 +17804,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -19294,6 +19307,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -20710,6 +20724,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -22152,6 +22167,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -23579,6 +23595,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -25021,6 +25038,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -26417,6 +26435,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -27851,6 +27870,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -29262,6 +29282,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -30685,6 +30706,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -32106,6 +32128,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -33529,6 +33552,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -35040,6 +35064,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -36465,6 +36490,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -37883,6 +37909,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -39306,6 +39333,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -40727,6 +40755,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -42148,6 +42177,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -43570,6 +43600,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -44992,6 +45023,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -46419,6 +46451,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -47865,6 +47898,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -49259,6 +49293,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -50705,6 +50740,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -52109,6 +52145,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -53525,6 +53562,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -54949,6 +54987,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -56373,6 +56412,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -57794,6 +57834,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -59223,6 +59264,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -60639,6 +60681,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -62071,6 +62114,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -63557,6 +63601,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -64980,6 +65025,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -66403,6 +66449,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -67840,6 +67887,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -69327,6 +69375,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -70746,6 +70795,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -72167,6 +72217,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -73606,6 +73657,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -75009,6 +75061,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -76436,6 +76489,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -77944,6 +77998,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -79383,6 +79438,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -80789,6 +80845,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -82218,6 +82275,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -83632,6 +83690,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -85056,6 +85115,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -86478,6 +86538,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle431_rederive_guard.py
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -87902,6 +87963,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -89324,6 +89386,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -90749,6 +90812,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -92242,6 +92306,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -93665,6 +93730,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -95087,6 +95153,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle431_rederive_guard.py
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -96508,6 +96575,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -97931,6 +97999,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -99440,6 +99509,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -100862,6 +100932,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -102345,6 +102416,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -103774,6 +103846,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -105203,6 +105276,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -106695,6 +106769,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -108109,6 +108184,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -109530,6 +109606,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -110955,6 +111032,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle431_rederive_guard.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -112374,6 +112452,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -113803,6 +113882,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -115218,6 +115298,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -116642,6 +116723,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -118066,6 +118148,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -119482,6 +119565,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -121010,6 +121094,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -122523,6 +122608,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -124118,6 +124204,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -125539,6 +125626,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -126967,6 +127055,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -128413,6 +128502,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -129807,6 +129897,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -131231,6 +131322,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -132647,6 +132739,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -134071,6 +134164,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -135494,6 +135588,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -137091,6 +137186,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
       - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
@@ -138499,6 +138595,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
       - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
@@ -139762,6 +139859,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -141183,6 +141281,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -142606,6 +142705,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -144023,6 +144123,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -145452,6 +145553,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -146891,6 +146993,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -148292,6 +148395,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -149732,6 +149836,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -151137,6 +151242,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -152555,6 +152661,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -153977,6 +154084,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -155401,6 +155509,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -156823,6 +156932,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -158245,6 +158355,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -159672,6 +159783,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -161142,6 +161254,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle431_rederive_guard.py
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
       - tests/unit/engine/strategies/test_cycleC_vcp_breakeven.py
@@ -162572,6 +162685,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -163969,6 +164083,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle431_rederive_guard.py
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -165418,6 +165533,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle405_donchian_kk_sizing.py
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -166827,6 +166943,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle431_rederive_guard.py
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -168250,6 +168367,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -169655,6 +169773,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle431_rederive_guard.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -171100,6 +171219,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle405_donchian_kk_sizing.py
       - tests/unit/engine/strategies/test_cycle431_rederive_guard.py
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
       - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
       - tests/unit/engine/strategies/test_cycleC_bfb_breakeven.py
@@ -172520,6 +172640,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle431_rederive_guard.py
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -173382,6 +173503,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -175341,6 +175463,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -176767,6 +176890,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -178265,6 +178389,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -179606,6 +179731,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -181033,6 +181159,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -182543,6 +182670,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -183967,6 +184095,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -185385,6 +185514,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -186098,6 +186228,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle382_market_unit_signal.py
       - tests/unit/engine/strategies/test_cycle384_buy_paused_unpause.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_vcp_breakout.py
       - tests/unit/engine/test_cycle227_e2e_acml_vol_pipeline.py
       - tests/unit/engine/test_cycle227_risk_on_tick_acml.py
@@ -188228,6 +188359,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -189649,6 +189781,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -191070,6 +191203,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -192497,6 +192631,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -193917,6 +194052,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -195352,6 +195488,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -196766,6 +196903,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -198257,6 +198395,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -199679,6 +199818,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -201106,6 +201246,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -202540,6 +202681,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -204029,6 +204171,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -205449,6 +205592,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -206968,6 +207112,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -208571,6 +208716,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -210075,6 +210221,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -211519,6 +211666,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -212920,6 +213068,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -214361,6 +214510,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -215787,6 +215937,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -219348,6 +219499,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -220764,6 +220916,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -222190,6 +222343,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -223607,6 +223761,7 @@ backend:
       - tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py
       - tests/unit/engine/strategies/test_cycle449_slot_full_baseline.py
       - tests/unit/engine/strategies/test_cycle457_chart_indicators.py
+      - tests/unit/engine/strategies/test_cycle460_latch_release_while_full.py
       - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
       - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
       - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -228813,10 +228968,10 @@ frontend:
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-15T07:01:49.384Z'
+generated_at: '2026-10-15T07:09:12.341Z'
 stats:
   backend_modules: 209
-  backend_tests: 1403
+  backend_tests: 1404
   frontend_modules: 168
   frontend_tests: 178
   unmapped_modules:
