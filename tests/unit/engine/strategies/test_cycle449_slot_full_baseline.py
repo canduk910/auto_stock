@@ -321,11 +321,11 @@ def test_price_drops_below_line_while_full_then_cross_after_free_buys(kit):
 # T4 — 래치 불가침
 # ###########################################################################
 
-def test_latched_ticker_untouched_while_full(kit, caplog):
-    """T4 — 만석 전에 래치가 무장된 종목은 만석 동안 `_prev_price`·`_vol_latch` 그대로.
+def test_latched_ticker_untouched_while_full_above_low(kit, caplog):
+    """T4 — 만석 전에 래치가 무장된 종목은 만석 동안 하단 위 틱이면 `_prev_price`·`_vol_latch` 그대로.
 
     기존 규약(001450 회귀): `_prev_price` 는 fresh 경로에서만 read-then-write 하고
-    래치 재평가 경로에서는 건드리지 않는다.
+    래치 재평가 경로에서는 건드리지 않는다. 하단 아래 틱은 아래 T4c(cycle460)가 본다.
     """
     caplog.set_level(logging.INFO, logger=kit.logger_name)
     strat = kit.make()
@@ -338,12 +338,28 @@ def test_latched_ticker_untouched_while_full(kit, caplog):
         prev_before = strat._prev_price[kit.ticker]
 
         _fill_slots(strat)
-        for price in (kit.line - 300, kit.line + 200, kit.low - 1, kit.line + 50):
+        for price in (kit.line - 300, kit.line + 200, kit.low + 1, kit.line + 50):
             assert _tick(strat, kit, price) == Signal.NONE
 
     assert strat._prev_price[kit.ticker] == prev_before, "래치 무장 종목의 `_prev_price` 가 바뀌었다"
     assert strat._vol_latch.get(kit.ticker) == latch_before, "만석 추적이 래치를 건드렸다"
     assert _marker_records(caplog, kit) == [], "래치 무장 종목에 교차 스킵 로그가 찍혔다"
+
+
+def test_latched_ticker_released_while_full_below_low(kit):
+    """T4c (cycle460) — 만석 중 하단 아래 틱은 래치를 해제하고 그 틱부터 직전 가격을 추적한다."""
+    strat = kit.make()
+    with freeze_time(IN_WINDOW):
+        tick_volume.record_acml_vol(kit.ticker, kit.short_vol)
+        strat._prev_price[kit.ticker] = kit.line - 100
+        assert _tick(strat, kit, kit.line + 100) == Signal.NONE
+        assert kit.ticker in strat._vol_latch, "픽스처 오류 — 래치가 무장되지 않았다"
+
+        _fill_slots(strat)
+        assert _tick(strat, kit, kit.low - 1) == Signal.NONE
+
+    assert kit.ticker not in strat._vol_latch, "만석 중 하단 이탈인데 래치가 남았다"
+    assert strat._prev_price[kit.ticker] == kit.low - 1
 
 
 def test_stale_yesterday_latch_does_not_freeze_tracking_while_full(kit):
