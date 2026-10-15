@@ -1570,3 +1570,12 @@ EC2 사전 생성 규약의 `secrets/journal_worker.env` 문장(`env_file` 결�
 
 - 계기: cycle457 이 10-15 08:15 에 배포됐다(장외 창 07:45 밖, 보유 0 · LTV 섀도라 프리장 매수 불가 · 피해 없음, `pre_market_blind_secs=111`). 로컬 세션 점검이 이를 이상으로 보고했고, 사용자가 「보유 0 이고 프리장 매수 창이 열린 전략이 없으면 07:45~09:00 배포 허용」 규칙 추가를 결정(「응 넣자」).
 - 정본 반영 = 루트 `CLAUDE.md` 「Docker / 배포」 운영 가이드 + 자율 진행 「사전 승인 범위」 (b).
+
+## 다중 전략 (요약)
+### 2026-10-15 문서 동기화 — 시장 유닛 5전략, 선택 배포 축 llm 추가, 공통 키 전략 수 (정본에서 옮긴 원문)
+
+- 터틀 4전략(`kojiro`·`donchian_swing`·`bull_flag_breakout`·`vcp_breakout`)의 **신규 진입 설계 랏만** … 4전략 기본 `shadow` … 「시장 유닛 — 터틀 4전략 (cycle382)」 절
+- **선택 배포**(축 `frontend` · `macro` · `journal` 중 걸린 것을 그 순서로 `+` 로 이은 모드 — `journal`, `frontend+macro+journal` 등. …)
+- 7 전략 공통 `DEFAULT_PARAMS["buy_paused"]=False` / `DEFAULT_PARAMS["shadow_mode"]=False` / `calc_buy_quantity()` 7 전략 / 폴·래치형 5전략
+
+→ CHANGELOG: cycle403 · cycle443 · cycle446 행

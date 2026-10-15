@@ -22,7 +22,7 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 - **cycle352 15:20 상한가 유지 확인** — 킬스위치 `limit_up_close_hold_mode`(기본 `enforce`, `off` 만 롤백) — `PARAM_RANGES`/`INT_PARAMS` 미편입. 8영역·`scheduler.py`·`risk.py` 무접촉, 전략 파일 `check_force_clear()` 한 곳에서 끝난다. 경위·실측 = `docs/history/workspace-00_leader_trading_rules.history.md`(자문 원문 `_workspace/domain_consult/cycle352_ltv_limit_up_trailing.md`).
 
 ### 전략 D: 20일 신고가 스윙 (strategy_id: donchian_swing)
-일봉 종가가 20일 신고가 돌파 + 60일 EMA 우상향 + 거래대금 1.5배 → 다음 영업일 09:05 시장가 매수. ATR(14)×2 트레일링 청산 / 하드 -7% / 15:20 강제 청산 없음(단 `breakout_fail_n_days`=5 시간 기반 청산은 있음) / 평균 5~15 영업일 보유. **KRX 메인만 활성**(추세추종은 일중 변동성 필요).
+일봉 종가가 20일 신고가 돌파 + 60일 EMA 우상향 + 거래대금 1.5배 → 다음 영업일 09:05 시장가 매수. 깡토식 청산 — 손절 = 매수가 − R(R = `max(8% × 매수가, 1.5 × 진입 ATR)`), 고점이 +3R 에 닿으면 본전 승격 + 10일 저가 채널 / 15:20 시간 청산은 20봉째 +1R 미달·250봉 도달 종목만(그날 끝낼 종목만 반환) / 수량 = 예산 × `risk_pct` ÷ R 을 `position_ratio` 한도로 자름(1주 폴백 없음) / 상세 = 6 절. **KRX 메인만 활성**(추세추종은 일중 변동성 필요).
 
 ### 전략 E: 눌림목 돌파 (strategy_id: bull_flag_breakout)
 강한 상승(폴) 후 짧은 횡보·완만한 조정(플래그) 종목을 추적, 플래그 상단 재돌파 시 매수. **KRX 메인 09:05~13:00 한정**(`tradable_boards=("main",)`). "측정된 이동(measured move)" 익절 — 폴 폭만큼 가면 절반 청산, 잔여 ATR×2 트레일링. 손절 -5% 또는 플래그 하단 이탈. 모멘텀(+29% 폭발) 후속 진입로.
@@ -44,17 +44,20 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 ### 전략 H: ETF 추세 (strategy_id: etf_trend)
 국내주식형 1배 ETF(증권그룹 `EF` ∧ 과세유형 `01` ∧ 추적배수 `1` ∧ 투자유의 아님 ∧ 순자산 500억↑) 가운데 전일 일봉이 20일 신고가 돌파 + EMA60 상승·종가 위 + 거래대금 1.5배인 ETF 를 다음 영업일 **KRX 09:05~09:30 시장가**로 산다. 같은 기초자산 묶음(120일 수익률 상관 > 0.9)은 하나만, 최대 4개. 청산 = 하드 `max(E−2N, E×0.91)` · 본전 승격 1.5N · 트레일링 고점−1.8N · 10일 저가 채널 · **15:20 돌파 실패**(매수 3번째 거래일부터 15:20 가격 < 돌파선 → 시장가, 마감 동시호가 체결). 사이징 = 터틀 유닛(N=TR14 단순평균, `risk_pct` 0.01), **1주 폴백 없음**. 시장 유닛 계단형 적용 + 결손 날 신규 진입 쉼. ETF 는 NXT·KRX 애프터에서 거래되지 않아 정규장에서만 판다. 상세 = 6-H 절 · 설계 정본 = `_workspace/design/2026-09-27_etf_trend_strategy.md`.
 
+### 전략 I: 나스닥2배-위험회피 (strategy_id: ndx2x_riskoff)
+고정 종목 418660(TIGER 미국나스닥100레버리지(합성))을 나스닥100 종가의 두 지표로 켜고 끈다 — T7 = 120일선의 20영업일 기울기, R4 = 250일 최고 종가 대비 낙폭. 기울기 하락 ∧ 낙폭 −20% 이하일 때만 현금, 그 밖은 2배 100%. 이력 부족·결측은 매매하지 않는다(fail-closed). 집행창 KST 09:30~10:30(양끝 포함) 밖에서는 평가 자체가 없다. **손절이 없다** — 노출 크기는 비중 상한이 정한다. 코드 기본 `shadow_mode=True`, 등록 `enabled=True, weight=0`, 시장 유닛 비대상. 실매수 경로는 미완성이다 — 섀도 해제 전 8영역(`order_engine.py`) 승인 + domain-consult 선행. 상세 = 6-I 절.
+
 ### 전략별 자금 비중
-- 프론트엔드 Settings 페이지에서 비중 조절. **단위 = 비율 0.0~1.0** (`PUT /api/strategies/weights` — 퍼센트 0~100 을 보내면 422). Σ > 1.0 이면 저장 전 거부(`success=false`). **진실 원천은 DB `strategy_config`**(7 전략) — 코드 기본값도 이 문서의 예시도 아니다. 마지막 실측(2026-08-18 `GET /api/strategies`) = momentum 0.05 / VB 0.15 / LTV 0.10 / donchian 0.15 / bull_flag 0.15 / vcp 0.10 / kojiro 0.30 (합 1.00, 7 전략 전부 enabled=True).
+- 프론트엔드 Settings 페이지에서 비중 조절. **단위 = 비율 0.0~1.0** (`PUT /api/strategies/weights` — 퍼센트 0~100 을 보내면 422). Σ > 1.0 이면 저장 전 거부(`success=false`). **진실 원천은 DB `strategy_config`**(9 전략) — 코드 기본값도 이 문서의 예시도 아니다. 운영값은 `GET /api/strategies` 로 읽는다.
 - ⚠️ **보유 중인 전략의 weight 를 0 으로 내리지 않는다** — weight 0 은 `registry.enabled()` 에서 이탈해 그 전략 보유 종목의 손절 평가가 멈춘다(`risk.py` `on_tick` 이 `enabled()` 를 단일 순회한다). 비활성화가 목적이면 `enabled` 축을 쓴다.
 - 총 자산을 비중에 따라 분배, 각 전략은 할당된 자금 내에서만 매매
 - 전략 간 동일 종목 중복 매수 방지 (보유 OR 주문중 OR 당일매도 통합 가드)
-- **매수 수량 1주 fallback (전략 잔여 자금 기준)**: `position_ratio × total_investment // current_price = 0`이라도 **전략 잔여 자금**이 1주 살 수 있으면 1주 매수. **7개 전략 동일 규칙**.
+- **매수 수량 1주 fallback (전략 잔여 자금 기준)**: `position_ratio × total_investment // current_price = 0`이라도 **전략 잔여 자금**이 1주 살 수 있으면 1주 매수. **9개 전략 동일 규칙**.
   - **잔여 자금 = `state.total_investment` − (해당 전략 보유 포지션 `buy_price×qty` 합계 + 해당 전략 `pending_buys` 매수 예정 금액 합계)**
   - 보유/주문중은 `strategy_id`로 격리 — 다른 전략 포지션은 자기 전략 사용액에 포함하지 않음
   - 고정 총액(`state.total_investment >= current_price`)과 비교하면 같은 전략이 이미 자금 90%를 점유해도 1주가 더 나가 **전략 한도를 넘는다**(2026-05-11 운영 사고).
-  - 구현: 7 전략(`momentum`/`volatility_breakout`/`long_tail_volatility`/`donchian_swing`/`bull_flag_breakout`/`vcp_breakout`/`kojiro`)의 `calc_buy_quantity` 가 `StrategyBase._apply_budget_limit` 관문을 경유하고, 관문이 `qty <= 0` 일 때 `_fallback_one_share(current_price)` 로 위임
-- **전략별 투자한도 이중제한**: **① 개수 `max_positions` + ② 명목 `Σ매수금액 ≤ total_investment`.** ②는 `StrategyBase._apply_budget_limit(qty, price, ticker)` 공통 관문이 **7 전략 `calc_buy_quantity` 의 모든 return** 을 통과시켜 강제한다(AST 가드 A-GATE). 관문이 없던 시절 `position_ratio × max_positions` 가 kojiro 0.20×10 / LTV 0.50×4 = 각 **2.00** 이 되어 계좌 전체 122.5% 초과 청약이 났다.
+  - 구현: 9 전략(`momentum`/`volatility_breakout`/`long_tail_volatility`/`donchian_swing`/`bull_flag_breakout`/`vcp_breakout`/`kojiro`/`etf_trend`/`ndx2x_riskoff`)의 `calc_buy_quantity` 가 `StrategyBase._apply_budget_limit` 관문을 경유하고, 관문이 `qty <= 0` 일 때 `_fallback_one_share(current_price)` 로 위임
+- **전략별 투자한도 이중제한**: **① 개수 `max_positions` + ② 명목 `Σ매수금액 ≤ total_investment`.** ②는 `StrategyBase._apply_budget_limit(qty, price, ticker)` 공통 관문이 **9 전략 `calc_buy_quantity` 의 모든 return** 을 통과시켜 강제한다(AST 가드 A-GATE). 관문이 없던 시절 `position_ratio × max_positions` 가 kojiro 0.20×10 / LTV 0.50×4 = 각 **2.00** 이 되어 계좌 전체 122.5% 초과 청약이 났다.
   - `qty <= 0` → `_fallback_one_share` 위임 (**분기 순서가 계약**) / `qty > 0` → `min(qty, 잔여//price)`. **부분 매수 허용** — 부분 유닛의 리스크는 1유닛 *미만*(under-risk)이라 안전 방향이고, 소액 계좌에서 "유닛 미만 스킵"은 사실상 무매매를 만든다.
   - **불변식 `position_ratio × max_positions ≤ 1.0`** — 코드 기본값은 AST 가드(C-DEFAULT), AI 추천은 `_validate_recommendations` 교차검증. `max_positions` 는 리스크 정체성 상수라 `PARAM_RANGES`/`INT_PARAMS` **편입 금지**.
   - **원자성**: `order_engine.execute_buy` 의 `calc_buy_quantity` ~ `pending_buys.add` 사이 `await` **0건**이라 관문 read 가 pending 등록까지 원자적이다. 관문 안에서 `await`/DB/HTTP **절대 금지** (AST 가드 A-ATOMIC/A-PURE).
@@ -67,19 +70,19 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
   - **왜 ρ축인가**: LTV·VB·momentum 은 `risk_pct`·`_entry_atr`·`_candidates` 가 **소스에 0건**이라 ATR 축이 원리적으로 불가하다. 컷오프는 `[oversized_fallback]`·`portfolio_risk.compute_over_cap_positions` 가 이미 재고 있는 축이라 자기검증이 성립한다. 근거 = 09-04 실측 LTV 000500 220,000원이 설계 랏 52,041원의 **4.23배**로 들어가 그날 최대 단일 손실(−11,000원, 순자산 0.42%)을 냈다.
   - **차단(0주)이 유일 선택지** — K_ρ≥1 이면 캡은 1주 폴백 경로에서만 바인딩되고 그 수량은 항상 1이다(1주는 쪼갤 수 없다).
   - **전략별 차등 없음** — 진짜 차등은 이미 `weight × position_ratio`(순자산 대비 VB 5.25% / BFB 3.75% / LTV·VCP 2.00% / MOM 1.25%)에 있다.
-  - **키 부재 = 캡 OFF** (cycle242 `max_lot_units` 와 **반대 관례** — 매수를 막는 통제라 fail-closed 는 P0-1 유령 키 재현 경로다). 키는 **7 전략 전부**의 `DEFAULT_PARAMS` 에 2.5 로 명시하고 AST 가 glob 전수로 강제한다. `PARAM_RANGES`/`INT_PARAMS` **편입 금지**, 읽는 쪽 `[1.0, 20.0]` 클램프(**하한 1.0 = 정상 비중 랏 무접촉의 수학적 전제**). `position_ratio` 결측·예산 0·초소액·판정 예외는 **fail-open**(현행 수량 + `[ratio_cap_skipped]` WARNING).
+  - **키 부재 = 캡 OFF** (cycle242 `max_lot_units` 와 **반대 관례** — 매수를 막는 통제라 fail-closed 는 P0-1 유령 키 재현 경로다). 키는 **9 전략 전부**의 `DEFAULT_PARAMS` 에 2.5 로 명시하고 AST 가 glob 전수로 강제한다. `PARAM_RANGES`/`INT_PARAMS` **편입 금지**, 읽는 쪽 `[1.0, 20.0]` 클램프(**하한 1.0 = 정상 비중 랏 무접촉의 수학적 전제**). `position_ratio` 결측·예산 0·초소액·판정 예외는 **fail-open**(현행 수량 + `[ratio_cap_skipped]` WARNING).
   - **컷오프는 예산에 선형 비례한다** — `weight`·`cash_usage_ratio`·순자산이 바뀌면 함께 움직인다.
   - **관측 4마커** `[ratio_notional_blocked]`(INFO 행위) · `[ratio_cap_skipped]`(WARNING fail-open) · `[ratio_cap_config]`(INFO 카나리아 `off|on`, `cutoff_price` 필수) · `[ratio_cap_clamped]`(WARNING). ⚠️ `[oversized_fallback]` 은 **"사려 했던 랏"** 이고 `order_engine` 수량-0 WARNING 은 **"ρ캡 차단 포함"** 이라 1:1 이 아니라 1:N 이다 — 도입 전후 같은 grep 합산 금지.
   - **롤백** = 해당 전략 `max_lot_ratio_mult = 20.0`. **PUT 은 즉시 / SQL UPDATE 는 다음 재시작에서만** 반영되고, 보유 중 장중 재시작은 금지(cycle232 D6)이므로 **장중 실효 수단은 PUT 뿐**이다. ⚠️ 키가 배포되기 **전**에는 PUT 이 무음 실패(미지 키 탈락) + `params` 통째 덮어쓰기로 SQL 값까지 지운다.
   - `compute_unit_qty_guarded` 의 notional 상한이 `position_ratio × 예산` 이라 **터틀 수량 ≤ 비중 수량**이 항상 성립 = 전환은 **순수 축소 방향**.
   - race 가드: `pending_buys`는 `place_order` 응답 직후 동기 영역에서 즉시 등록 — 기존 매핑 등록 규약과 동일하게 합산 일관성 보장
-- **시장 유닛(단계형) `market_unit_mode` (cycle382, 사용자 결정 2026-09-27)** — 터틀 4전략(`donchian_swing`·`bull_flag_breakout`·`vcp_breakout`·`kojiro`) 한정. **종목 소속 시장의 종합지수** 60일선으로 그날 신규 진입의 **설계 랏만** 계단형으로 줄인다 — 위·상승 = 1.0(그대로) · 위·하락 = 0.75 · 아래·상승 = 0.5 · 아래·하락 = **0.0**(신규 진입 없음). 상승 = 60일선이 20봉 전 60일선보다 높다. 동률(종가 = 60일선, 60일선 = 20봉 전 값)은 약한 쪽으로 판정한다. 판정은 D-1(전 영업일) 종가 기준이라 07:45 부팅 시점에 이미 안다.
+- **시장 유닛(단계형) `market_unit_mode` (cycle382, 사용자 결정 2026-09-27)** — 터틀 5전략(`donchian_swing`·`bull_flag_breakout`·`vcp_breakout`·`kojiro`·`etf_trend`) 한정. **종목 소속 시장의 종합지수** 60일선으로 그날 신규 진입의 **설계 랏만** 계단형으로 줄인다 — 위·상승 = 1.0(그대로) · 위·하락 = 0.75 · 아래·상승 = 0.5 · 아래·하락 = **0.0**(신규 진입 없음). 상승 = 60일선이 20봉 전 60일선보다 높다. 동률(종가 = 60일선, 60일선 = 20봉 전 값)은 약한 쪽으로 판정한다. 판정은 D-1(전 영업일) 종가 기준이라 07:45 부팅 시점에 이미 안다.
   - **시장별 판정(cycle455 — 사용자 결정 2026-10-14)** — 코스피 종목 = 코스피 종합지수(KIS 업종 `0001`) · 코스닥 종목(`stock_master.excg_dvsn_cd=="03"`) = 코스닥 종합지수(`1001`) · 시장을 모르는 종목 = 코스피. 같은 날 같은 전략에서 두 시장 배수가 다를 수 있다. 종목 없이 묻는 자리(etf_trend 의 결손·m≤0 거름)는 코스피로 본다. 근거 = 처음 설계(cycle376)의 검증 원천도 코스피 종합지수였다 · 코스닥 적용 자문 = `_workspace/domain_consult/2026-10-13_market_unit_kosdaq.md` · 명세 = `_workspace/red/cycle455_market_unit_by_market_spec.md`.
-  - **적용 자리 = 설계 랏뿐이다.** `cash_usage_ratio`·`total_investment`·잔여 클램프·K축(`max_lot_units`)·ρ축(`max_lot_ratio_mult`)·오픈리스크 캡·보유분·청산 규약은 전부 무접촉. 예산 경로(`cash_usage_ratio`·`total_investment` 축소)는 재현에서 조금 더 좋았지만(샤프 변화 +0.29 대 +0.23, MA60 ½ 기준) 택하지 않았다 — 7전략 전부와 일일 손실 분모·정산 기준선·비중 하한선 검증이 함께 흔들리고, 매크로 자동 조정과 같은 손잡이라 두 효과를 로그로 가를 수 없다(자문 §7.4).
+  - **적용 자리 = 설계 랏뿐이다.** `cash_usage_ratio`·`total_investment`·잔여 클램프·K축(`max_lot_units`)·ρ축(`max_lot_ratio_mult`)·오픈리스크 캡·보유분·청산 규약은 전부 무접촉. 예산 경로(`cash_usage_ratio`·`total_investment` 축소)는 재현에서 조금 더 좋았지만(샤프 변화 +0.29 대 +0.23, MA60 ½ 기준) 택하지 않았다 — 9전략 전부와 일일 손실 분모·정산 기준선·비중 하한선 검증이 함께 흔들리고, 매크로 자동 조정과 같은 손잡이라 두 효과를 로그로 가를 수 없다(자문 §7.4).
   - **축소일(m<1)에는 1주 폴백도, 터틀→비중 경로 낙하도 하지 않는다**(원인 불문 — ATR 결측이든 저변동 floor 든 동일). 폴백을 허용하면 donchian·VCP 는 0.5 조차 실현되지 않는다(재현 실측 — 폴백 유지 시 실현배수 0.70·0.61, 폴백 금지 시 0.45~0.48).
   - **줄인 랏으로 못 사는 종목은 신호 단계에서 거른다**(`enforce` 만) — m=0(`zero_state`) · 줄였더니 0주(`rounds_to_zero`) · m=1 이었다면 폴백·낙하로 샀을 종목(`no_fallback`). 수량 0 을 관문까지 흘리면 「매수 수량 0 → 900s cooldown(투자금 부족)」으로 오귀인된다(cycle316 재현 차단). 잔여 부족(`funds`)은 거르지 않는다 — 기존 자금 경로가 맞는 귀인이다.
   - **결측·stale·예외** — 제 시장 지수가 결측이면 다른 시장의 배수를 쓴다(「한쪽 결측 → 그 시장만 m=1」 금지 — 약세장에서 결측 쪽만 풀배수로 열린다). 두 시장 모두 결측이면 **m=1.0**(fail-open) — 장세 데이터 결손이 매수를 조용히 줄이면 안 된다.
-  - **모드 3단계** `off|shadow|enforce` — 부재·오타 = `off`. 4전략 기본값은 **`shadow`**(계산·기록만, 수량 불변) — 1주 섀도 관찰 뒤 `enforce` 전환은 별도 사용자 승인. `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(리스크 정체성 상수, AI 자동 튜닝 대상 아님). 킬스위치·`enforce` 전환 = 전략마다 `PUT /api/strategies/{id}/params {"params":{"market_unit_mode":"off"}}` **즉시**(모드를 매 호출 읽는다). 🔴 전략 끄기(`enabled`·`weight=0`)로 되돌리지 않는다 — 보유분 손절이 멈춘다.
+  - **모드 3단계** `off|shadow|enforce` — 부재·오타 = `off`. 5전략 기본값은 **`shadow`**(계산·기록만, 수량 불변) — 1주 섀도 관찰 뒤 `enforce` 전환은 별도 사용자 승인. `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(리스크 정체성 상수, AI 자동 튜닝 대상 아님). 킬스위치·`enforce` 전환 = 전략마다 `PUT /api/strategies/{id}/params {"params":{"market_unit_mode":"off"}}` **즉시**(모드를 매 호출 읽는다). 🔴 전략 끄기(`enabled`·`weight=0`)로 되돌리지 않는다 — 보유분 손절이 멈춘다.
   - **매크로 레짐과는 다른 축이다** — 매크로 레짐(`cash_usage_ratio` 자동 조정)은 관찰 지표라 매수를 차단·축소하지 않는다(§8-3). 시장 유닛은 그와 별개로 전략 사이징에서만 작동하는 규칙이다.
   - 근거 = `_workspace/domain_consult/cycle376_market_unit.md`(계좌 재현 — 6년 낙폭 −61.5%→−27.5%, 샤프 −0.40→+0.18) · 명세 = `_workspace/red/cycle382_market_unit_spec.md`.
 
@@ -149,14 +152,14 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 | KRX 애프터 16:00~20:00 | **KRX 강제** | **`44` 최유리지정가(`ORD_UNPR=0`)** | `41` 지정가 + `step_down(5)` |
 
 - **정규장에 NXT/SOR 을 쓰지 않는다는 것이 사용자의 명시 확정 규약이다**("SOR이 최적호가라는 보장도 없다" — 재론 대상 아님). 우리가 보낼 수 있는 호가유형이 그 시각 그 거래소에 아예 없는 창(프리장·15:30~16:00)만 DB 값을 그대로 쓴다.
-- 운영 DB 7 전략의 `exchange` 는 **전부 `NXT`** 이고 라우팅은 그 값을 바꾸지 않는다(읽기 전용으로 가로챈다).
+- 운영 DB `exchange` 의 정본은 `GET /api/strategies` 다(코드 기본값은 9전략 전부 `KRX`). 라우팅은 그 값을 바꾸지 않는다(읽기 전용으로 가로챈다) — `NXT`/`SOR` 인 전략에서만 효력이 있다.
 - **`44` 는 시장가가 아니다** — 반대편 최우선호가 지정가라 실질 최악이 1틱(20~21bp)으로 기존 폴백 5틱(101~106bp)보다 작다. `ORD_UNPR=0` 을 쓰는 근거는 비대칭이다: 0 이 틀리면 즉시 거부가 알려 주고 41 폴백이 받지만, 가격이 틀리면 미체결 잔존 = 손절 **무음** 실패다.
 - **폴백은 거부 사유 분류에 의존하지 않는다** — 44 거부 사유 어느 것도 현재 msg1 키워드에 걸릴 근거가 없고, 원문을 모르는 채 키워드를 추측하면 다음 사람이 "이미 처리했다"고 오독한다. 폭주 봉인 3종 = TTL 항상 등록 · 종목당 5회 포기 래치 + `[after_exit_giveup]` CRITICAL · 익일청산 전환.
 - **프리장 `27` 의 정체성** = 미체결 잔량을 거래소가 프리마켓 종료(08:50)에 **일괄 취소**한다. `00` 은 그 자동취소를 받지 못해 미체결이 NXT 정규장(09:00:30~)으로 새고, 그 누출은 역선택 방향으로만 치우친다(프리장 목표가는 `main` 시가로 09:00:05 에 다시 계산되므로 넘어간 주문은 이미 폐기된 목표가의 잔상이다). 게이트 4중(실전·NXT·`market_state` 표에서 그 시각 유효·프리장) 중 하나라도 실패하면 `00` 이 그대로 나간다(fail-safe, 파라미터 없음 — 롤백은 1커밋 revert).
 - **매도는 `27` 로 바꾸지 않는다** — GTP 매도는 08:50 자동취소가 `_selling` 을 ≈09:45 까지 잠가 손절 재평가를 억제한다. 현행 `00` 은 09:00:30 NXT 정규장에서 시세 아래 지정가라 거의 확실히 체결돼 안전망으로 기능한다(청산 경로를 좁히지 않는다).
 - 상세 = `src/engine/CLAUDE.md` §order_engine.py · 자문 = `_workspace/domain_consult/cycle291_pre_nxt_gtp_20260913.md`.
 
-**장중 킬스위치 2키** — 7 전략 전부의 `DEFAULT_PARAMS` + `param_catalog` 에 코드 상수와 같은 값으로 등재돼 있다.
+**장중 킬스위치 2키** — 9 전략 전부의 `DEFAULT_PARAMS` + `param_catalog` 에 코드 상수와 같은 값으로 등재돼 있다.
 
 | 키 | 기본값 | 허용값 | 부재/오타 시 해석 |
 |---|---|---|---|
@@ -955,7 +958,7 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 - **per-ticker low_funds cooldown**: 900초 — `calc_buy_quantity()<=0`인 종목 매 틱 반복 호출 차단
 - **매도 잔고부족 즉시 break**: `is_insufficient_quantity` 응답 시 3회 재시도 생략 + 메모리·DB positions 정리
 
-### 관리종목(51)·단기과열(59) — 보유 청산 + 당일 매수 차단 (7 전략 공통)
+### 관리종목(51)·단기과열(59) — 보유 청산 + 당일 매수 차단 (9 전략 공통)
 
 사용자 결정 원문:
 - 2026-09-25 21:5x 「관리종목51과 단기과열59가 발동했는데 해당 종목을 보유하고 있으면 시장가로 청산하게 하고 재구독 중지등으로 신규매수를 중단하자.」
@@ -971,7 +974,7 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 | 청산 방법 | `execute_sell(t, Signal.STATUS_EXIT, sid)` 시장가 · KRX · `asyncio.shield` 안. 조회 5분 격자 · 종목당 하루 3회 상한(재시작해도 그날 `system_logs` 발사 기록으로 이어 센다) · 정지(58) 겹치면 대기 |
 | 재시작 뒤 걸린 주문 | 이전 청산 주문이 거래소에 걸린 채 재시작하면 한 번 더 쏜다. 그 주문은 `APBK0400`(매도가능수량 초과)으로 거부되고 `[sell_qty_locked]` 로 끝난다 — 포지션 보존 · `_selling` 유지라 그 종목은 더 쏘지 않는다. 두 번 팔리지 않는다 |
 | 체결 지연 | 단기과열은 30분 단일가라 시장가도 다음 :00/:30 체결까지 최대 30분 걸린다(제도상 강제 — 새 취소 타이머를 두지 않는다) |
-| 신규 매수 차단 | 그날 장중 조회에서 해당이면 그 종목 신규 매수 신호를 7 전략 전부 막는다(지정 첫날 포함). 판 종목은 `is_sold_today`, 다음 날부터는 진입 필터 `_is_master_blocked_for_entry` 도 막는다. 막는 순간 그 종목의 edge 기준가(VB·LTV `_prev_price[t]` · momentum `_prev_prdy_rate[t]`)를 비워 해제 뒤 거짓 돌파를 막는다 |
+| 신규 매수 차단 | 그날 장중 조회에서 해당이면 그 종목 신규 매수 신호를 9 전략 전부 막는다(지정 첫날 포함). 판 종목은 `is_sold_today`, 다음 날부터는 진입 필터 `_is_master_blocked_for_entry` 도 막는다. 막는 순간 그 종목의 edge 기준가(VB·LTV `_prev_price[t]` · momentum `_prev_prdy_rate[t]`)를 비워 해제 뒤 거짓 돌파를 막는다 |
 | 매수 차단 조회 시각 | P0 08:45(`pre_nxt` 전략이 있으면 07:59)부터 09:00:00 전까지 장 전 기록 · P1 **09:00:05** 후보 전수(스윙 donchian·kojiro 제외 — 스윙 폴 조회가 덮는다) · INC 60초마다 15:20 까지 · 기존 조회의 관측 훅 |
 | 못 읽은 종목 | 막지 않는다(fail-open). 새어 산 종목은 다음 청산 패스가 판다(`bought_today=1`) |
 | 구독 | 건드리지 않는다 — 보유 구독을 끊으면 청산 거부 시 손절이 멈춘다 |
@@ -980,14 +983,14 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 
 구현·마커 상세 = `src/engine/CLAUDE.md` 「종목상태 청산·당일 매수 차단」 절.
 
-### 신규 매수 멈춤 `buy_paused` (7 전략 공통)
+### 신규 매수 멈춤 `buy_paused` (9 전략 공통)
 
 사용자 결정 원문: 2026-09-27 「돈키언 신규매수 중지」 — 보유분은 원래 청산 규약대로 자연히 나가게 두고, 개조는 전용 브랜치에서 뒤에 한다.
-설정으로는 할 수 없어서(돈키언 매수 창 09:05~09:30 은 코드 고정) 7 전략 공통 파라미터를 새로 두었다(cycle384).
+설정으로는 할 수 없어서(돈키언 매수 창 09:05~09:30 은 코드 고정) 9 전략 공통 파라미터를 새로 두었다(cycle384).
 
 | 규칙 | 값 |
 |---|---|
-| 키 | `DEFAULT_PARAMS["buy_paused"]` — 7 전략 전부 기본 `False` |
+| 키 | `DEFAULT_PARAMS["buy_paused"]` — 9 전략 전부 기본 `False` |
 | 막는 것 | 그 전략의 **신규 매수 신호만**(`Signal.NONE`) |
 | 막지 않는 것 | 손절 · 트레일링 · 익일청산 · 15:20 강제청산 · 종목상태 청산 · 시간 청산 · 후보 준비 · 퍼널 기록 · 시세 구독 |
 | 막는 자리 | 공통 게이트 `StrategyBase._account_soft_gate_blocked` 의 둘째 문장(첫 문장 = 종목상태 차단 · 셋째 = 계좌 SOFT) |
@@ -1002,13 +1005,13 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 
 🔴 멈춰 둔 동안 키를 지운 코드를 배포하지 않는다 — DB 의 `true` 가 버려져 조용히 풀린다. 구현·마커 상세 = `src/engine/CLAUDE.md` `strategy_base.py` 절.
 
-### 섀도 모드 `shadow_mode` (7 전략 공통)
+### 섀도 모드 `shadow_mode` (9 전략 공통)
 
 사용자 승인 2026-10-02 R1(ETF 설계 §10.2) — 새 전략을 「실전과 똑같이 판단하되 주문만 빼고」 몇 주 지켜보는 단계(ETF S1)를 위한 공통 키(cycle399).
 
 | 규칙 | 값 |
 |---|---|
-| 키 | `DEFAULT_PARAMS["shadow_mode"]` — 7 전략 전부 기본 `False` |
+| 키 | `DEFAULT_PARAMS["shadow_mode"]` — 9 전략 전부 기본 `False` |
 | 하는 것 | 매수 신호가 나는 순간 주문 대신 `[shadow_buy]` INFO 1줄(종목당 하루 1번) + `Signal.NONE` |
 | 막는 자리 | 각 전략의 `return Signal.BUY` 바로 앞 — **마지막 거름 뒤 · 상태 변경 앞**. 순서 = 종목상태 차단 → `buy_paused` → 계좌 SOFT → 신호 계산 → 시장 유닛 거름 → 섀도 |
 | 바꾸지 않는 것 | 주문 · 예산 · `pending_buys` · 화면 `buy_signals` · `_bought_today` · 진입 스탬프 · 래치 · 수량 계산 · 손절·트레일링·익일청산·15:20 강제청산·종목상태 청산 |
@@ -1149,7 +1152,7 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 
 우리 `macro` 컨테이너(cycle315)의 매크로 레짐을 `_boot()` 에서 1회 fetch 해 `market_regime_snapshots` 에 1행 남긴다.
 
-- **매크로 레짐은 매수를 차단하거나 축소하지 않는다.** `risk.on_tick`/`_swing_buy_poll_loop` 의 게이트는 존재하지 않는다. 매크로 레짐 대응은 **`cash_usage_ratio` 하나로만** 한다. (⚠️ 장세에 따른 터틀 4전략 신규 진입 축소는 이 레짐이 아니라 **시장 유닛**(§2 「전략별 자금 비중」의 `market_unit_mode`, cycle382)이 별개 사이징 규칙으로 담당한다 — 둘을 섞지 않는다.)
+- **매크로 레짐은 매수를 차단하거나 축소하지 않는다.** `risk.on_tick`/`_swing_buy_poll_loop` 의 게이트는 존재하지 않는다. 매크로 레짐 대응은 **`cash_usage_ratio` 하나로만** 한다. (⚠️ 장세에 따른 터틀 5전략 신규 진입 축소는 이 레짐이 아니라 **시장 유닛**(§2 「전략별 자금 비중」의 `market_unit_mode`, cycle382)이 별개 사이징 규칙으로 담당한다 — 둘을 섞지 않는다.)
 - **`cash_usage_ratio` 자동 조정**: `clamp((100 − regime.params.cash_min) / 100, 0.0, 1.0)` — defensive(75)→0.25 / neutral(50)→0.5 / aggressive(20)→0.8. `auto_regime_adjust=true`(기본)일 때만 갱신하고 `false` 면 운영자 수동값을 보존한다.
 - **외부 실패 graceful**: fetch 실패·timeout·토큰 만료·토글 OFF → `MarketRegime.empty()` → `cash_usage_ratio` 자동 갱신 안 함(수동값 유지), 자동매매 본 흐름 영향 0.
 - `get_current_regime()` 는 `_boot()` 1회 호출을 가정한 모듈 싱글톤이다(동시성 lock 없음 — 단일 워커 전제). 소비처는 대시보드 `/current` 와 AI 자문 payload **표시 전용**이다.
@@ -1167,7 +1170,7 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 우선순위 = ① 활성 보드 키 `params.get(f"stop_loss_{board}")` 가 **음수**면 채택 → ② top-level `stop_loss_rate` → ③ 둘 다 없으면 `0.0` 반환(손절 분기 skip).
 
 - 활성 보드는 VB 내부 `_resolve_active_board()` 가 `SessionTracker.active` ∩ `tradable_boards` 에서 고른다. 예외는 흡수하고 None 을 돌려주며, None 이면 top-level 로 폴백한다(테스트 환경·부팅 직후 race 안전).
-- `check_exit_signal(ticker, current_price, open_price)` 시그니처는 **7 전략 공통**이라 보드 인자를 추가하지 않는다 — 보드는 전략이 스스로 조회한다(`risk.py` 변경 0).
+- `check_exit_signal(ticker, current_price, open_price)` 시그니처는 **9 전략 공통**이라 보드 인자를 추가하지 않는다 — 보드는 전략이 스스로 조회한다(`risk.py` 변경 0).
 - `stop_loss_main` / `stop_loss_pre_nxt` 는 VB `DEFAULT_PARAMS` 에 **없다**. `supabase/migrations/024_vb_board_stop_loss_defaults.sql` 이 `stop_loss_rate` 값을 복사해 DB `strategy_config.params` 에만 주입하고, 소스 참조는 `recommendation_engine.PARAM_RANGES` / `recommendation_metrics._normalize_stop_loss_rate` / `portfolio_risk` 뿐이다. 코드 fallback 기본값은 **-3.0** 이다.
 - ⚠️ **`stop_loss_pre_nxt` 는 적용 경로가 없다** — VB 가 `DEFAULT_TRADABLE_BOARDS=("main",)` 라 `_resolve_active_board()` 가 `pre_nxt` 를 반환하지 않는다. 값을 넣어도 손절은 `stop_loss_main` → `stop_loss_rate` 로만 결정된다(DB 호환 보존 키).
 - **STOP_LOSS 우선순위 보존** — 보드별 손절 > 익일 청산(NEXT_DAY_CLEAR). 손절은 `_next_day_clear_pending` 가드의 영향을 받지 않는다.

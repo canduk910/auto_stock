@@ -1192,3 +1192,12 @@ BFB·VCP 는 `_prev_price` 가 이미 이번 틱으로 갱신된 뒤라 끈 뒤 
 - **결측·stale·예외 = m=1**(현행) + WARNING(`[market_unit_unavailable]`·`[market_unit_error]`) — 장세 데이터 결손이 매수를 조용히 줄이면 안 된다.
 
 → CHANGELOG: cycle455 행
+
+## 시장 유닛 — 터틀 4전략 (cycle382)
+### 2026-10-15 문서 동기화 — etf_trend 가 시장 유닛 대상에 들어 5전략으로 (정본에서 옮긴 원문)
+
+- ### 시장 유닛 — 터틀 4전략 (cycle382) / 장세에 따라 터틀 4전략(`kojiro`·`donchian_swing`·`bull_flag_breakout`·`vcp_breakout`)의 **신규 진입 설계 랏만** 줄인다.
+- 코드 등록 기본값(`scheduler.py` `__init__`)은 momentum 만 `enabled=True`·`weight=1.0`, 나머지 7전략은 `enabled=False`·`weight=0.0` 이다.
+- `_MULTIDAY_STRATEGIES` 리터럴 = `frozenset({"donchian_swing", "vcp_breakout", "kojiro", "etf_trend"})`
+
+→ CHANGELOG: cycle403 · cycle443 행

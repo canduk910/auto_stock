@@ -959,3 +959,27 @@ flowchart TB
 터틀 4전략(donchian·BFB·VCP·kojiro)에는 **시장 유닛**(cycle382)이 하나 더 있다. KODEX 200 60일선 계단(1 · ¾ · ½ · 0)으로
 
 → CHANGELOG: cycle455 행
+
+## 8. 전략 매수 신호 흐름
+### 2026-10-15 문서 동기화 — 전략 9개, donchian 깡토식, 21:30 OpenAI 제거, 주간 자문 (정본에서 옮긴 원문)
+
+- 7전략의 **매수** 판정 흐름이다. / 13.1 다중 전략 확장 (7 전략) / 컨테이너는 셋이다 — `backend` · `frontend` · `macro`.
+- 사이징은 `sizing_mode` 가 정한다 — 코드 기본은 `position_ratio`, `turtle` 이면 ATR 유닛이다.
+- donchian = ATR×2 샹들리에·하드손절·돌파 실패 청산(`breakout_fail_n_days`)
+- `_MULTIDAY_STRATEGIES = frozenset({donchian_swing, vcp_breakout, kojiro})` — 3 전략 모두 …
+- | 21:30 | `TIME_SETTLEMENT` (cycle283 D3) | 일일 로그 보고서 완전판(OpenAI)이 20:05 1차 행을 upsert 로 덮어쓴다 |
+- `PARAM_RANGES` 화이트리스트: `k_value_krx_main/k_value_nxt_pre` (0.5~2.0) + `stop_loss_main/stop_loss_pre_nxt` (-15.0~0.0) + `donchian_period` (10~60) + `long_ma_period` (20~120) + `volume_multiplier`/`atr_trail_mult` (1.0~5.0)
+- | 2 | 20:00 자문 · 21:30 로그 분석 · 외부 백테스트 분리 (퍼널은 가를 수 없다 → 15.3) | 계획 (착수 미정) |
+
+→ CHANGELOG: cycle405 · cycle443 · cycle445 · cycle446 행
+
+## 2026-10-15 — 8.7 · 13.1 의 kojiro 운영 사실 문장 제거
+
+- 8.7 끝 문장 「코드 등록 기본값은 `enabled=False`·`weight=0.0` 이지만 운영 DB 에서 활성이다(13.1).」 와 13.1 의 「`kojiro` 는 코드 기본값 `enabled=False` 가 다크런치 잔재다. 운영 DB 는 `enabled=True` = 실매매 중이고, 활성 여부·비중·`sizing_mode` 의 정본은 DB `strategy_config` 다」 를 걷어냈다. 정본에는 코드 기본값과 「정본은 DB `strategy_config`」 만 남김(운영값은 `GET /api/strategies`).
+- 8.5 · 8.6 · 8.7 흐름도는 코드(`DEFAULT_PARAMS` · 진입 분기)와 대조해 틀린 곳이 없었다.
+
+→ CHANGELOG: cycle449 · cycle405 행
+
+### 2026-10-15 문서 정리 — RS·재무 2단계(cycle453) 흐름 보충
+
+- 정본에 없던 두 줄을 더했다(걷어낸 문장 없음): 부팅 시퀀스의 `rs_fundamental_observe.spawn_boot_observe()` Note · 시각표 16:40 행(`fundamental_load_tasks` 추가 적재). CHANGELOG cycle453 행 참조.

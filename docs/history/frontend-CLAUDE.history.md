@@ -1712,3 +1712,10 @@ nginx 계약(`auth_basic off;` 금지 · 옛 `nginx.conf` 부활 금지)은 루�
 경위: cycle457 이 거래일지 차트 모달(`JournalChartModal.tsx`)을 더하면서 `registerIndicator`·`registerOverlay` 를 쓰게 됐다. 「뿐」 계약은 `StockChartModal.tsx` 의 것이라 주어를 그 파일로 밝혔고, 한글 로케일 값은 `utils/stockChart.ts::KLINE_LOCALE_KO` 하나로 옮겨 두 모달이 같이 쓴다.
 
 → CHANGELOG: cycle457 행
+
+## 전략 한글 표시명
+### 2026-10-15 문서 동기화 — etf_trend 표시명 추가, 터틀 5전략 (정본에서 옮긴 원문)
+
+- … kojiro=고지로 대순환. 이 7 전략은 백엔드 API 가 주는 `name` … / 터틀 4전략: `shadow` = 「관찰만」 …
+
+→ CHANGELOG: cycle403 행

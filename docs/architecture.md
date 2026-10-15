@@ -26,8 +26,9 @@ flowchart LR
     BE -->|"레짐 조회 (관찰 전용)"| MAC
 ```
 
-컨테이너는 셋이다 — `backend` · `frontend` · `macro`. `macro` 는 매크로 화면 API 이자 매매 레짐의
+컨테이너는 다섯이다 — `backend` · `frontend` · `macro` · `journal_worker` · `llm_worker`. `macro` 는 매크로 화면 API 이자 매매 레짐의
 출처이고(`MACRO_API_URL`, 기본 `http://macro:8000`), 레짐은 매수를 막지 않는 관찰 지표다(13.3).
+두 워커는 매매 경로 밖의 관찰자다 — 거래일지(15.8)와 청산 AI 섀도 기록(15.9). 아래 그림은 매매 흐름의 세 컨테이너만 그린다.
 
 ### 요청 인증 흐름
 
@@ -263,13 +264,13 @@ flowchart TD
 빠졌을 때의 안전망). 나머지 넷은 청산 조건이 올 때까지 보유한다. 그중 donchian · VCP · kojiro 는
 `_MULTIDAY_STRATEGIES` 멤버이고, BFB 는 멤버가 아니지만 5영업일 시간 청산까지 보유한다.
 
-7전략 공통 청산이 하나 더 있다. 보유 종목이 관리종목이나 단기과열로 지정되면
+9전략 공통 청산이 하나 더 있다. 보유 종목이 관리종목이나 단기과열로 지정되면
 `status_exit_watch` 가 KRX 정규장(09:00:30~15:28)에 시장가로 판다. 같은 조회 결과로 그날 그 종목의
 신규 매수도 막는다 — 막는 자리는 `check_buy_signal` 이 거치는 공통 게이트다(14.9).
 
 **전략 객체의 멤버**
 
-7전략 공통 = `config: StrategyConfig(strategy_id, name, enabled, weight, params)` ·
+9전략 공통 = `config: StrategyConfig(strategy_id, name, enabled, weight, params)` ·
 `state: StrategyState(positions, pending_buys, pending_buy_amounts, sold_today, …)`.
 아래 표는 전략마다 **더 가진** 상태만 적는다. 규약 상세 = [`src/engine/strategies/CLAUDE.md`](../src/engine/strategies/CLAUDE.md).
 
@@ -320,11 +321,13 @@ sequenceDiagram
     D-->>S: _load_strategy_config() ← DB strategy_config
     S->>K: get_balance() → GET inquire-balance
     Note over S: allocate_funds()
+    S->>K: 종합지수 일봉 최신화 (domestic_index_ingest, 최대 20초 — 시장 유닛 원천)
     Note over S: wait_for_boot() — 확정 대기(최대 90초, 넘기면 나머지는 배경)
     S->>K: strategy.prepare() → GET daily-price (일봉)
     Note over S: ticker_prev_close 사전 등록 (전일 종가)
     D-->>S: DB positions 복구 ← DB positions
     Note over S: KIS 잔고 교차검증
+    Note over S: rs_fundamental_observe.spawn_boot_observe() — 비차단<br/>60초 뒤 4전략(donchian·VCP·kojiro·etf_trend) 후보·보유의<br/>RS·재무·목표가 점수 → candidate_score_snapshots (관찰 전용, cycle453)
 
     Note over S,X: 07:59 connect() (TIME_PRESUBSCRIBE)
     S->>W: connect() → WebSocket 연결
@@ -395,6 +398,7 @@ sequenceDiagram
     S->>W: unsubscribe_all() → WebSocket 구독 해제
 
     Note over S,X: 20:00 generate_recommendations() — 전략수정 AI자문 (TIME_RECOMMENDATION)
+    Note over S: 주간 자문일(기본 목요일)에만 — 다른 날은 건너뛴다 (cycle445 D8)
     S->>D: collect_metrics() → trade_history 집계
     S->>X: OpenAI Chat Completion
     S->>D: insert_recommendation() → parameter_recommendations (status: pending)
@@ -410,6 +414,7 @@ sequenceDiagram
     Note over S,X: 20:30 _stock_master_daily_load_once() (TIME_STOCK_MASTER_DAILY_LOAD, cycle283 D2)
     S->>K: KIS FHKST03010100
     S->>D: stock_master_daily 적재 (~121초)
+    S->>K: 종합지수(코스피 0001 · 코스닥 1001) 일봉 → domestic_index_daily (cycle455)
 
     Note over S,X: 21:00 저녁 funnel 미리보기 (TIME_EVENING_FUNNEL_CAPTURE, cycle364)
     D-->>S: 20:30 적재 성공 마커 확인 (30초 간격, 21:15 까지)
@@ -419,8 +424,8 @@ sequenceDiagram
     Note over S,X: 21:30 _settle() (TIME_SETTLEMENT, cycle283 D3)
     S->>K: get_balance() → GET inquire-balance
     S->>D: upsert_daily_performance() (전략별 + total)
-    S->>X: generate_daily_log_report() (OpenAI)
-    S->>D: daily_log_reports ← 완전판이 20:05 1차 행을 upsert 로 덮어쓴다
+    S->>D: generate_daily_log_report() — 지표 최종 집계 (OpenAI 미호출, cycle445)
+    S->>D: daily_log_reports ← 최종 집계가 20:05 1차 행을 upsert 로 덮어쓴다
     S->>W: disconnect() → WebSocket 종료
     Note over S,X: 익일 07:45까지 대기 (주말 자동 건너뜀)
 ```
@@ -432,18 +437,19 @@ sequenceDiagram
 | 08:00 | `TIME_PRE_NXT_OPEN` | `_execute_next_day_clear()` 는 비차단이다. NXT 프리 시가를 받고 `NEXT_DAY_STABILIZE_SECS`(30초) 안정화한 뒤 판정한다 — 갭이 `gap_up_threshold` 이상이면 트레일링 모드, 미달·시가 미수신·`nxt_tradable=False` 면 `_pending_next_day_clear` 에 보류했다가 09:00 KRX 시장가로 판다. 프리장 지정가 청산은 내지 않는다. 시가 확정은 0.5초/5초 폴링. LTV 는 `k_value_nxt_pre` 적용. VB 는 `DEFAULT_TRADABLE_BOARDS=("main",)` — 프리장 매수 없음 |
 | 08:45 · 09:00:05 · 09:00:30~15:28 | `status_exit_watch` 패스 | 관리종목·단기과열 조회. 08:45 는 장 전 기록만 한다(`pre_nxt` 매수 전략이 있으면 07:59). 09:00:05 에 매수 후보를 한 번에 읽어 그날 매수 차단을 정한다(5초 캐시가 장 전 값을 돌려주지 않게 5초 늦춘다. 스윙 donchian·kojiro 는 09:05 스윙 폴 조회가 덮으므로 뺀다). 09:00:30 부터 15:28 전까지 5분마다 보유를 읽어 전용 플래그가 `Y` 면 시장가로 판다. 휴장일로 확정된 날은 돌지 않는다. scheduler `TIME_*` 상수가 아니라 leaf 상수다 — 14.9 |
 | 09:00:05 | `TIME_KRX_OPEN_CONFIRM` | VB·LTV 의 `main` 목표가 기준가는 KRX REST 시가(`stck_oprc`) 하나다. `open_price_rest` 가 09:00:35 부터 확정하고, 이 호출은 09:05 전까지 그 두 전략을 건너뛴다(`open_price_rest.owns_board`). 목표가 = 시가 + 전일 Range × K × `k_value_krx_main` |
-| 09:05~09:30 | `_swing_buy_poll_loop` 창 | donchian·kojiro 의 매수 평가다(1분 주기 REST `fetch_stock_detail`). `risk.on_tick` 은 이 두 전략의 매수 평가를 건너뛴다(`_TICK_BUY_EVAL_SKIP_STRATEGIES`). BFB(09:05~13:00)·VCP(09:05~14:30)는 폴 루프가 없어 WS 틱이 유일한 매수 평가 경로다 — 8장 |
+| 09:05~09:30 | `_swing_buy_poll_loop` 창 | donchian·kojiro·etf_trend 의 매수 평가다(1분 주기 REST `fetch_stock_detail`). `risk.on_tick` 은 이 세 전략과 `ndx2x_riskoff` 의 매수 평가를 건너뛴다(`_TICK_BUY_EVAL_SKIP_STRATEGIES`). `ndx2x_riskoff` 는 이 루프가 아니라 전용 `_ndx2x_poll_loop` 이 09:30~10:30 에 평가한다. BFB(09:05~13:00)·VCP(09:05~14:30)는 폴 루프가 없어 WS 틱이 유일한 매수 평가 경로다 — 8장 |
 | 09:30 | — | 실시간 체결가는 `H0STCNT0` KRX 전용 / `H0NXCNT0` NXT 전용 — 47필드 동일, 한 파서. `_resolve_active_board()` 가 활성 보드를 결정한다(main 우선). 체결통보는 `_order_ticker[order_no]` 로 정확한 ticker 를 잡는다 |
 | 15:20 | `TIME_KRX_MAIN_BUY_STOP` | `_force_clear_main_only()` 시간 가드(2026-05-15 hotfix): 진입 시 >=15:30 이면 즉시 skip → 익일 청산 안전망 위임(재시작 시점이 15:30 이후일 때 KRX 애프터 SOR 시장가가 APBK3013 거부되던 사고 차단). VB/LTV 둘 다 POST_NXT 매수 비활성이라 `keeps_post_nxt=False`. LTV `check_force_clear()` 는 `_limit_up_reached` 종목 중 15:20 가격이 `limit_up_threshold` 이상을 유지할 때만 제외한다(`limit_up_close_hold_mode`, cycle352 — 상세 = `src/engine/strategies/CLAUDE.md` LTV 절) |
-| 15:30 | `TIME_KRX_MAIN_CLOSE` | post_nxt 시가 확정 대상은 `tradable_boards` 에 post_nxt 가 있는 VB·LTV 뿐이다 — 코드 기본값으로는 LTV 하나(야간 매수 목표가용). 구독 유지 = 7전략 보유 종목 전부(positions HIGH 그룹). VB 는 POST_NXT 매수 비활성(main 단독). LTV 는 코드 기본에 post_nxt 가 있고 실제 활성 보드의 정본은 DB `strategy_config.params.tradable_boards` 다. 손절·트레일링·익일청산 평가는 보드와 무관하게 계속 돈다 |
+| 15:30 | `TIME_KRX_MAIN_CLOSE` | post_nxt 시가 확정 대상은 `tradable_boards` 에 post_nxt 가 있는 VB·LTV 뿐이다 — 코드 기본값으로는 LTV 하나(야간 매수 목표가용). 구독 유지 = 9전략 보유 종목 전부(positions HIGH 그룹). VB 는 POST_NXT 매수 비활성(main 단독). LTV 는 코드 기본에 post_nxt 가 있고 실제 활성 보드의 정본은 DB `strategy_config.params.tradable_boards` 다. 손절·트레일링·익일청산 평가는 보드와 무관하게 계속 돈다 |
 | 15:40 | `session._BOARD_SCHEDULE` | SessionTracker 보드 = post_nxt (15:30~15:40 은 MAIN 유지 = 종가 흡수 마진). 보드 경계의 정본은 `_BOARD_SCHEDULE` 이다. `TIME_POST_NXT_OPEN`(15:40) 은 같은 값이지만 런타임 미사용 상수이고, 스케줄러의 전환·시가 확정은 위 15:30 이다. 시장 구간 정본 = `market_state.MARKET_TABLE` — KRX 15:30~16:00 장후 시간외 종가(K5) · 16:00~20:00 애프터마켓(K6) · NXT 15:30~15:40 애프터 단일가(N5) · 15:40~20:00 애프터마켓(N6) |
+| 16:40 | `TIME_STOCK_MASTER_FINANCIAL_LOAD` | 연간 재무 5 TR 주 1회 적재 뒤 이어서 추가 적재(`fundamental_load_tasks.run_extra_loads_once`, cycle453) — 분기 재무 · 증권사 투자의견(주 1회) · 추정실적(월 1회). 16:00~19:00 창 안에서만 돌고 19:30 에 멈춘다. 시세 조회 한도를 애프터마켓 주문과 나눠 써서 평균 초당 약 2회 이하로 간다. 킬스위치 `system_config.fundamental_extra_load_mode`. 매매 행위 0 |
 | 19:50 | `TIME_NXT_POST_BUY_STOP` | `buy_disabled = True` (모든 활성 전략) |
-| 20:00 | `TIME_NXT_POST_CLOSE` · `TIME_RECOMMENDATION` | 애프터 종료와 구독 해제, 이어서 전략수정 AI자문 |
+| 20:00 | `TIME_NXT_POST_CLOSE` · `TIME_RECOMMENDATION` | 애프터 종료와 구독 해제, 이어서 전략수정 AI자문 — **주간 자문일(기본 목요일, `weekly_advisory_weekday`)에만** 돈다. 다른 날은 `[weekly_advisory_skip]` 로 건너뛴다 |
 | 20:00:05 | `TIME_FULL_UNIVERSE_LOAD` | AI자문 직후 5초 마진. 같은 20:00 이 기동 거부 경계(`TIME_SESSION_START_CUTOFF`, cycle283 D4)다 — 이 시각 이후 `start()` 는 거부된다. 20:00~21:30 재기동은 그날 20:30 일봉 적재를 통째로 잃는다(다음 영업일 아침 immediate 가 보정하지만 `_boot()` 의 prepare 보다 늦다 → `[daily_head_stale]` WARNING) |
 | 20:05 | `TIME_METRICS_SNAPSHOT` (cycle283 D5) | `api_metrics`·`strategy_funnel` 은 프로세스 메모리 전용 — 유실 노출 90분 → 5분 |
-| 20:30 | `TIME_STOCK_MASTER_DAILY_LOAD` (cycle283 D2) | 09-14 KRX 애프터마켓(16:00~20:00) 종료 후 = 그날 거래량이 확정된 뒤. 종가·고저는 이 시각에도 KIS 가 애프터마켓 값을 주므로 잠정이다 — 다음 거래일 아침 부팅이 확정한다(cycle386) |
+| 20:30 | `TIME_STOCK_MASTER_DAILY_LOAD` (cycle283 D2) | 일봉 적재 뒤 이어서 종합지수 적재(`domestic_index_ingest`). KRX 애프터마켓(16:00~20:00) 종료 후 = 그날 거래량이 확정된 뒤. 종가·고저는 이 시각에도 KIS 가 애프터마켓 값을 주므로 잠정이다 — 다음 거래일 아침 부팅이 확정한다(cycle386) |
 | 21:00 | `TIME_EVENING_FUNNEL_CAPTURE` (cycle364) | 다음 거래일 후보 미리보기(20:30 잠정 봉 기준 — 정본은 다음 날 부팅 목록). 20:30 적재 뒤 · 20:45 보조 계정 토큰 재발급 체인 뒤 · 정산 전이라 이 시각이다. 적재 성공 마커가 21:15 까지 없으면 건너뛴다. 결과는 다음 거래일 날짜의 잠정 행이고, 그날 09:35 확정 행을 덮지 않는다 |
-| 21:30 | `TIME_SETTLEMENT` (cycle283 D3) | 일일 로그 보고서 완전판(OpenAI)이 20:05 1차 행을 upsert 로 덮어쓴다 |
+| 21:30 | `TIME_SETTLEMENT` (cycle283 D3) | 일일 로그 지표 최종 집계가 20:05 1차 행을 upsert 로 덮어쓴다. OpenAI 는 부르지 않는다(cycle445) — 사람이 읽는 요약은 20:20 클라우드 루틴이 쓴다 |
 
 ---
 
@@ -532,12 +538,12 @@ flowchart TD
 
 ## 8. 전략 매수 신호 흐름
 
-7전략의 **매수** 판정 흐름이다. 청산 규칙과 파라미터의 정본은
+9전략의 **매수** 판정 흐름이다. 8.1~8.7 은 앞선 일곱 전략이고 8.8·8.9 가 ETF 추세와 나스닥2배-위험회피다. 청산 규칙과 파라미터의 정본은
 [`src/engine/strategies/CLAUDE.md`](../src/engine/strategies/CLAUDE.md) 다. 아래 숫자는 전부
 **코드 기본값**(`DEFAULT_PARAMS`)이다. 운영 DB `strategy_config.params` 에 다른 값이 있으면 DB 가 이긴다.
 
 매수 평가가 도는 곳은 둘이다. WS 틱이 오면 `RiskManager.on_tick` 이 평가하고(4장 그림),
-donchian·kojiro 만 틱 평가를 건너뛰고 1분 REST 폴 루프가 평가한다.
+donchian·kojiro·etf_trend 는 틱 평가를 건너뛰고 1분 REST 폴 루프가, ndx2x_riskoff 는 전용 폴 루프가 평가한다.
 
 | 전략 | 매수 평가 경로 | 신규 매수 시각 (코드 기본값) | 절 |
 |------|----------------|------------------------------|----|
@@ -548,6 +554,8 @@ donchian·kojiro 만 틱 평가를 건너뛰고 1분 REST 폴 루프가 평가�
 | `bull_flag_breakout` | WS 틱 → `risk.on_tick` | 09:05 ~ 13:00 | 8.5 |
 | `vcp_breakout` | WS 틱 → `risk.on_tick` | 09:05 ~ 14:30 | 8.6 |
 | `kojiro` | `_swing_buy_poll_loop`(1분 REST) | 09:05 ~ 09:30 | 8.7 |
+| `etf_trend` | `_swing_buy_poll_loop`(1분 REST) | 09:05 ~ 09:30 | 8.8 |
+| `ndx2x_riskoff` | 전용 `_ndx2x_poll_loop`(60초) | 09:30 ~ 10:30 (상태가 바뀐 날 1회) | 8.9 |
 
 모든 전략에 같이 걸리는 관문은 그림에서 한 칸으로 줄였다. `risk.on_tick` 의 보드 가드 ·
 `registry.is_ticker_blocked_for_buy`(타 전략 보유·주문중·당일매도) · 자금 사전 가드, 그리고 전략 안의
@@ -557,7 +565,7 @@ donchian·kojiro 만 틱 평가를 건너뛰고 1분 REST 폴 루프가 평가�
 15:30~16:00 은 주문 발사점(`execute_buy`·`execute_sell`)에서 주문이 막힌다(`order_engine._market_rest_now`).
 매수 수량은 `calc_buy_quantity` → `_apply_budget_limit` 관문을 지난다(루트 `CLAUDE.md` 「핵심 안전 규칙」).
 
-터틀 4전략(donchian·BFB·VCP·kojiro)에는 **시장 유닛**(cycle382)이 하나 더 있다. 종목이 속한 시장의 종합지수(코스피 `0001` · 코스닥 `1001`, cycle455) 60일선 계단(1 · ¾ · ½ · 0)으로
+터틀 5전략(donchian·BFB·VCP·kojiro·etf_trend)에는 **시장 유닛**(cycle382)이 하나 더 있다. 종목이 속한 시장의 종합지수(코스피 `0001` · 코스닥 `1001`, cycle455) 60일선 계단(1 · ¾ · ½ · 0)으로
 그날 신규 진입의 설계 랏을 줄이고, `enforce` 모드에서는 줄인 랏으로 못 사는 종목을 신호 단계에서 거른다.
 기본 모드 `shadow` 는 계산·기록만 하고 수량을 바꾸지 않는다. 규칙 = 루트 `CLAUDE.md` 「자금 관리」 절.
 
@@ -738,8 +746,9 @@ flowchart TD
     PREP --> POLL
 ```
 
-사이징은 `sizing_mode` 가 정한다 — 코드 기본은 `position_ratio`, `turtle` 이면 ATR 유닛이다.
-보유 종목 손절 평가는 `_swing_rest_poll_loop`(09:00:30~15:20, 60초 REST — donchian·kojiro)가 WS 를 보강한다.
+사이징(코드 기본 `sizing_mode="turtle"`)은 깡토식이다 — 수량 = 예산 × `risk_pct` ÷ R 을 `position_ratio` 한도로 자른 값이고, R = `max(8% × 매수가, 1.5 × 진입 ATR)` 이다. 진입 ATR 이 없거나 수량이 0 이면 1주 폴백 없이 건너뛴다.
+청산은 매수가 − R 손절 → 고점이 +3R 에 닿으면 본전 승격 + 10일 저가 채널 → 15:20 시간 청산(20봉째 +1R 미달·250봉)이다(`strategies/CLAUDE.md` donchian 행).
+보유 종목 손절 평가는 `_swing_rest_poll_loop`(09:00:30~15:20, 60초 REST — `SWING_POLL_IDS`)가 WS 를 보강한다.
 
 ### 8.5 눌림목 돌파 (BFB)
 
@@ -882,9 +891,35 @@ flowchart TD
     PREP --> POLL
 ```
 
-- 폴 루프는 donchian 을 다 처리한 뒤 kojiro 로 넘어간다. 같은 종목을 두 전략이 동시에 사는
-  경쟁을 이 순서가 막는다(`_SWING_POLL_STRATEGIES = ("donchian_swing", "kojiro")`).
-- 코드 등록 기본값은 `enabled=False`·`weight=0.0` 이지만 운영 DB 에서 활성이다(13.1).
+- 폴 루프는 donchian → kojiro → etf_trend 순으로 한 전략씩 다 처리한다. 같은 종목을 두 전략이 동시에
+  사는 경쟁을 이 순서가 막는다(`_SWING_POLL_STRATEGIES` = 명부 파생 `SWING_POLL_IDS`).
+- 코드 등록 기본값은 `enabled=False`·`weight=0.0` 이다. 가동 여부·비중의 정본은 DB `strategy_config` 다(13.1).
+
+### 8.8 ETF 추세 (`etf_trend`)
+
+donchian 과 같은 모양의 스윙이다. 종목군만 다르다 — 국내주식형 **1배 ETF**(증권그룹 `EF` · 과세유형 `01` ·
+추적배수 1 · 투자유의 아님 · 순자산 ≥ 500억)만 일봉 DB 에서 고른다(KIS 폴백 없음).
+
+- **후보** — 20일 평균 거래대금 ≥ 20억, 종가 1,000~500,000원, ATR20/종가 1~6% → 종가가 직전 20봉 고가를 넘고,
+  60일 EMA 가 오르고, 거래대금이 직전 20봉 평균의 1.5배 이상이다. 계산은 순수 모듈 `etf_trend_core.py` 가 한다.
+- **매수** — 09:05~09:30 에 `_swing_buy_poll_loop` 가 평가한다. 시가 갭이 크거나 장중에 시가 밑으로 무너지면 그날 건너뛴다.
+  이 전략이 이미 든 ETF 와 120일 수익률 상관이 0.9 를 넘으면 사지 않는다(묶음 캡). 수량은 터틀 유닛이고 1주 폴백이 없다.
+- **청산** — 하드 `max(매수가 − 2N, 매수가 × 0.91)` → 본전 승격 → 완성봉 고가 − 1.8N 트레일 → 10일 저가 채널.
+  15:20 에 돌파선 아래로 내려온 종목만 시간 청산한다(`close_at_1520`).
+- 시장 유닛 대상(5전략 중 하나)이고, 코드 기본이 `shadow_mode=True` 라 주문 없이 `[shadow_buy]` 만 남긴다.
+
+### 8.9 나스닥2배-위험회피 (`ndx2x_riskoff`)
+
+고정 종목 418660(TIGER 미국나스닥100레버리지(합성))을 나스닥100 일봉 두 지표로 켜고 끈다.
+
+- **원천** — KIS `FHKST03030100` 나스닥100 종가를 `overseas_index_daily` 에 쌓는다(`ndx2x_ingest.py`, 이력 ≥ 300 미국 영업일).
+- **신호** — T7 = 120일선의 20영업일 기울기, R4 = 250일 최고 종가 대비 낙폭. 기울기가 내려가고 낙폭이 −20% 이하일 때만 현금, 그 밖은 2배 100% 다.
+  이력이 모자라거나 값이 비면 매매하지 않는다(fail-closed). 계산은 순수 모듈 `ndx2x_core.py` 가 한다.
+- **평가** — 전용 `scheduler._ndx2x_poll_loop`(60초)가 하루 1회 신호를 맞추고, 집행창 09:30~10:30(양끝 포함) 안에서만 매수·매도를 본다.
+  `get_scanned_tickers()` 가 항상 빈 목록이라 공유 스윙 폴은 이 전략을 건드리지 않는다.
+- **청산** — 손절이 없다. 상태가 현금으로 바뀌면 보유 전량을 판다(TREND_EXIT). 노출 크기는 비중 상한이 정한다.
+- 시장 유닛 비대상, 코드 기본 `shadow_mode=True`. 🔴 실매수 경로는 아직 막혀 있다 — 지정가를 강제할 공개 경로가 없어서
+  섀도를 풀기 전에 `order_engine.py`(8영역) 승인과 도메인 자문이 먼저다.
 
 ---
 
@@ -996,6 +1031,14 @@ flowchart TD
 | `pending_next_day_clear` | 038 | 익일청산큐 DB 영속화 — PK (target_date, ticker, strategy_id). 재기동 시 메모리 휘발 차단 |
 | `llm_buy_evaluations` | 043 | AI 매수평가(LLM)를 주문 발화 시점에 기록 — PK (trade_date, account_no, ticker, order_no) + eval_kind('order'|'blocked'). 주문 1건 = 1행(성공·실패 모두), 매매 hot path 무관한 관측 계층. 열 정의 정본 = 루트 `CLAUDE.md` DB 스키마 표 (cycle276). 프로세스 분리 1단계가 이 테이블을 큐로 재사용한다 → 15.2 |
 | `trade_journal_orders` · `_stops` · `_notes` · `_cursor` | 047 | 거래일지 — 주문 1건 1행 `(order_date, order_no, side)` UNIQUE · 손절선 사건 · 메모 · 로그 커서. `_orders`·`_stops`·`_cursor` 를 쓰는 쪽은 `journal_worker` 컨테이너의 전용 역할 하나 → 15.8. backend 는 거래일지 탭을 위해 `_orders`·`_stops` 를 읽고 메모 `_notes` 를 쓴다. 칸 정의 정본 = `src/db/CLAUDE.md` 「DB 스키마」 절 |
+| `stock_master_financial` | 041 | KIS 재무 5 TR 정규화 — PK `(ticker, stac_yymm, div_cls)`. 주 1회 16:40 적재, 매매 hot path 무관 |
+| `trade_cost_daily` | 045 | KIS `TTTC8715R` 정산 수수료·제세금 사후 대사 — PK `(trad_dt, pdno)` + 기간 합계 `trade_cost_period_totals`. 정본 = `src/db/CLAUDE.md` 「trade_cost.py」 절 |
+| `trade_history.order_price` | 046 | PENDING 때 주문가 — 체결가로 덮이는 `price` 와 따로 남는 슬리피지 원천 |
+| `overseas_index_daily` | 048 | 해외지수 일별 종가 — PK `(index_code, bas_dd)`. `ndx2x_riskoff` 의 신호 원천(KIS `FHKST03030100`, 8.9) |
+| `exit_ai_evaluations` · `exit_ai_runs` | 050 | 청산 AI 섀도 기록 — 평가 1행 = 포지션 × 입력 봉 날짜(영구 보존) · 하루 1행(대상 없음과 워커 중단을 가른다). 쓰는 쪽은 `llm_worker` 전용 역할 하나 → 15.9. backend 는 읽기만 한다 |
+| `invest_opinion_history` · `estimate_perform_snapshot` | 051 | 증권사 투자의견·목표가 이력(PK `(ticker, bsop_date, mbcr_name)`) · 추정실적 월 스냅샷(PK `(ticker, snapshot_month)`). 16:40 추가 적재가 쓰고 부팅 관찰 기록이 읽는다. 매매 무관 |
+| `candidate_score_snapshots` | 052 | 4전략(donchian·VCP·kojiro·etf_trend) 후보·보유 종목별 RS·재무·목표가 점수 관찰 기록 — PK `(target_date, strategy_id, ticker)`. 부팅 때 1회 쓴다. 관찰 전용 — 매매 경로가 읽지 않는다 |
+| `domestic_index_daily` | 053 | 국내 종합지수(코스피 `0001` · 코스닥 `1001`) 일별 종가 — PK `(index_code, bas_dd)` + 시가·고가·저가·거래량 `raw`. 시장 유닛 원천이고 화면 차트가 읽는다 |
 
 ---
 
@@ -1030,7 +1073,10 @@ frontend/src/
 │   ├── ConfirmModal.tsx    # 확인 모달 (매매/매도 안전장치)
 │   ├── useStockChartOpener.tsx # 잔고·체결·손익 행 더블클릭 → 종목 차트 (공용 훅)
 │   ├── LazyStockChartModal.tsx # 차트 모달 분리 청크 래퍼 (React.lazy)
-│   └── StockChartModal.tsx # 종목 차트 (KLineChart, 최근 5년 일·주·월봉)
+│   ├── StockChartModal.tsx # 종목 차트 (KLineChart, 최근 5년 일·주·월봉)
+│   ├── JournalChartModal.tsx # 거래일지 카드의 「차트」 모달 — 일봉 + 전략 지표선 + 매수·매도 표시 (cycle457)
+│   ├── LazyJournalChartModal.tsx # 위 모달의 분리 청크 래퍼
+│   └── MarketUnitChartCard.tsx # 대시보드 「시장 유닛 결정 과정」 — 종합지수 캔들·60일선 + 3단계 판정 (cycle456)
 │
 ├── api/
 │   ├── client.ts           # axios 인스턴스 (baseURL: /api)
@@ -1038,7 +1084,9 @@ frontend/src/
 │   ├── balance.ts          # 잔고 조회
 │   ├── history.ts          # 거래 내역
 │   ├── performance.ts      # 실적 데이터
-│   └── stock-chart.ts      # 종목 차트 (GET /api/stock-chart/candles)
+│   ├── stock-chart.ts      # 종목 차트 (GET /api/stock-chart/candles)
+│   ├── journal-chart.ts    # 거래일지 차트 (GET /api/journal-chart)
+│   └── market-unit-chart.ts # 시장 유닛 차트 (GET /api/market-unit/chart)
 │
 └── types/
     ├── trading.ts          # TradingStatusData, StrategyInfo, TradeRecord
@@ -1059,7 +1107,7 @@ flowchart TB
         MR["MarketRegimeCard (시장 레짐 — 관찰 전용)"]
         PR["PortfolioRiskCard (포트폴리오 리스크 — 관찰 전용)"]
         KP["KisAccountPoolCard (KIS 시세 계좌 풀)"]
-        TAB["전략 탭 [전체] + 등록 전략마다 1개<br/>(8전략 · 이름 옆에 보유 수)"]
+        TAB["전략 탭 [전체] + 등록 전략마다 1개<br/>(9전략 · 이름 옆에 보유 수)"]
         SP["전략 진행상황<br/>· 「전체」 탭 = StrategySummaryTable<br/>· 전략 탭 = StrategyMonitor<br/>(고지로 탭은 없음 — ScanMonitor 안 KojiroMonitor)"]
         SM["ScanMonitor<br/>· 스캔 요약<br/>· 종목 리스트<br/>· VB 타겟가<br/>· 매수 신호"]
         OM["OrderMonitor<br/>· 투자가능금액<br/>· 매수 대기<br/>· 보유 포지션<br/>· 체결 진행"]
@@ -1187,13 +1235,13 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`, `SUPABASE_DB_URL`(값
 1~12 장이 다루지 않는 확장 계층의 현행 계약. 사이클별 도입 경위는 `docs/HARNESS_CHANGELOG.md`,
 모듈 계약은 각 디렉터리 `CLAUDE.md` 가 정본이다.
 
-### 13.1 다중 전략 확장 (7 전략)
+### 13.1 다중 전략 확장 (9 전략)
 
-- 7전략의 매수 흐름은 8장(8.1~8.7)에 있다. 청산 규칙과 파라미터 값은 `src/engine/strategies/CLAUDE.md` 가 정본이다
-- 보유형 4전략의 청산 요약 — BFB = `flag_low` 이탈·측정된 이동 도달·ATR×2 트레일·5영업일 시간 청산 / VCP = `base_low` 이탈·ATR×2 트레일·50일 EMA 이탈 / donchian = ATR×2 샹들리에·하드손절·돌파 실패 청산(`breakout_fail_n_days`) / kojiro = 고정%(-8%) → 2ATR → 스테이지3 → 2.5ATR 트레일
-- `kojiro` 는 **코드 기본값 `enabled=False` 가 다크런치 잔재다. 운영 DB 는 `enabled=True` = 실매매 중**이고,
-  활성 여부·비중·`sizing_mode` 의 정본은 DB `strategy_config` 다
-- **코드 정본 `_MULTIDAY_STRATEGIES = frozenset({donchian_swing, vcp_breakout, kojiro})`** — `is_next_day` 항상 False. 3 전략 모두 `strategy_base.py` **리터럴에 정적 선언**한다(동적 side-effect 추가 금지 — 그 패턴은 목록을 읽는 시점마다 답이 달라진다)
+- 9전략의 매수 흐름은 8장(8.1~8.9)에 있다. 청산 규칙과 파라미터 값은 `src/engine/strategies/CLAUDE.md` 가 정본이다
+- 보유형 4전략의 청산 요약(etf_trend·ndx2x_riskoff 는 8.8·8.9) — BFB = `flag_low` 이탈·측정된 이동 도달·ATR×2 트레일·5영업일 시간 청산 / VCP = `base_low` 이탈·ATR×2 트레일·50일 EMA 이탈 / donchian = 깡토식(매수가 − R 손절 → +3R 본전 승격 + 10일 저가 채널 → 15:20 시간 청산) / kojiro = 고정%(-8%) → 2ATR → 스테이지3 → 2.5ATR 트레일
+- `bull_flag_breakout`·`vcp_breakout`·`kojiro` 의 코드 등록 기본값은 `enabled=False`·`weight=0.0` 이다.
+  활성 여부·비중·`sizing_mode` 의 정본은 DB `strategy_config` 다(`GET /api/strategies`)
+- **코드 정본 `_MULTIDAY_STRATEGIES = frozenset({donchian_swing, vcp_breakout, kojiro, etf_trend, ndx2x_riskoff})`** — `is_next_day` 항상 False. 5 전략 모두 `strategy_base.py` **리터럴에 정적 선언**한다(동적 side-effect 추가 금지 — 그 패턴은 목록을 읽는 시점마다 답이 달라진다)
 - 상세: `src/engine/strategies/CLAUDE.md`
 
 ### 13.2 다중 KIS 계좌 + WebSocket 풀
@@ -1224,7 +1272,7 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`, `SUPABASE_DB_URL`(값
 - DB `market_regime_snapshots` 일일 스냅샷 (`_boot()` 시점 1행)
 - Frontend: `MarketRegimeCard` (Dashboard) + `IntegrationToggleCard::BuyBlockSection` (Settings)
 - 장세에 따른 신규 진입 축소는 레짐이 아니라 **시장 유닛**(`src/engine/market_unit.py`, cycle382)이 한다 — 레짐 게이트가 아니라
-  터틀 4전략의 전략 사이징이다(8장 머리말). ETF 스테이지 신호(`[etf_regime]`)는 관찰로만 남고 매수 가드로 통합하지 않는다
+  터틀 5전략의 전략 사이징이다(8장 머리말). ETF 스테이지 신호(`[etf_regime]`)는 관찰로만 남고 매수 가드로 통합하지 않는다
 
 ### 13.4 외부 백테스트 (MCP)
 
@@ -1247,8 +1295,9 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`, `SUPABASE_DB_URL`(값
   - `applied_weight` NUMERIC (apply 시 사용자 명시 토글)
   - `backtest_summary` JSONB
 - `_validate_recommendations()` 5-tuple 반환 `(validated_params, reasoning, weight, notes, weight_reasoning)`
-- user_payload 12 키 (current_weight + peer_weights + peer_metrics + market_regime)
-- `PARAM_RANGES` 화이트리스트: `k_value_krx_main/k_value_nxt_pre` (0.5~2.0) + `stop_loss_main/stop_loss_pre_nxt` (-15.0~0.0) + `donchian_period` (10~60) + `long_ma_period` (20~120) + `volume_multiplier`/`atr_trail_mult` (1.0~5.0)
+- 주간 자문일(기본 목요일)에만 돈다 — `weekly_advisory.should_run_weekly_advisory` 가 `generate_recommendations()` 첫머리에서 다른 날을 거른다(cycle445). 목 20:30 클라우드 루틴이 `GET /api/recommendations` 로 결과를 읽는다
+- user_payload 12 키 (current_weight + peer_weights + peer_metrics + market_regime) + 선택 키 `core_metrics_distribution`(그 전략 후보·보유 종목의 핵심값 분포, cycle448 — 분포 키가 없으면 싣지 않는다)
+- `PARAM_RANGES` 화이트리스트(AI 자동 조정이 건드릴 수 있는 키와 범위)의 정본은 `recommendation_engine.py` 의 상수다. 진입 축·청산 축·리스크 축의 정체성 상수는 편입하지 않는다 — 목록 = `src/engine/CLAUDE.md` 「recommendation_engine.py」 절
 - `min(candidates)` 손절률 정책 — 5 키 후보 (`stop_loss_rate`/`intraday_stop_loss`/`overnight_stop_loss`/`stop_loss_main`/`stop_loss_pre_nxt`)
 
 ### 13.6 운영 안정성 — stale 감시와 정합성 가드
@@ -1365,7 +1414,7 @@ flowchart TD
     P --> C
     C -->|"해당"| B
     B --> G
-    G -->|"7전략 check_buy_signal → 신호 없음"| X["매수 안 함"]
+    G -->|"9전략 check_buy_signal → 신호 없음"| X["매수 안 함"]
     C -->|"보유 ∧ 전용 플래그 Y ∧ 09:00:30~15:28"| S
 ```
 
@@ -1382,7 +1431,7 @@ flowchart TD
 - **몇 번까지 내나** — 종목당 하루 3회다. 서버를 다시 켜도 그날 발사 기록(`system_logs`)으로 이어 센다.
   발사 한 번은 `system_logs` 에 한 줄만 남는다. 재시작 뒤 이전 주문이 아직 걸려 있으면 한 번 더 쏘지만,
   그 주문은 매도가능수량 초과로 거부되고 포지션은 그대로 남는다 — 두 번 팔리지 않는다.
-- **어떻게 새 매수를 막나** — 공통 매수 게이트의 첫 문장이 그날 목록을 본다. 7전략 모두 그 게이트를 거친다.
+- **어떻게 새 매수를 막나** — 공통 매수 게이트의 첫 문장이 그날 목록을 본다. 9전략 모두 그 게이트를 거친다.
   매일 새로 읽으므로 지정 첫날부터 막힌다. 조회에 실패한 종목은 막지 않는다 — 그 종목을 사게 되면
   다음 보유 청산 패스(5분 안)가 판다.
 - **하지 않는 것** — 보유 종목의 시세 구독은 끊지 않는다. 끊으면 청산 주문이 거부됐을 때 손절을 볼 수 없다.
@@ -1407,7 +1456,7 @@ tick blind — 루트 `CLAUDE.md` 운영 가이드 D6 = cycle232. cycle248 이 �
 |------|------|------|
 | 0 | 현재 — compose 서비스 5개(backend / frontend / macro / journal_worker / llm_worker). journal_worker 는 거래일지 관찰자(15.8), **`llm_worker` 는 청산 AI 섀도 기록 관찰자다(cycle446, 15.9)** — 둘 다 매매 경로 밖 | 가동 중 |
 | 1 | AI 매수평가(LLM)를 `llm_worker` 컨테이너에 **합류**(새 컨테이너 아님 — 자리는 cycle446 이 먼저 썼다) | 계획 (착수 미정 · cycle279 예약) |
-| 2 | 20:00 자문 · 21:30 로그 분석 · 외부 백테스트 분리 (퍼널은 가를 수 없다 → 15.3) | 계획 (착수 미정) |
+| 2 | 주간 자문(목 20:00) · 외부 백테스트 분리 (퍼널은 가를 수 없다 → 15.3). 21:30 로그 분석은 OpenAI 를 부르지 않아 분리 대상에서 빠졌다 | 계획 (착수 미정) |
 | 3 | 시세 감시 ↔ 전략 판정 ↔ 주문 완전 분리 | **보류** (착수하지 않는다) |
 | 4 | 메시지 기반 5프로세스 (WS·REST 전송 2 + 시세·전략평가 / 주문 / 체결) | **방향 기록** (승인 전 · 3단계를 흡수한다 → 15.5) |
 
@@ -1427,8 +1476,8 @@ flowchart LR
     subgraph BE["backend (uvicorn 단일 워커)"]
         direction TB
         B1["scheduler / session / scanner"]
-        B2["strategies(7) -> risk -> order_engine"]
-        B3["llm_buy_gate (AI 매수평가 — 7전략 shadow)"]
+        B2["strategies(9) -> risk -> order_engine"]
+        B3["llm_buy_gate (AI 매수평가 — 9전략 shadow)"]
         B4["recommendation_engine (20:00 자문)"]
         B5["log_analysis_engine (21:30 분석)"]
         B6["api/base.py _semaphore = Semaphore(20)"]
@@ -1478,8 +1527,8 @@ KIS REST 와의 연결은 backend 상자 안 `api/base.py` 의 `_semaphore = Sem
 
 여기서 "AI 매수평가"는 cycle274 가 배선하고 cycle276 이 주문 시점으로 옮긴 **관찰 기능**이다 —
 매수 주문 직후에 LLM 이 점수를 매겨 **기록만** 하고 매수 여부는 바꾸지 않는다(shadow).
-**7전략 전부** 켜져 있다 — cycle297(2026-09-17 `a61ded9`)이 나머지 5전략에 `"llm_gate_mode": "shadow"`
-4키를 넣어 넓혔다(사용자 결정 = "모든 전략에 걸어 데이터를 쌓고 전략별로 하나씩 enforce").
+**9전략 전부** 켜져 있다 — 전략마다 `DEFAULT_PARAMS` 에 `"llm_gate_mode": "shadow"` 가 있다
+(사용자 결정 = "모든 전략에 걸어 데이터를 쌓고 전략별로 하나씩 enforce").
 배선 자체는 전략 무관이다 — `order_engine` 의 호출부 2곳(주 경로 · 지정가 폴백 경로)이 모든 전략을
 같은 코드로 태우고, 갈리는 것은 `llm_gate_mode` 값 하나뿐이다(`llm_buy_gate._read_mode`).
 
@@ -1547,14 +1596,14 @@ flowchart TD
 
 ### 15.3 2단계 — 관측·분석 분리 (계획 · 착수 미정)
 
-20:00 AI 자문, 21:30 일일 로그 분석, 외부 백테스트 연동을 워커 쪽으로 옮긴다.
+주간 20:00 AI 자문과 외부 백테스트 연동을 워커 쪽으로 옮긴다(21:30 일일 로그 분석은 OpenAI 를 부르지 않는다).
 
 ```mermaid
 %%{init: {"flowchart": {"wrappingWidth": 360}}}%%
 flowchart TD
     BE["backend (매매 전용으로 얇아진다)<br/>scheduler / scanner / strategies<br/>risk / order_engine / realtime<br/>※ 퍼널 캡처는 여기 남는다 (_funnel_steps)"]
     DB[("AWS RDS PostgreSQL<br/>parameter_recommendations<br/>daily_log_reports<br/>strategy_funnel_snapshots<br/>backtest_runs")]
-    LW["llm_worker (2단계에서 분석 작업 추가)<br/>20:00 AI 자문 · recommendation_engine<br/>21:30 로그 분석 · log_analysis_engine<br/>외부 백테스트 MCP"]
+    LW["llm_worker (2단계에서 분석 작업 추가)<br/>주간 20:00 AI 자문 · recommendation_engine<br/>외부 백테스트 MCP"]
     BE -->|"asyncpg"| DB
     LW -->|"결과 쓰기"| DB
     DB -->|"읽기"| LW
@@ -1566,7 +1615,7 @@ flowchart TD
 
 | 대상 | 위험 | 이유 |
 |------|------|------|
-| 21:30 로그 분석 · 외부 백테스트 | 낮음 | live registry 를 읽지 않는다. DB 를 읽어 DB 에 쓴다 |
+| 외부 백테스트 | 낮음 | live registry 를 읽지 않는다. DB 를 읽어 DB 에 쓴다 |
 | 20:00 AI 자문 | **중간 — 매매 행위가 바뀐다** | `recommendation_engine.py:404-406`·`:581-582` 가 `trading_scheduler.registry` 를 잡아 **살아 있는 전략 객체**를 읽고, auto_apply 는 `:626 strategy.config.weight = new_weight` · `:657 strategy.config.params[k] = v` 로 그 객체를 **직접 변이**한다. 이 in-memory 쓰기가 파라미터 즉시 반영의 유일한 경로다(루트 `CLAUDE.md` — `strategy_config` SQL UPDATE 는 다음 재시작에서만 반영). 워커로 옮기면 DB 쓰기만 남아 감액·보수적 파라미터가 **다음 재시작까지 실매매에 반영되지 않는다** |
 | 퍼널 스냅샷 | 가를 수 없다 | 데이터 원천이 DB 가 아니라 **엔진 프로세스의 메모리**다. `capture_funnel_snapshots(registry, …)`(`scheduler.py:188`)가 registry 를 순회해 각 전략의 `_funnel_steps` 를 읽고(`:264`, 접근 실패 로그 `:266`), 호출자는 `_scan_loop` 안의 `:2552`(09:35 확정)과 저녁 미리보기(`funnel_capture.evening_capture_once`)다. 저녁 미리보기는 캡처 전에 같은 메모리 객체를 `prepare(as_of=)` 로 다시 채운다. 워커 프로세스엔 그 객체가 없다 |
 

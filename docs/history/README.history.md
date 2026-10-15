@@ -111,3 +111,35 @@ SELECT 한다(전용 역할에 SELECT 만 있다). 원문은 그 읽기를 빠�
 `./logs:/app/logs:ro`).
 
 → CHANGELOG: cycle412 마무리 행
+
+## 매매 전략
+### 2026-10-15 문서 동기화 — 전략 9개 반영, donchian 깡토식 반영 (정본에서 옮긴 원문)
+
+- | `donchian_swing` | 09:05~09:30 시장가 | 20일 신고가+추세 | -7% | ATR×2 트레일 · 멀티데이 (5~15일) |
+- | 손절 | 매수가 대비 -7% 하드 손절. 터틀 매수(`_entry_atr` 스탬프가 있는 랏)는 대신 **2×ATR 하드손절 + -9% backstop**을 타고, 고점이 `매수가 + 1.5×entry_atr` 에 닿으면 손절선이 매수가로 승격된다(`breakeven_promote_atr`, 좁히는 방향만) |
+- | 청산 | 코드 평가 순서대로 ① **시간 청산** — `breakout_fail_n_days`(기본 5 **영업일**) 이상 보유 + 현재가 < 돌파고점 → TIME_EXIT ② **채널 이탈** — 최근 `channel_exit_period`(기본 10)일 저가 하회 → TRAILING_STOP ③ **ATR(14)×2 Chandelier 트레일링**(`high_since_buy − ATR×2`) → TRAILING_STOP |
+- AI 매수평가 행: cycle297(2026-09-17)이 **7전략 전부**로 넓혔다
+- `_force_clear_main_only` — 대상은 VB·LTV 두 전략이고 각 전략의 `check_force_clear()` 가 목록을 정한다.
+
+## 스케줄 — KRX/NXT 통합 운영 (08:00~20:00)
+### 2026-10-15 문서 동기화 — 21:30 일일 로그 분석에서 OpenAI 제거(cycle445) 반영 (정본에서 옮긴 원문)
+
+- 직후 일일 로그 분석 리포트 생성 (OpenAI → `daily_log_reports`).
+- 일일 로그 분석 = **21:30** 정산 직후 OpenAI 가 system_logs+trade_history 를 분석한 운영 개선 리포트(영업일 리스트 + findings + 메트릭).
+
+## 프로세스 구성과 분리 로드맵
+### 2026-10-15 문서 동기화 — 컨테이너 5개(llm_worker 가동), 1단계 상태 정정 (정본에서 옮긴 원문)
+
+- `docker-compose.prod.yml` 의 컨테이너는 4개다 — `backend` · `frontend` · `macro` · `journal_worker`.
+- | 1 | **AI 매수평가** — … 큐는 별도 메시지 브로커가 아니라 `llm_buy_evaluations` 테이블(043) | **진행 중** |
+
+→ CHANGELOG: cycle445 · cycle446 · cycle405 행
+
+## 2026-10-15 — 전략 E·F·G 절 코드 대조 (/sync-docs 후속)
+
+- 전략 E(BFB) 진입·매수 칸에 돌파 유지 3분(`breakout_retention_minutes`)과 만석 중 직전 가격 추적(cycle449)을 더하고, 수량·공통 스위치 칸을 새로 둠.
+- 전략 F(VCP) 에 만석 중 직전 가격 추적(cycle449), 수량, 공통 스위치 칸을 더함.
+- 전략 G(kojiro) 에 후보 점수 순서, 매수 한도(`max_positions` 5 · 섹터 2 · Σ 오픈리스크 4.5%), 공통 스위치 칸을 더함.
+- 걷어낸 문장 없음(README 의 E·F·G 에는 운영 DB 사실 문장이 없었음).
+
+→ CHANGELOG: cycle449 · cycle405 행

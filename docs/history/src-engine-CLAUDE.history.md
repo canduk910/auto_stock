@@ -3235,3 +3235,15 @@ cycle359 조사). cycle368 이 파서 기준점을 고치고, VI 수명 600초(�
 경위: 사용자 요청 2026-10-15 「일봉적재도 해서 시세와 이평선차트를 이용해서 시장배수 결정과정을 좀 더 시각화해줘」. 화면 차트가 120봉을 보이고 봉마다 판정(80봉 창)을 다시 내야 해서 200행이 필요하다 — 목표를 260 으로 올렸다(history 상한 50행 × 6회 = 300 안). 차트에 고가·저가를 그리려고 KIS 응답의 시가·고가·저가·거래량·거래대금을 `raw` 에 담기 시작했다. 판정 입력(종가)은 바뀌지 않았다. 기존 130행 DB 는 다음 부팅의 `count < 260` 판정으로 전체 적재를 다시 탄다.
 
 → CHANGELOG: cycle456 행
+
+## 모듈 맵
+### 2026-10-15 문서 동기화 — 전략 9개·시장 유닛 5전략·swing_poll 4 멤버 반영 (정본에서 옮긴 원문)
+
+- 전략 7개 상세 / 전략 등록 7행 / `strategies/` — 7 전략(`momentum` … `kojiro`)
+- `open_price_target`(시가 목표가)과 `close_at_1520`(15:20 강제청산)은 지금 값이 둘 다 VB·LTV 로 같지만 **독립된 칸**이다 — 합치지 않는다(ETF 가 `close_at_1520` 만 켜고 `scheduler.py` 를 다시 열지 않을 수 있게). `market_unit_policy` 는 지금 선언 + 교차 검사일 뿐 행위가 없다.
+- `param_catalog.py` — 7 전략 `DEFAULT_PARAMS` 합집합 **105 키 단일 진실원**
+- 시장 유닛 헬퍼 (cycle382 — 터틀 4전략 `kojiro`·`donchian_swing`·`bull_flag_breakout`·`vcp_breakout` 한정) / 나머지 3전략은 부르지 않는다(AST A04).
+- 공유 순차 대상 `_SWING_POLL_STRATEGIES = ("donchian_swing", "kojiro")`
+- `Position.is_next_day` 리터럴 정본 = `{donchian_swing, vcp_breakout, kojiro}`
+
+→ CHANGELOG: cycle403 · cycle405 · cycle443 행

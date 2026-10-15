@@ -785,3 +785,12 @@ Hx/Mx**` 태그가 어겼다(2차 통합 검증 F14). 더불어 `/api/performanc
 `market_unit`(대상 = `strategy_manifest.MARKET_UNIT_SCALE_IDS`, 명부의 `market_unit_policy=="scale"` 파생 — 리팩토링 카드 #5·cycle423, 손으로 적은 전략 목록이 아니다. 오늘 스냅샷 `_market_unit_snaps[오늘]` 의 `mode`·`ok`·`m`·`state`·`bar_date`·`reason` 그대로, 없으면 `{mode, ok: false, reason: "not_computed"}`. 그 밖 전략 null)
 
 → CHANGELOG: cycle455 행
+
+## 엔드포인트 목록
+### 2026-10-15 문서 동기화 — 전략 수 9, 파라미터 카탈로그 125키 (정본에서 옮긴 원문)
+
+- `GET /api/strategies/te` — `data: TeRrMetrics[]`(7전략 · 19필드 …)
+- `GET /api/strategies/params-schema` — 파라미터 카탈로그(`src/engine/param_catalog.py` 105키)
+- 예산 불변식 경계 `1.0` 은 **통과**(EPS=1e-9 — 7 전략 중 6 전략의 기본값이 정확히 1.0 이라 `<` 면 전면 저장 불가).
+
+→ CHANGELOG: cycle403 · cycle443 행
