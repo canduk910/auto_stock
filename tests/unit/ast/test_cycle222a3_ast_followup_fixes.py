@@ -459,7 +459,7 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle444 섀도 후보 구독 최후순위 사용자 승인 2026-10-11",
     ),
     "src/engine/scheduler.py": (
-        "c33709d5010db4b45d5d34ce1cbeda82eb45fbd003c83de189210ea55811890e",
+        "b80bb83f8d5f03449f683ae4344716792df2e50481a06e8b87ceef18079b1066",
         "cycle461 ⑦-F1 안 U, 사용자 승인 2026-10-10·10-15 — _sync_positions_from_balance 의 "
         "주인 판정·채택을 unknown_holding_policy 로 위임 + 끝 sync_pass 1줄",
     ),

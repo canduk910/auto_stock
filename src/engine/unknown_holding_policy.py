@@ -132,13 +132,71 @@ def note_adopted(
         logger.exception("[unknown_holding_note_failed] ticker=%s", ticker)
 
 
-async def adopt_balance_only_holding(registry: Any, holding: Any, *, path: str = "sync") -> None:
-    """15분 동기화 — 장부에 없는 KIS 보유를 판정해 올리고 DB 에도 저장한다(재시작 뒤 표시 유지)."""
+#: `[unknown_holding_adopt_skipped]` 1회/(날짜, 종목, 사유) — 15분마다 같은 줄이 쌓이지 않게.
+_ADOPT_SKIP_EMITTED: set[tuple[Any, str, str]] = set()
+
+
+def _emit_adopt_skipped(ticker: str, reason: str) -> None:
+    try:
+        key = (now_kst().date(), ticker, reason)
+        if key in _ADOPT_SKIP_EMITTED:
+            return
+        if len(_ADOPT_SKIP_EMITTED) > 2000:
+            _ADOPT_SKIP_EMITTED.clear()
+        _ADOPT_SKIP_EMITTED.add(key)
+        logger.warning("[unknown_holding_adopt_skipped] ticker=%s reason=%s — 방금 팔렸거나 매도 중", ticker, reason)
+    except Exception:
+        logger.debug("[unknown_holding_adopt_skipped] emit 실패", exc_info=True)
+
+
+def _adopt_block_reason(registry: Any, order_engine: Any, ticker: str) -> str | None:
+    """입양을 막는 사유 — 동기(await 0). 호출 뒤 입양까지 await 를 두지 않는다(D2)."""
+    if registry.is_ticker_held_by_any(ticker):
+        return "held"
+    if registry.is_ticker_sold_today_by_any(ticker):
+        return "sold_today"
+    if order_engine is not None and ticker in getattr(order_engine, "_selling", ()):
+        return "selling"
+    return None
+
+
+async def adopt_balance_only_holding(
+    registry: Any, holding: Any, *, order_engine: Any = None, path: str = "sync",
+) -> None:
+    """15분 동기화 — 장부에 없는 KIS 보유를 판정해 올리고 DB 에도 저장한다(재시작 뒤 표시 유지).
+
+    🔴 잔고 스냅샷은 이미 낡았을 수 있다 — 호출부의 await(PENDING 정리)·이 함수의 조회 await
+    동안 매도 체결통보가 보유를 닫았을 수 있다. 그래서 조회 **뒤**에 보유·당일 매도·매도 중을
+    다시 보고, 그 판정과 입양 사이에는 await 를 두지 않는다(cycle461 검수 D2 — 방금 판 종목을
+    unknown 으로 다시 입양해 또 파는 경로).
+    """
+    from datetime import date as _date
+
     from src.engine.strategy_base import Position
     from src.engine.scanner import ticker_names
 
     ticker = holding.ticker
     sid, reason, owner = await resolve_owner(registry, ticker)
+    buy_date: _date | None = None
+    if reason == REASON_OWNER:
+        # L1 — 주인 입양이면 그 열린 왕복의 첫 BUY 날짜(익일청산·보유일 판정의 기준).
+        try:
+            from src.db import trade_history as _th
+
+            buy_date = await _th.get_open_roundtrip_first_buy_date(ticker)
+        except Exception:
+            buy_date = None
+        if buy_date is None:
+            logger.warning(
+                "[unknown_holding_buy_date_unknown] ticker=%s owner=%s — 첫 매수일 모름, 오늘로 둔다",
+                ticker, sid,
+            )
+    # ── 여기부터 입양까지 await 0 ──
+    block = _adopt_block_reason(registry, order_engine, ticker)
+    if block is not None:
+        if block != "held":
+            _emit_adopt_skipped(ticker, block)
+        return
     target = resolve_target(registry, sid)
     if target is None:
         return
@@ -148,6 +206,8 @@ async def adopt_balance_only_holding(registry: Any, holding: Any, *, path: str =
         ticker=ticker, buy_price=buy_price, quantity=holding.quantity,
         order_no="", strategy_id=actual_sid,
     )
+    if buy_date is not None:
+        pos.buy_date = buy_date
     target.state.positions[ticker] = pos
     if holding.name:
         ticker_names[ticker] = holding.name

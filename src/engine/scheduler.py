@@ -3532,7 +3532,7 @@ class TradingScheduler:
             if self.registry.is_ticker_held_by_any(h.ticker):
                 continue
             # 체결통보 누락·권리 입고 — 열린 왕복 주인(켜진 전략) 또는 `unknown`(cycle461 ⑦-F1 안 U).
-            await _uhp.adopt_balance_only_holding(self.registry, h, path="sync")
+            await _uhp.adopt_balance_only_holding(self.registry, h, order_engine=self.order_engine)
 
         # 잔고 동기화 후 모든 전략의 매수 락/캐시 해제 — 가용액이 회복됐을 가능성 반영
         for s in self.registry.all():

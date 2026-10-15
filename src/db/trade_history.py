@@ -426,6 +426,31 @@ async def get_open_roundtrip_owner(ticker: str) -> tuple[str, str | None]:
     return ("found", str(buy_strategy))
 
 
+async def get_open_roundtrip_first_buy_date(ticker: str) -> date | None:
+    """열린 왕복의 **첫 BUY 날짜**(KST) — 마지막 SELL(COMPLETED·PARTIAL) 뒤 BUY(COMPLETED·PARTIAL·
+    PENDING) 중 가장 이른 시각의 날짜. 없으면 `None` (cycle461 L1 — 15분 동기화 주인 입양의 `buy_date`).
+
+    🔴 DB 예외를 삼키지 않는다 — 호출자가 「모름 = 오늘 + WARNING」 으로 받는다.
+    """
+    ts = await pg.fetchval(
+        """
+        SELECT min(b.timestamp) FROM trade_history b
+        WHERE b.ticker = $1 AND b.trade_type = 'BUY' AND b.status = ANY($2::text[])
+          AND b.timestamp > COALESCE(
+            (SELECT max(s.timestamp) FROM trade_history s
+              WHERE s.ticker = $1 AND s.trade_type = 'SELL' AND s.status = ANY($3::text[])),
+            '-infinity'::timestamptz)
+        """,
+        ticker,
+        list(_OPEN_ROUNDTRIP_BUY_STATUSES),
+        list(_OPEN_ROUNDTRIP_SELL_STATUSES),
+    )
+    if ts is None:
+        return None
+    from src.db._kst import KST as _KST_TZ
+    return ts.astimezone(_KST_TZ).date() if getattr(ts, "tzinfo", None) else ts.date()
+
+
 async def get_today_buys_ticker_strategy() -> list[dict]:
     """오늘(KST) BUY row 의 (ticker, strategy) 목록을 조회한다 (사이클 M5, boot_manager 전용).
 

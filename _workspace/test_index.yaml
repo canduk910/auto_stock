@@ -154,6 +154,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -1050,6 +1051,7 @@ backend:
     - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -1521,6 +1523,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -2450,6 +2453,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -2857,6 +2861,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -3860,6 +3865,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -4335,6 +4341,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -5260,6 +5267,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -5704,6 +5712,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -6663,6 +6672,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -7109,6 +7119,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -8068,6 +8079,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -8515,6 +8527,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -9474,6 +9487,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -9920,6 +9934,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -10879,6 +10894,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -11326,6 +11342,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -12283,6 +12300,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -12732,6 +12750,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -13689,6 +13708,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -14146,6 +14166,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -15098,6 +15119,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -15547,6 +15569,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -16499,6 +16522,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -16945,6 +16969,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -17903,6 +17928,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -18429,6 +18455,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -19383,6 +19410,7 @@ backend:
     - tests/unit/engine/test_cycle455_domestic_index_ingest.py
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -19827,6 +19855,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -20787,6 +20816,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -21252,6 +21282,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -22212,6 +22243,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -22679,6 +22711,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -23618,6 +23651,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -24097,6 +24131,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -25032,6 +25067,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -25466,6 +25502,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -26426,6 +26463,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -26890,6 +26928,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -27835,6 +27874,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -28282,6 +28322,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -29237,6 +29278,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -29685,6 +29727,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -30643,6 +30686,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -31091,6 +31135,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -32047,6 +32092,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -32493,6 +32539,7 @@ backend:
     - tests/integration/test_cycle413_journal_pg.py
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -33452,6 +33499,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -33866,6 +33914,7 @@ backend:
     - tests/unit/db/test_cycle401_save_params_seed.py
     - tests/unit/engine/test_cycle245_ratio_notional_cap.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/main/test_cycle72_db_log_dedupe.py
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/main/test_cycleM3b_main_seam_pg.py
@@ -33989,6 +34038,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -34947,6 +34997,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -35403,6 +35454,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -36351,6 +36403,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -36796,6 +36849,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -37755,6 +37809,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -38209,6 +38264,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -39162,6 +39218,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -39611,6 +39668,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -40565,6 +40623,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -41011,6 +41070,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -41970,6 +42030,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -42423,6 +42484,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -43375,6 +43437,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -43825,6 +43888,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -44780,6 +44844,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -45176,6 +45241,7 @@ backend:
     - tests/unit/engine/test_cycle404_account_cluster.py
     - tests/unit/engine/test_cycle417_daily_gap_fill.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -45247,6 +45313,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -46594,6 +46661,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -46669,6 +46737,7 @@ backend:
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle438_exact_order_match.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/routes/test_cycle385_manual_sell_selling.py
@@ -48038,6 +48107,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -48996,6 +49066,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -49503,6 +49574,7 @@ backend:
     - tests/integration/test_cycle413_journal_pg.py
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -50406,6 +50478,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -50881,6 +50954,7 @@ backend:
     - tests/integration/test_cycle413_journal_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -51806,6 +51880,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -52255,6 +52330,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -53211,6 +53287,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -53624,6 +53701,7 @@ backend:
     - tests/unit/db/test_cycleM1_1_strategy_config_pg.py
     - tests/unit/engine/test_cycle399_shadow_weights.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/routes/test_cycle278_params_validation.py
     - tests/unit/routes/test_cycle290_killswitch_put.py
     transitive_tests:
@@ -53662,6 +53740,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -55075,6 +55154,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -56020,6 +56100,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -56469,6 +56550,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -57429,6 +57511,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -57900,6 +57983,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -58837,6 +58921,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -59282,6 +59367,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -60240,6 +60326,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -60614,6 +60701,7 @@ backend:
     direct_tests:
     - tests/integration/test_cycle379_buying_reconcile_pg.py
     - tests/integration/test_cycle409_order_price_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycleM2a_hotpath_roundtrip.py
     - tests/unit/db/test_cycle147_trade_history_strategy_lookup.py
     - tests/unit/db/test_cycle235_forced_update_partial.py
@@ -60637,6 +60725,7 @@ backend:
     - tests/unit/engine/test_cycle385r4_round4.py
     - tests/unit/engine/test_cycle409_sell_order_price.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_sync_orders_to_db_042700_pingpong.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/routes/test_cycle385_manual_sell_selling.py
@@ -62163,6 +62252,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -63123,6 +63213,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -63569,6 +63660,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -64529,6 +64621,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -64975,6 +65068,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -65934,6 +66028,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -66402,6 +66497,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -67340,6 +67436,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -67864,6 +67961,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -68818,6 +68916,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -69267,6 +69366,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -70224,6 +70324,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -70670,6 +70771,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -71628,6 +71730,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -72021,6 +72124,7 @@ backend:
     - tests/unit/engine/test_cycle441_boot_partial_fill_seed.py
     - tests/unit/engine/test_cycle455_domestic_index_ingest.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -72094,6 +72198,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -73478,6 +73583,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -74438,6 +74544,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -74817,6 +74924,7 @@ backend:
     - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -74890,6 +74998,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -76261,6 +76370,7 @@ backend:
     - tests/unit/db/test_cycle401_save_params_seed.py
     - tests/unit/engine/test_cycle245_ratio_notional_cap.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/main/test_cycle72_db_log_dedupe.py
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/main/test_cycleM3b_main_seam_pg.py
@@ -76379,6 +76489,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -77339,6 +77450,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -77809,6 +77921,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -78750,6 +78863,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -79191,6 +79305,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -80150,6 +80265,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -80604,6 +80720,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -81556,6 +81673,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -81999,6 +82117,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -82959,6 +83078,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -83407,6 +83527,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -84365,6 +84486,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -84812,6 +84934,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -85771,6 +85894,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -86218,6 +86342,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -87178,6 +87303,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -87623,6 +87749,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -88583,6 +88710,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -89031,6 +89159,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -89985,6 +90114,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -90508,6 +90638,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -91464,6 +91595,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -91913,6 +92045,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -92869,6 +93002,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -93318,6 +93452,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -94276,6 +94411,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -94722,6 +94858,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -95679,6 +95816,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -96127,6 +96265,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -97084,6 +97223,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -97618,6 +97758,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -98570,6 +98711,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -99023,6 +99165,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -99973,6 +100116,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -100490,6 +100634,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -101448,6 +101593,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -101900,6 +102046,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -102857,6 +103004,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -103314,6 +103462,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -104269,6 +104418,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -104787,6 +104937,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -105736,6 +105887,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -106183,6 +106335,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -107143,6 +107296,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -107587,6 +107741,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -108546,6 +108701,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -108996,6 +109152,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -109951,6 +110108,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -110397,6 +110555,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -111356,6 +111515,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -111811,6 +111971,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -112761,6 +112922,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -113209,6 +113371,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -114166,6 +114329,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -114614,6 +114778,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -115571,6 +115736,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -116022,6 +116188,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -116976,6 +117143,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -117420,6 +117588,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -118380,6 +118549,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -118816,6 +118986,7 @@ backend:
     - tests/unit/engine/test_cycle245_ratio_notional_cap.py
     - tests/unit/engine/test_cycle382_market_unit_refresh.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/main/test_cycle72_db_log_dedupe.py
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/main/test_cycleM3b_main_seam_pg.py
@@ -118931,6 +119102,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -119890,6 +120062,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -120307,6 +120480,7 @@ backend:
     - tests/unit/db/test_cycle401_save_params_seed.py
     - tests/unit/engine/test_cycle245_ratio_notional_cap.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/main/test_cycle72_db_log_dedupe.py
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/main/test_cycleM3b_main_seam_pg.py
@@ -120427,6 +120601,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -121384,6 +121559,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -121797,6 +121973,7 @@ backend:
     - tests/unit/db/test_cycle401_save_params_seed.py
     - tests/unit/engine/test_cycle245_ratio_notional_cap.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/main/test_cycle72_db_log_dedupe.py
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/main/test_cycleM3b_main_seam_pg.py
@@ -121885,6 +122062,7 @@ backend:
     - tests/unit/db/test_cycle401_save_params_seed.py
     - tests/unit/engine/test_cycle245_ratio_notional_cap.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/main/test_cycle72_db_log_dedupe.py
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/main/test_cycleM3b_main_seam_pg.py
@@ -122005,6 +122183,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -122963,6 +123142,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -123409,6 +123589,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -124369,6 +124550,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -124822,6 +125004,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -125774,6 +125957,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -126278,6 +126462,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -127188,6 +127373,7 @@ backend:
     - tests/unit/engine/test_cycle455_domestic_index_ingest.py
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -127626,6 +127812,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -128586,6 +128773,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -129033,6 +129221,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -129992,6 +130181,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -130432,6 +130622,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -131392,6 +131583,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -131839,6 +132031,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -132799,6 +132992,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -133245,6 +133439,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -134205,6 +134400,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -134647,6 +134843,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -135682,6 +135879,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -136052,6 +136250,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -136200,6 +136399,7 @@ backend:
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -137462,6 +137662,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -138420,6 +138621,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -138866,6 +139068,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -139825,6 +140028,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -140272,6 +140476,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -141228,6 +141433,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -141672,6 +141878,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -142632,6 +142839,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -143086,6 +143294,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -144039,6 +144248,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -144514,6 +144724,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -145463,6 +145674,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -145891,6 +146103,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -146848,6 +147061,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -147318,6 +147532,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -148271,6 +148486,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -148701,6 +148917,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -149659,6 +149876,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -150102,6 +150320,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -151062,6 +151281,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -151507,6 +151727,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -152467,6 +152688,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -152914,6 +153136,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -153873,6 +154096,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -154320,6 +154544,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -155278,6 +155503,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -155724,6 +155950,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -156683,6 +156910,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -157138,6 +157366,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -158092,6 +158321,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -158610,6 +158840,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -159525,6 +159756,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -159931,6 +160163,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -160934,6 +161167,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -161379,6 +161613,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -162333,6 +162568,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -162826,6 +163062,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -163745,6 +163982,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -164146,6 +164384,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -165144,6 +165383,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -165551,6 +165791,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -166549,6 +166790,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -166997,6 +167239,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -167952,6 +168195,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -168399,6 +168643,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -169357,6 +169602,7 @@ backend:
     - tests/unit/engine/test_cycle455_domestic_index_ingest.py
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -169850,6 +170096,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -170766,6 +171013,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -171171,6 +171419,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -172172,6 +172421,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -172582,6 +172832,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -172857,6 +173108,7 @@ backend:
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycleH_portfolio_risk.py
@@ -174019,6 +174271,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -174977,6 +175230,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -175431,6 +175685,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -176384,6 +176639,7 @@ backend:
     - tests/unit/engine/test_cycle455_domestic_index_ingest.py
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -176791,6 +177047,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -177809,6 +178066,7 @@ backend:
     - tests/unit/engine/test_cycle455_domestic_index_ingest.py
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -178233,6 +178491,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -179193,6 +179452,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -179644,6 +179904,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -180597,6 +180858,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -181016,6 +181278,7 @@ backend:
     - tests/unit/db/test_cycle401_save_params_seed.py
     - tests/unit/engine/test_cycle245_ratio_notional_cap.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/main/test_cycle72_db_log_dedupe.py
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/main/test_cycleM3b_main_seam_pg.py
@@ -181136,6 +181399,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -182093,6 +182357,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -182544,6 +182809,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -183499,6 +183765,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -183945,6 +184212,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -184902,6 +185170,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -185371,6 +185640,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -186310,6 +186580,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -186753,6 +187024,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -187712,6 +187984,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -188157,6 +188430,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -189117,6 +189391,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -189561,6 +189836,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -190521,6 +190797,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -190972,6 +191249,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -191928,6 +192206,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -192300,6 +192579,7 @@ backend:
   src/engine/unknown_holding_policy.py:
     direct_tests:
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -192373,6 +192653,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -193779,6 +194060,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -194737,6 +195019,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -195197,6 +195480,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -196149,6 +196433,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -196595,6 +196880,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -197551,6 +197837,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -198067,6 +198354,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -199027,6 +199315,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -199472,6 +199761,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -200432,6 +200722,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -200884,6 +201175,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -201841,6 +202133,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -202285,6 +202578,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -203251,6 +203545,7 @@ backend:
     - tests/unit/engine/test_cycle455_domestic_index_ingest.py
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -203770,6 +204065,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -204726,6 +205022,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -205177,6 +205474,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -206133,6 +206431,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -206613,6 +206912,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -207612,6 +207912,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -208110,6 +208411,7 @@ backend:
     - tests/unit/engine/test_cycle385r4_round4.py
     - tests/unit/engine/test_cycle409_sell_order_price.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_sector_naming.py
     - tests/unit/main/test_cycle72_db_log_dedupe.py
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
@@ -208282,6 +208584,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
     - tests/integration/test_cycle99_fluctuation_single_call.py
@@ -209214,6 +209517,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -209754,6 +210058,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -210692,6 +210997,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -211178,6 +211484,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -212127,6 +212434,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -212558,6 +212866,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -213514,6 +213823,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -213981,6 +214291,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -214936,6 +215247,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -215399,6 +215711,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -216340,6 +216653,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -216690,6 +217004,7 @@ backend:
     - tests/unit/db/test_cycle401_save_params_seed.py
     - tests/unit/engine/test_cycle245_ratio_notional_cap.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_sector_naming.py
     - tests/unit/routes/test_cycle110_lock_persistence.py
     - tests/unit/routes/test_cycle112_krx_open_api_routes.py
@@ -216890,6 +217205,7 @@ backend:
     - tests/unit/db/test_cycle401_save_params_seed.py
     - tests/unit/engine/test_cycle245_ratio_notional_cap.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/main/test_cycle72_db_log_dedupe.py
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
     - tests/unit/main/test_cycleM3b_main_seam_pg.py
@@ -218361,6 +218677,7 @@ backend:
     - tests/unit/db/test_cycle401_save_params_seed.py
     - tests/unit/engine/test_cycle245_ratio_notional_cap.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/routes/test_cycle278_params_schema.py
     - tests/unit/routes/test_cycle278_params_validation.py
     - tests/unit/routes/test_cycle290_killswitch_put.py
@@ -218909,6 +219226,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -219864,6 +220182,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -220307,6 +220626,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -221266,6 +221586,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -221717,6 +222038,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -222674,6 +222996,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -223117,6 +223440,7 @@ backend:
     - tests/integration/test_cycle417_daily_gap_scan_pg.py
     - tests/integration/test_cycle446_exit_ai_pg.py
     - tests/integration/test_cycle455_domestic_index_pg.py
+    - tests/integration/test_cycle461_open_roundtrip_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -224076,6 +224400,7 @@ backend:
     - tests/unit/engine/test_cycle455_market_unit_by_market.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle461_unknown_holding.py
+    - tests/unit/engine/test_cycle461b_unknown_holding_review.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -228692,10 +229017,10 @@ frontend:
     - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
     - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
     - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-15T16:40:33.237321+09:00'
+generated_at: '2026-10-15T17:22:33.108014+09:00'
 stats:
   backend_modules: 211
-  backend_tests: 1402
+  backend_tests: 1404
   frontend_modules: 168
   frontend_tests: 178
   unmapped_modules:

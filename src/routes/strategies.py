@@ -399,8 +399,8 @@ async def update_weights(req: WeightsRequest):
     if total_asset > 0:
         for sid, new_weight in weights.items():
             strategy = registry.get(sid)
-            if not strategy:
-                continue
+            if not strategy or is_unknown_strategy_id(sid):
+                continue  # cycle461 — unknown 은 비중 0 고정 · 항상 켜짐(하한선 검증 대상 아님)
             # 보유 포지션의 매수금액 합산
             invested = sum(
                 pos.buy_price * pos.quantity
