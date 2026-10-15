@@ -303,7 +303,9 @@ async def _sell(r, signal: Signal = Signal.STOP_LOSS, **kw) -> None:
 def _assert_final_critical(r, caplog, err: BaseException, signal: Signal = Signal.STOP_LOSS) -> None:
     msg = f"매도 주문 최종 실패: {_T} {signal.value} — {err}"
     assert _recs(caplog, logging.CRITICAL) == [msg]
-    r.write_log.assert_any_await("CRITICAL", msg)
+    # cycle458 — 사건 하나 = system_logs 한 줄: 영속은 위 CRITICAL 을 `_DbLogHandler` 가
+    # 옮기는 것뿐이다. 같은 메시지를 write_log 로 또 남기지 않는다.
+    assert all(c.args[1:2] != (msg,) for c in r.write_log.await_args_list)
 
 
 # ===========================================================================
@@ -783,12 +785,11 @@ async def test_p01_insufficient_cleanup_order_and_effects(monkeypatch, caplog):
     assert _T in r.strat.state.positions  # D1 안A — 자동 삭제 없음
     r.on_closed.assert_not_called()
     r.delete_position.assert_not_awaited()
-    assert r.write_log.await_count == 1
-    lvl, msg = r.write_log.await_args.args[:2]
-    assert lvl == "ERROR"
-    assert msg.startswith("[sell_insufficient_unexplained] ")
+    # cycle458 — 영속은 로거 경로(`_DbLogHandler`) 단일: write_log 0, ERROR 로그 1행
+    assert r.write_log.await_count == 0
+    (msg,) = _recs(caplog, logging.ERROR, "[sell_insufficient_unexplained] ")
     assert f"ticker={_T}" in msg and f"strategy={_SID}" in msg and "held=0" in msg
-    assert r.events == ["place", "get_balance", "write_log:ERROR"]
+    assert r.events == ["place", "get_balance"]
     assert _recs(caplog, logging.CRITICAL) == []
     assert _T not in r.eng._selling
     assert _T not in r.eng._selling_locked_wait
@@ -805,7 +806,7 @@ async def test_p02_on_position_closed_is_never_called_for_insufficient(monkeypat
 
     r.on_closed.assert_not_called()
     r.delete_position.assert_not_awaited()
-    assert r.events == ["place", "get_balance", "write_log:ERROR"]
+    assert r.events == ["place", "get_balance"]  # cycle458 — write_log 0(로거 경로 단일)
 
 
 @pytest.mark.asyncio
@@ -818,7 +819,7 @@ async def test_p03_delete_position_is_never_called_for_insufficient(monkeypatch,
 
     r.delete_position.assert_not_awaited()
     assert _T in r.strat.state.positions
-    assert r.events == ["place", "get_balance", "write_log:ERROR"]
+    assert r.events == ["place", "get_balance"]  # cycle458 — write_log 0(로거 경로 단일)
     assert _recs(caplog, logging.CRITICAL) == []
 
 
@@ -836,8 +837,7 @@ async def test_p04_held_value_is_observational_only_in_unexplained_message(monke
     r.place.side_effect = [_insufficient()]
     await _sell(r)
 
-    lvl, msg = r.write_log.await_args.args[:2]
-    assert lvl == "ERROR"
+    (msg,) = _recs(caplog, logging.ERROR, "[sell_insufficient_unexplained] ")
     assert f"held={actual}" in msg
     assert _T in r.strat.state.positions  # D1 안A — 잔량과 무관하게 보존
 
@@ -851,8 +851,7 @@ async def test_p05_reconciliation_balance_failure_is_swallowed(monkeypatch, capl
     r.place.side_effect = [_insufficient()]
     await _sell(r)  # 전파 없음
 
-    lvl, msg = r.write_log.await_args.args[:2]
-    assert lvl == "ERROR"
+    (msg,) = _recs(caplog, logging.ERROR, "[sell_insufficient_unexplained] ")
     assert "held=?" in msg
     assert _recs(caplog, logging.CRITICAL) == []
 

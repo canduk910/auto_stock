@@ -120,3 +120,127 @@ def test_g_6_no_logger_write_log_pair_within_5_lines() -> None:
         f"\nsystem_logs 이중 INSERT 결함 (사이클 71 root cause). 옵션 A' = logger.* "
         f"단독 유지 + write_log 호출 제거 (logger 가 _DbLogHandler 위임으로 INSERT)."
     )
+
+
+# ---------------------------------------------------------------------------
+# cycle458 — 같은 식(변수 포함) 쌍 검출 (사용자 결정 2026-10-15 「1개 사건은 1번만 로그」)
+#
+# 위 G-6 은 `logger.*` 호출 *텍스트*에서 `[prefix]` 리터럴을 찾는다. 메시지를 변수(`msg`)로
+# 만들어 `logger.warning(msg)` + `await write_log("WARNING", msg)` 로 넘기면 리터럴이
+# 호출 줄에 없어 놓친다(10-14 `[tick_coverage]` 121회 발화 → system_logs 242행).
+# G-458 은 AST 로 같은 함수 본문 안의 두 호출을 찾아, write_log 계열의 메시지 인자와
+# logger.<level> 의 메시지 인자(첫 인자, 또는 `"%s"` 뒤 인자)가 **같은 식**이면 위반이다.
+# ---------------------------------------------------------------------------
+import ast as _ast
+
+_G458_LOGGER_LEVELS = frozenset({"info", "warning", "error", "exception", "critical"})
+_G458_WRITE_LOG_NAMES = frozenset({"write_log", "_write_log", "safe_write_log"})
+
+
+def _g458_callee_name(func: _ast.expr) -> str | None:
+    if isinstance(func, _ast.Name):
+        return func.id
+    if isinstance(func, _ast.Attribute):
+        return func.attr
+    return None
+
+
+def _g458_is_logger_call(node: _ast.Call) -> bool:
+    func = node.func
+    if not (isinstance(func, _ast.Attribute) and func.attr in _G458_LOGGER_LEVELS):
+        return False
+    recv = func.value
+    return isinstance(recv, _ast.Name) and (
+        "logger" in recv.id.lower() or recv.id in {"log", "_log"}
+    )
+
+
+def _g458_write_log_message(node: _ast.Call) -> _ast.expr | None:
+    if _g458_callee_name(node.func) not in _G458_WRITE_LOG_NAMES:
+        return None
+    if len(node.args) >= 2:
+        return node.args[1]
+    for kw in node.keywords:
+        if kw.arg == "message":
+            return kw.value
+    return None
+
+
+def _g458_logger_messages(node: _ast.Call) -> list[_ast.expr]:
+    if not node.args:
+        return []
+    first = node.args[0]
+    msgs = [first]
+    if isinstance(first, _ast.Constant) and first.value == "%s" and len(node.args) >= 2:
+        msgs.append(node.args[1])
+    return msgs
+
+
+def _find_same_expr_pairs(source: str) -> list[tuple[str, int, int, str]]:
+    """[(함수 이름, logger 줄, write_log 줄, 메시지 식)] — 같은 식을 두 경로로 남기는 쌍."""
+    tree = _ast.parse(source)
+    found: set[tuple[str, int, int, str]] = set()
+    for fn in _ast.walk(tree):
+        if not isinstance(fn, (_ast.FunctionDef, _ast.AsyncFunctionDef)):
+            continue
+        logger_calls: list[_ast.Call] = []
+        write_calls: list[tuple[_ast.Call, _ast.expr]] = []
+        for node in _ast.walk(fn):
+            if not isinstance(node, _ast.Call):
+                continue
+            if _g458_is_logger_call(node):
+                logger_calls.append(node)
+                continue
+            msg = _g458_write_log_message(node)
+            if msg is not None:
+                write_calls.append((node, msg))
+        for w_call, w_msg in write_calls:
+            w_dump = _ast.dump(w_msg)
+            for l_call in logger_calls:
+                if any(_ast.dump(m) == w_dump for m in _g458_logger_messages(l_call)):
+                    found.add((fn.name, l_call.lineno, w_call.lineno, _ast.unparse(w_msg)[:60]))
+    return sorted(found, key=lambda x: (x[2], x[1]))
+
+
+def test_g_458_detector_catches_variable_pair() -> None:
+    """양성 대조군 — 검출기가 변수 메시지 쌍을 실제로 잡는다(공허한 초록 방지)."""
+    src = (
+        "async def f():\n"
+        "    msg = '[x] a=1'\n"
+        "    logger.warning(msg)\n"
+        "    await write_log('WARNING', msg)\n"
+        "async def g():\n"
+        "    msg = '[y]'\n"
+        "    logger.info(msg)\n"
+        "    await system_logs.write_log('INFO', msg)\n"
+        "async def h():\n"
+        "    logger.info('%s', msg)\n"
+        "    await safe_write_log('INFO', msg)\n"
+        "async def ok():\n"
+        "    logger.info(msg)\n"
+        "    await write_log('INFO', other)\n"
+    )
+    names = {p[0] for p in _find_same_expr_pairs(src)}
+    assert names == {"f", "g", "h"}
+
+
+def test_g_458_no_same_expr_logger_write_log_pair() -> None:
+    """G-458: src/ 전체 — 같은 함수 안 logger.<level>(X) 와 write_log(level, X) 쌍 0건.
+
+    루트 `_DbLogHandler`(src/main.py)가 `src.*` 로거의 INFO 이상을 이미 system_logs 로
+    옮긴다(접두 `[<logger name>] `). 같은 메시지를 write_log 로 또 쓰면 사건 하나가 두 줄이다.
+    """
+    all_violations: dict[str, list[tuple[str, int, int, str]]] = {}
+    for py_file in _iter_py_files():
+        violations = _find_same_expr_pairs(_read(py_file))
+        if violations:
+            all_violations[str(py_file.relative_to(_SRC_ROOT.parent))] = violations
+    total = sum(len(v) for v in all_violations.values())
+    detail = "\n".join(
+        f"  {path}: {sites}" for path, sites in sorted(all_violations.items())
+    )
+    assert total == 0, (
+        f"\ncycle458 G-458 위반 — 같은 메시지를 logger.* 와 write_log 로 두 번 남기는 쌍 "
+        f"{total} 건 (함수, logger 줄, write_log 줄, 식):\n{detail}\n"
+        f"\n한쪽만 남긴다 — 로거가 src.* 이고 INFO 이상이면 write_log 를 지운다."
+    )

@@ -632,7 +632,6 @@ class KojiroStrategy(StrategyBase):
         VCP 는 2026-08-08 전체 상장 전환(is_kospi200/is_kosdaq150=None) — kojiro 만 시총 500억.
         """
         from src.db import stock_master as _sm_mod
-        from src.db.system_logs import write_log
         from src.engine.etf_like import is_etf_like
         from src.engine.scanner import ticker_names
 
@@ -687,10 +686,6 @@ class KojiroStrategy(StrategyBase):
                 f"{min_mcap // 100_000_000}억+ / 거래대금 {min_trade // 100_000_000}억+ / ETF 제외 후 없음"
             )
             logger.error(msg)
-            try:
-                await write_log("ERROR", msg)
-            except Exception:
-                logger.exception("system_logs 기록 실패")
 
         filtered = await self._apply_price_filter_in_prepare(filtered)
         return filtered

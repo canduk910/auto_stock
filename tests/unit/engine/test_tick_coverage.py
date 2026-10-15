@@ -75,14 +75,9 @@ async def test_report_tick_coverage_fresh_and_stale_mixed(caplog):
     assert "fresh=3" in msg or "수신=3" in msg
     assert "stale=2" in msg or "미수신=2" in msg
 
-    # system_logs 1행
-    mock_write_log.assert_called_once()
-    args, kwargs = mock_write_log.call_args
-    log_payload = args[1] if len(args) >= 2 else kwargs.get("message", "")
-    assert "[tick_coverage]" in log_payload
-    assert "subscribed=5" in log_payload
-    assert "fresh=3" in log_payload
-    assert "stale=2" in log_payload
+    # system_logs 1행 — cycle458: 위 로거 1행을 루트 `_DbLogHandler` 가 옮기는 것뿐이다.
+    # write_log 를 또 부르면 사건 하나가 두 줄이 된다.
+    mock_write_log.assert_not_called()
 
 
 # ===========================================================================
@@ -112,9 +107,8 @@ async def test_report_tick_coverage_all_stale(caplog):
     assert "fresh=0" in msg or "수신=0" in msg
     assert "stale=5" in msg or "미수신=5" in msg
 
-    mock_write_log.assert_called_once()
-    log_payload = mock_write_log.call_args.args[1]
-    assert "stale=5" in log_payload
+    # cycle458 — 영속은 로거 경로 단일(write_log 0)
+    mock_write_log.assert_not_called()
 
 
 # ===========================================================================

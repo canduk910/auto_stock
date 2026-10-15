@@ -2644,10 +2644,8 @@ class OrderEngine:
         )
         if count >= SELL_INSUFFICIENT_CRITICAL_THRESHOLD:
             logger.critical(msg)
-            await write_log("CRITICAL", msg)
         else:
             logger.error(msg)
-            await write_log("ERROR", msg)
 
     async def _handle_sell_final_failure(
         self,
@@ -2673,7 +2671,6 @@ class OrderEngine:
         self._selling.discard(ticker)
         error_msg = f"매도 주문 최종 실패: {ticker} {signal.value} — {last_error}"
         logger.critical(error_msg)
-        await write_log("CRITICAL", error_msg)
 
     def _schedule_sell_unknown_reconcile(self, ticker: str, strategy_id: str) -> None:
         """cycle428(F-422-1) — 매도 결과 모름(UNKNOWN) 뒤 그 종목만 확인 조회를

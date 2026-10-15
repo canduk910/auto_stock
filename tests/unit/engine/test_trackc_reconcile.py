@@ -7,7 +7,7 @@
 | C1 | KIS 조회 → 집계 → `trade_cost_daily` upsert + 기간 합계 upsert, 저장 건수·쪽수 반환 |
 | C2 | 행 합계(수수료·세금)와 KIS output2 합계가 같으면 `totals_match=True`, 다르면 False |
 | C3 | 경보 기준 없음(None) = `[trade_cost_high]` 0건 · system_logs 0건 |
-| C4 | 기준 있음 + 30일 창 실효 bp 초과 = `[trade_cost_high]` WARNING 1행 + system_logs WARNING |
+| C4 | 기준 있음 + 30일 창 실효 bp 초과 = `[trade_cost_high]` WARNING 1행(영속은 `_DbLogHandler` — write_log 0, cycle458) |
 | C5 | 경보 계산이 실패해도 대사 결과는 돌려준다(관측 전용) |
 | C6 | `build_summary` 는 DB 에서 비용 행·체결 행·주문가를 읽어 `summarize` 결과를 돌려준다 |
 | C7 | 경보 창 = `end` 를 포함한 30 달력일 |
@@ -72,7 +72,9 @@ def env(monkeypatch):
     monkeypatch.setattr(m.trade_cost_db, "get_daily_range", get_daily)
     monkeypatch.setattr(m.trade_cost_db, "get_completed_trades", get_trades)
     monkeypatch.setattr(m.system_config, "get_trade_cost_alert_bp", threshold)
-    monkeypatch.setattr(m.system_logs, "write_log", write_log)
+    # cycle458 — trade_cost 는 write_log 를 부르지 않는다(로거 경로 단일 영속).
+    # 모듈 원본을 감싸 「호출 0」 을 확인한다.
+    monkeypatch.setattr(importlib.import_module("src.db.system_logs"), "write_log", write_log)
     return SimpleNamespace(m=m, fetch=fetch, upsert_daily=upsert_daily,
                            upsert_total=upsert_total, get_daily=get_daily,
                            get_trades=get_trades,
@@ -133,9 +135,10 @@ async def test_c4_threshold_exceeded_emits_warning(env, caplog):
     assert len(recs) == 1
     assert "strategy=kojiro" in recs[0].getMessage()
     assert "threshold_bp=10" in recs[0].getMessage()
-    levels = [c.args[0] for c in env.write_log.await_args_list]
-    assert levels == ["WARNING"]
-    assert env.write_log.await_args.args[1].startswith("[trade_cost_high] ")
+    # cycle458 — 사건 하나 = system_logs 한 줄: 영속은 루트 `_DbLogHandler` 가 위 WARNING 을
+    # 옮기는 것뿐이고 write_log 를 따로 부르지 않는다.
+    env.write_log.assert_not_awaited()
+    assert recs[0].name == "src.engine.trade_cost"
 
 
 async def test_c5_alert_failure_does_not_break_reconcile(env, caplog):

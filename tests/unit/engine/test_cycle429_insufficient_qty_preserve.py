@@ -326,15 +326,20 @@ async def test_s7_third_occurrence_same_day_escalates_to_critical(
 
     assert TICKER in strat.state.positions, "3회째도 자동 삭제 없음"
     assert mock_env.delete_position.await_count == 0
+    # cycle458 — 사건 하나 = system_logs 한 줄: 영속은 로거 경로(`_DbLogHandler`) 단일.
     critical_lines = [
-        c for c in mock_env.write_log.await_args_list
-        if len(c.args) >= 2 and c.args[0] == "CRITICAL"
-        and "[sell_insufficient_unexplained]" in str(c.args[1])
+        r for r in caplog.records
+        if r.levelno == logging.CRITICAL
+        and "[sell_insufficient_unexplained]" in r.getMessage()
     ]
     assert len(critical_lines) == 1, (
         f"3회째만 CRITICAL 이어야 한다(1~2회는 ERROR): {critical_lines}"
     )
-    assert "count=3" in str(critical_lines[0].args[1])
+    assert "count=3" in critical_lines[0].getMessage()
+    assert not [
+        c for c in mock_env.write_log.await_args_list
+        if "[sell_insufficient_unexplained]" in str(c.args)
+    ], "같은 사건을 write_log 로 또 남기지 않는다(cycle458)"
 
 
 # ═══════════════════════════════════════════════════════════════════════════

@@ -79,16 +79,8 @@ async def test_H1_daily_summary_writes_with_correct_prefix(caplog: pytest.LogCap
         f"block_count 필드 누락 또는 값 결함: {msg}"
     )
 
-    # 2) system_logs.write_log INSERT 검증
-    write_log_mock.assert_called_once()
-    call_args = write_log_mock.call_args
-    # write_log("INFO", "...") 형태 (사이클 64 답습)
-    assert call_args[0][0] == "INFO", (
-        f"write_log 첫 인자 'INFO' 의무 (실제 {call_args[0][0]})"
-    )
-    assert "[trade_amount_filter_scanner_daily_summary]" in call_args[0][1], (
-        f"system_logs prefix 누락: {call_args[0][1]}"
-    )
-    assert "block_count=42" in call_args[0][1], (
-        f"system_logs block_count 누락: {call_args[0][1]}"
-    )
+    # 2) system_logs 영속 = 위 INFO 를 루트 `_DbLogHandler` 가 옮기는 한 줄뿐(cycle458 —
+    #    사건 하나 = system_logs 한 줄). write_log 를 따로 부르지 않는다.
+    assert summary_logs[0].levelno == logging.INFO
+    assert summary_logs[0].name.startswith("src.")
+    write_log_mock.assert_not_called()
