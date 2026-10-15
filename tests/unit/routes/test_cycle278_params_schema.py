@@ -56,6 +56,7 @@ _STRATEGY_META: tuple[tuple[str, str, str, str], ...] = (
     ("kojiro", "kojiro", "KojiroStrategy", "고지로 대순환"),
     ("etf_trend", "etf_trend", "EtfTrendStrategy", "ETF 추세"),
     ("ndx2x_riskoff", "ndx2x_riskoff", "Ndx2xRiskoffStrategy", "나스닥2배-위험회피"),
+    ("unknown", "unknown", "UnknownHoldingStrategy", "비식별 보유"),  # cycle461
 )
 
 
@@ -149,7 +150,7 @@ async def test_schema_when_requested_then_200_with_101_params(schema_env):
     assert data["catalog_version"] == pc.CATALOG_VERSION
     keys = [p["key"] for p in data["params"]]
     assert keys == list(pc.all_keys()), "params 순서/집합이 카탈로그 정의 순서와 다르다"
-    assert len(keys) == 125, f"{len(keys)}개 — 125 전수여야 한다"
+    assert len(keys) == 126, f"{len(keys)}개 — 126 전수여야 한다"  # cycle461 +unknown_exit_mode
 
 
 async def test_schema_when_read_then_each_param_has_all_fields(schema_env):

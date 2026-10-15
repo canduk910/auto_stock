@@ -461,9 +461,9 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "사용자 승인 2026-10-15",
     ),
     "src/engine/scheduler.py": (
-        "a6936be77ee904b34c361e837610bcc655d38b5981007c2eaf4625044c9d0582",
-        "cycle458(2026-10-15) — 사건당 system_logs 1행(_report_tick_coverage 의 write_log 중복 제거), "
-        "사용자 승인 2026-10-15",
+        "78e84fa15174c0b76aa7a00b751ff17b7fb532e82950ca62085277372651e665",
+        "cycle458(2026-10-15) _report_tick_coverage write_log 중복 제거 + cycle461 ⑦-F1 안 U "
+        "(_sync_positions_from_balance 주인 판정·채택 위임 + sync_pass), 사용자 승인 2026-10-10·10-15",
     ),
     "src/engine/session.py": (
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",

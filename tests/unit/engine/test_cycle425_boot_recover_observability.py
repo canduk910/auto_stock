@@ -57,6 +57,10 @@ async def _run_boot(
             return await recent_buy_strategy_side_effect(ticker)
         return recent_buy_strategy_map.get(ticker)
 
+    async def _open_roundtrip_owner(ticker):
+        sid = await _get_recent_buy_strategy(ticker)
+        return ("found", sid) if sid else ("none", None)
+
     get_daily_orders_kwargs = (
         {"side_effect": get_daily_orders_side_effect}
         if get_daily_orders_side_effect is not None
@@ -91,9 +95,11 @@ async def _run_boot(
         patch("src.db.positions.load_all", new=AsyncMock(return_value=db_positions)),
         patch("src.db.positions.delete_position", new=AsyncMock()),
         patch("src.db.positions.save_position", new=AsyncMock()),
+        # cycle461 — KIS 잔고 보완 복구의 주인 판정은 열린 왕복 조회(`get_open_roundtrip_owner`)로
+        # 바뀌었다. 같은 표(전략 or None)·같은 예외 주입을 그 모양으로 옮긴다.
         patch(
-            "src.db.trade_history.get_recent_buy_strategy",
-            new=AsyncMock(side_effect=_get_recent_buy_strategy),
+            "src.db.trade_history.get_open_roundtrip_owner",
+            new=AsyncMock(side_effect=_open_roundtrip_owner),
         ),
         patch("src.db.trade_history.mark_pending_buys_completed", new=AsyncMock(**mark_pending_kwargs)),
         patch(
@@ -137,9 +143,12 @@ async def test_kis_supplement_trade_history_lookup_failure_logs_warning(caplog):
         today_buys_rows=[],
         recent_buy_strategy_side_effect=_boom,
     )
+    caplog.set_level(logging.WARNING, logger="src.engine.unknown_holding_policy")
 
-    msgs = _warning_messages(caplog, "[boot_recover_trade_history_lookup_failed]")
-    assert any("777777" in m for m in msgs), f"기대한 WARNING 없음: {caplog.text}"
+    # cycle461 — 조회 실패는 이제 판정 보류(`lookup_failed`)다. 마커는 판정 leaf 가 ERROR 로 남긴다.
+    msgs = [r.getMessage() for r in caplog.records
+            if r.getMessage().startswith("[unknown_holding_lookup_failed]")]
+    assert any("777777" in m for m in msgs), f"기대한 ERROR 없음: {caplog.text}"
 
 
 @pytest.mark.asyncio
@@ -223,11 +232,15 @@ async def test_kis_supplement_unknown_owner_emits_marker(caplog):
         all_orders=[],
         today_buys_rows=[],
     )
+    caplog.set_level(logging.WARNING, logger="src.engine.unknown_holding_policy")
 
-    msgs = _warning_messages(caplog, "[boot_recover_strategy_unknown]")
-    assert any("path=kis_supplement" in m and "ticker=111222" in m for m in msgs), (
-        f"기대한 마커 없음: {caplog.text}"
-    )
+    # cycle461 — 주인을 모르는 보유는 `unknown` 전략이 받는다. 이 가짜 레지스트리엔 `unknown` 이
+    # 없으니 `[unknown_holding_unregistered]` ERROR 와 함께 옛 폴백(momentum)으로 떨어진다.
+    # 옛 마커 `[boot_recover_strategy_unknown] path=kis_supplement` 는 없어졌다.
+    msgs = [r.getMessage() for r in caplog.records]
+    assert any(m.startswith("[unknown_holding_unregistered]") for m in msgs), f"기대한 마커 없음: {caplog.text}"
+    assert not any("path=kis_supplement" in m for m in msgs)
+    assert "111222" in registry.get("momentum").state.positions
 
 
 @pytest.mark.asyncio

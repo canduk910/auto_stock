@@ -77,7 +77,8 @@ def _lf():
 def _strategy_ids() -> tuple[str, ...]:
     from src.engine.param_catalog import STRATEGY_IDS
 
-    return tuple(STRATEGY_IDS)
+    # cycle461 — 매수하지 않는 비식별 보유(unknown)는 LLM 매수평가 대상이 아니다.
+    return tuple(s for s in STRATEGY_IDS if s != "unknown")
 
 
 def _default_params(sid: str) -> dict:

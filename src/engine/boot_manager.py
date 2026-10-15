@@ -26,6 +26,7 @@ from src.auth.token import token_manager
 from src.config import settings
 from src.db._kst import to_date
 from src.db.system_logs import write_log
+from src.engine import unknown_holding_policy as _uhp
 
 if TYPE_CHECKING:
     from src.engine.scheduler import TradingScheduler
@@ -679,23 +680,15 @@ async def boot(scheduler: "TradingScheduler") -> None:
         if scheduler.registry.is_ticker_held_by_any(h.ticker):
             continue
 
-        # DB에 없는 종목 — trade_history에서 전략 확인 + KIS 주문체결내역으로 매수일 판정
+        # DB에 없는 종목 — 열린 왕복 주인 판정 + KIS 주문체결내역으로 매수일 판정
         buy_price = int(h.avg_price)
         buy_dt = yesterday  # 기본 전일 매수로 간주
-        strategy_id = FALLBACK_OWNER_ID
 
-        # trade_history에서 전략 정보 조회
-        try:
-            from src.db.trade_history import get_recent_buy_strategy
-            fetched_strategy = await get_recent_buy_strategy(h.ticker)
-            if fetched_strategy:
-                strategy_id = fetched_strategy
-        except Exception:
-            # ⑦ 관측 (cycle425) — 전에는 조용히 넘어갔다. 행위 무변경(기본값 유지).
-            logger.warning(
-                "[boot_recover_trade_history_lookup_failed] ticker=%s — 전략 복원 조회 실패, 기본값 유지",
-                h.ticker,
-            )
+        # cycle461 ⑦-F1 안 U (사용자 결정 2026-10-10·10-15) — 주인은 trade_history 의 **열린 왕복**
+        # (마지막 BUY > 마지막 SELL)으로만 정한다. 주인이 켜진 전략이면 그 전략, 그 밖(주인 없음·
+        # 주인 꺼짐·권리 입고·조회 실패)은 전용 전략 `unknown` 이 맡는다(momentum 폴백 폐지).
+        # 조회 실패는 `lookup_failed` = 판정 보류(팔지 않는다, 15분 동기화가 재판정).
+        strategy_id, _uh_reason, _uh_owner = await _uhp.resolve_owner(scheduler.registry, h.ticker)
 
         try:
             orders = await get_daily_orders()
@@ -713,17 +706,12 @@ async def boot(scheduler: "TradingScheduler") -> None:
                 h.ticker,
             )
 
-        target = scheduler.registry.get(strategy_id)
+        target = _uhp.resolve_target(scheduler.registry, strategy_id)
         if target:
-            if strategy_id == FALLBACK_OWNER_ID:
-                # ⑦-F2 선행 관측 (cycle425) — 행위는 바뀌지 않는다(여전히 FALLBACK_OWNER_ID
-                # 가 받는다). 「주인을 모르는 보유를 폴백에 넘겼다」만 보이게 한다.
-                # 🔴 write_log 를 또 쓰지 않는다 — logger.* 가 루트 _DbLogHandler 로
-                # system_logs 에 들어간다(cycle72 G-6, 사건당 두 줄 금지).
-                logger.warning(
-                    "[boot_recover_strategy_unknown] path=kis_supplement ticker=%s order_no=",
-                    h.ticker,
-                )
+            strategy_id = target.strategy_id
+            # 「주인을 모르는 보유를 unknown 에 넘겼다」 마커 `[unknown_holding_adopted]` 는
+            # note_adopted 가 남긴다(logger 단독 — write_log 병행 금지, cycle72 G-6).
+            _uhp.note_adopted(target, h.ticker, _uh_reason, path="boot", owner=_uh_owner)
             target.state.positions[h.ticker] = Position(
                 ticker=h.ticker,
                 buy_price=buy_price,
@@ -748,6 +736,10 @@ async def boot(scheduler: "TradingScheduler") -> None:
                 "당일매수" if buy_dt == today else "익일청산",
                 strategy_id,
             )
+
+    # cycle461 ⑦-F1 안 U — DB 에서 복구된 `unknown` 보유는 재시작으로 채택 사유를 잃었다(메모리
+    # 전용). 사유가 없으면 팔지 않으므로 여기서 다시 판정한다(주인이 켜진 전략으로 확인되면 옮긴다).
+    await _uhp.rejudge_unknown_positions(scheduler.registry, scheduler.order_engine, path="boot")
 
     # PENDING 매수 기록 일괄 COMPLETED 처리
     try:

@@ -86,6 +86,7 @@ def _defaults(sid: str) -> dict:
     from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
     from src.engine.strategies.momentum import MomentumStrategy
     from src.engine.strategies.ndx2x_riskoff import Ndx2xRiskoffStrategy
+    from src.engine.strategies.unknown import UnknownHoldingStrategy
     from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
     from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 
@@ -99,6 +100,7 @@ def _defaults(sid: str) -> dict:
         "kojiro": KojiroStrategy,
         "etf_trend": EtfTrendStrategy,
         "ndx2x_riskoff": Ndx2xRiskoffStrategy,
+        "unknown": UnknownHoldingStrategy,  # cycle461
     }
     return copy.deepcopy(dict(table[sid].DEFAULT_PARAMS))
 
@@ -828,9 +830,9 @@ def test_g290_38_catalog_spec_count_is_102() -> None:
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1) — 105→106.
     # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설 — 106→119(신규 키 13개)→118(MED-3, atr_band_period 제거).
     # 🔁 cycle405 재핀 — donchian 깡토식 청산·사이징 신규 7키 — 118→125.
-    assert len(pc.PARAM_SPECS) == 125, len(pc.PARAM_SPECS)
-    assert len(pc.SPEC_BY_KEY) == 125, len(pc.SPEC_BY_KEY)
-    assert len({s.key for s in pc.PARAM_SPECS}) == 125, "키 중복"
+    assert len(pc.PARAM_SPECS) == 126, len(pc.PARAM_SPECS)  # cycle461 +unknown_exit_mode
+    assert len(pc.SPEC_BY_KEY) == 126, len(pc.SPEC_BY_KEY)
+    assert len({s.key for s in pc.PARAM_SPECS}) == 126, "키 중복"
 
 
 # ===========================================================================

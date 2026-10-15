@@ -126,7 +126,7 @@ def _str_consts(path: Path, value: str) -> list[int]:
 # ===========================================================================
 # S01 · S02 · S03 — 모든 BUY 반환이 섀도 관문을 지난다
 # ===========================================================================
-@pytest.mark.parametrize("fname", STRATEGY_FILES)
+@pytest.mark.parametrize("fname", census.BUYING_STRATEGY_FILES)  # cycle461 — 매수 안 하는 unknown 제외
 def test_s01_every_buy_return_is_preceded_by_shadow_gate(fname):
     tree = _tree(STRATEGY_DIR / fname)
     any_buy = [n for n in ast.walk(tree) if isinstance(n, ast.Attribute) and n.attr == "BUY"]
@@ -177,7 +177,7 @@ def _owner(tree: ast.AST, node: ast.AST):
     return best
 
 
-@pytest.mark.parametrize("fname", STRATEGY_FILES)
+@pytest.mark.parametrize("fname", census.BUYING_STRATEGY_FILES)
 def test_s02_shadow_gate_called_once_in_the_buy_returning_function(fname):
     tree = _tree(STRATEGY_DIR / fname)
     calls = [n for n in ast.walk(tree) if _is_self_call(n, GATE)]
@@ -208,7 +208,7 @@ def test_s02_shadow_gate_not_called_elsewhere_in_src():
     assert hits == [], f"섀도 관문이 전략 밖에서 불린다: {hits}"
 
 
-@pytest.mark.parametrize("fname", STRATEGY_FILES)
+@pytest.mark.parametrize("fname", census.BUYING_STRATEGY_FILES)
 def test_s03_shadow_gate_after_soft_gate_and_market_unit(fname):
     tree = _tree(STRATEGY_DIR / fname)
     gate = [n for n in ast.walk(tree) if _is_self_call(n, GATE)]
@@ -560,8 +560,8 @@ def test_s12_catalog_row_and_counts():
     for word in ("신규 매수", "손절", "주문"):
         assert word in spec.help, f"도움말에 「{word}」 없음"
     assert KEY in pc.identity_keys()
-    assert len(pc.PARAM_SPECS) == 125 and len(pc.SPEC_BY_KEY) == 125
-    assert len(pc.identity_keys()) == 26
+    assert len(pc.PARAM_SPECS) == 126 and len(pc.SPEC_BY_KEY) == 126  # cycle461 +unknown_exit_mode
+    assert len(pc.identity_keys()) == 27
     # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설, 신규 키 12개(atr_band_period 는 MED-3 에서 제거) — cycle399.1 → cycle403.1.
     assert pc.CATALOG_VERSION == "cycle405"
 

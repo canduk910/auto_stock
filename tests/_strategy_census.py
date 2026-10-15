@@ -60,6 +60,14 @@ if len(STRATEGY_FILES) < MIN_STRATEGIES:
     )
 #: 전략 id(= 파일 stem), `STRATEGY_FILES` 와 같은 순서.
 STRATEGY_IDS: tuple[str, ...] = tuple(Path(f).stem for f in STRATEGY_FILES)
+#: 매수하지 않는 전략 파일(cycle461 — `unknown` 비식별 보유: 출처 모를 보유의 청산 전용).
+#: 「사는 순간」 을 재는 가드(섀도 관문·예산 관문 행위·BUY 반환 탐지기)는 이 파일을 건너뛴다.
+#: 대신 `tests/unit/engine/test_cycle461_unknown_holding.py` 가 「BUY 를 절대 내지 않는다」 를 잰다.
+NON_BUYING_STRATEGY_FILES: frozenset[str] = frozenset({"unknown.py"})
+#: 매수하는 전략 파일 — `STRATEGY_FILES` 에서 `NON_BUYING_STRATEGY_FILES` 를 뺀 것(순서 유지).
+BUYING_STRATEGY_FILES: tuple[str, ...] = tuple(f for f in STRATEGY_FILES if f not in NON_BUYING_STRATEGY_FILES)
+#: 매수하는 전략 id.
+BUYING_STRATEGY_IDS: tuple[str, ...] = tuple(Path(f).stem for f in BUYING_STRATEGY_FILES)
 #: 리포 루트 기준 상대경로(`src/engine/strategies/momentum.py` …) — 닫힌 세계 판정용.
 STRATEGY_RELS: frozenset[str] = frozenset(f"{STRATEGIES_REL}/{f}" for f in STRATEGY_FILES)
 

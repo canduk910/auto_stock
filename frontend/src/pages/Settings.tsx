@@ -36,6 +36,9 @@ const BOARD_OPTIONS: { value: string; label: string; hint: string }[] = [
   { value: 'post_nxt', label: 'NXT 애프터 (15:30~20:00) 🌃', hint: '야간 매매 — 사용자 부재 시간대 사고 위험' },
 ]
 
+/** 비중을 갖지 않는 전략(비중 슬라이더에서 뺀다) — cycle461 비식별 보유. */
+const WEIGHTLESS_STRATEGY_KEYS = new Set(['unknown'])
+
 export default function Settings() {
   const queryClient = useQueryClient()
   const [weights, setWeights] = useState<Record<string, number>>({})
@@ -73,6 +76,7 @@ export default function Settings() {
       // 합계로 단위를 추론하던 종전 분기는 오염 시에만 깨어나 유효숫자를 파괴하고
       // "3개 전략 균등분배" 화면으로 결함을 위장했다 (2026-08-18 폐기).
       for (const s of data.strategies) {
+        if (WEIGHTLESS_STRATEGY_KEYS.has(s.key)) continue
         w[s.key] = Math.round(s.weight * 100)
       }
       setWeights(w)
@@ -85,6 +89,8 @@ export default function Settings() {
   if (!data) return null
 
   const strategies = data.strategies
+  // cycle461 — 비식별 보유(unknown)는 비중 0 고정(서버가 >0 을 422 로 거부)이라 비중 슬라이더에서 뺀다.
+  const weightStrategies = strategies.filter((s) => !WEIGHTLESS_STRATEGY_KEYS.has(s.key))
   const totalWeight = Object.values(weights).reduce((sum, w) => sum + w, 0)
   // 배너·저장차단 판정은 **서버 저장값(비율)** 기준. 편집 중 퍼센트 합(totalWeight)을 쓰면
   // (a) 슬라이더를 내리는 정상 편집과 (b) 4dp 비율 → 정수% 반올림 누적오차(전략 n개면 최대 ±n/2 %p)를
@@ -204,7 +210,7 @@ export default function Settings() {
 
             <div className="mb-6 p-4 bg-gray-50 rounded-lg">
               <div className="flex h-6 rounded-full overflow-hidden bg-gray-200">
-                {strategies.map((s) => {
+                {weightStrategies.map((s) => {
                   const pct = totalWeight > 0 ? ((weights[s.key] ?? 0) / totalWeight) * 100 : 0
                   const color = getStrategyColor(s.key)
                   if (pct <= 0) return null
@@ -220,7 +226,7 @@ export default function Settings() {
                 })}
               </div>
               <div className="flex gap-4 mt-2">
-                {strategies.map((s) => {
+                {weightStrategies.map((s) => {
                   const color = getStrategyColor(s.key)
                   const pct = totalWeight > 0 ? ((weights[s.key] ?? 0) / totalWeight) * 100 : 0
                   return (
@@ -234,7 +240,7 @@ export default function Settings() {
             </div>
 
             <div className="space-y-4">
-              {strategies.map((s) => {
+              {weightStrategies.map((s) => {
                 const color = getStrategyColor(s.key)
                 const w = weights[s.key] ?? 0
                 const minW = s.min_weight ?? 0

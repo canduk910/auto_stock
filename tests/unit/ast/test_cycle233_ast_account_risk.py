@@ -35,7 +35,7 @@ SRC = Path(__file__).resolve().parents[3] / "src"
 GATE_FIRST_FILES = [
     "long_tail_volatility.py", "donchian_swing.py",
     "bull_flag_breakout.py", "vcp_breakout.py", "kojiro.py", "etf_trend.py",
-    "ndx2x_riskoff.py",
+    "ndx2x_riskoff.py", "unknown.py",
 ]
 GATE_PRE_BUY_FILES = ["momentum.py", "volatility_breakout.py"]
 

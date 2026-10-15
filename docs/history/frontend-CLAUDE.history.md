@@ -1719,3 +1719,11 @@ nginx 계약(`auth_basic off;` 금지 · 옛 `nginx.conf` 부활 금지)은 루�
 - … kojiro=고지로 대순환. 이 7 전략은 백엔드 API 가 주는 `name` … / 터틀 4전략: `shadow` = 「관찰만」 …
 
 → CHANGELOG: cycle403 행
+
+## 시각적 컨벤션 · Settings
+### 2026-10-15 cycle461 — 전략 표시명 9 → 10 · 비중 슬라이더에서 unknown 제외 (정본에서 옮긴 원문)
+
+- 전략 한글 표시명 … ndx2x_riskoff=나스닥2배-위험회피. 이 9 전략은 백엔드 API 가 주는 `name` … 보다 이 표가 항상 우선한다.
+- 비중 슬라이더는 `GET /api/strategies` 의 전 전략을 그렸다.
+
+→ CHANGELOG: cycle461 행

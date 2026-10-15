@@ -645,6 +645,8 @@ def _exit_sentence(*, code: str | None, sub: str | None, source: str | None,
             text = "익일 청산"
     elif code == "STATUS_EXIT":
         text = f"{_reason_sub_label(sub)} 지정 — 보유 청산"
+    elif code == "UNKNOWN_EXIT":
+        text = "출처 모를 보유 — 비식별 보유 청산"
     elif code == "MANUAL":
         text = "수동 매도(화면)"
     elif code is None:

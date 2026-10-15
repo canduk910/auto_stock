@@ -37,7 +37,9 @@ pytestmark = pytest.mark.unit
 
 
 #: `[(전략 id, 클래스)]` — 전략 명부 전부(파일 이름순).
-ALL_STRATEGIES = list(strategy_classes().items())
+# cycle461 — 매수하지 않는 전략(unknown)은 「사는 순간」 행위 가드 대상이 아니다(_strategy_census.NON_BUYING_*).
+from tests._strategy_census import BUYING_STRATEGY_IDS as _BUYING_IDS
+ALL_STRATEGIES = [(sid, cls) for sid, cls in strategy_classes().items() if sid in _BUYING_IDS]
 
 #: cycle403 — ETF 추세(etf_trend)는 코드 기본값부터 `sizing_mode="turtle"` 이고(L12,
 #: 다른 4 터틀 전략은 기본이 `position_ratio` 이고 turtle 은 DB opt-in), L5 가 1주

@@ -468,7 +468,10 @@ async def generate_recommendations() -> list[dict]:
     # Phase J4 — peer 정보 사전 수집: 모든 enabled 전략의 weight + metrics 캐시
     peer_metrics_cache: dict[str, dict] = {}
     peer_weights_full: dict[str, float] = {}
-    for s in registry.enabled():
+    # cycle461 — 비식별 보유(`unknown`)는 자문 대상이 아니다(파라미터·비중 권고 0 · MCP 백테스트 0).
+    from src.engine.unknown_holding_policy import is_unknown_strategy_id
+    advisable = [s for s in registry.enabled() if not is_unknown_strategy_id(s.strategy_id)]
+    for s in advisable:
         try:
             peer_weights_full[s.strategy_id] = float(s.config.weight)
             start_date = target_date - timedelta(days=30)
@@ -483,7 +486,7 @@ async def generate_recommendations() -> list[dict]:
             logger.exception("peer metrics 수집 실패: %s", s.strategy_id)
             peer_metrics_cache[s.strategy_id] = {}
 
-    for strategy in registry.enabled():
+    for strategy in advisable:
         strategy_id = strategy.strategy_id
         current_params: dict = {}
         metrics: dict = {}
@@ -578,7 +581,7 @@ async def generate_recommendations() -> list[dict]:
         except Exception:
             logger.exception("파라미터 추천 INSERT 실패: %s", strategy_id)
 
-    logger.info("파라미터 추천 생성 완료: %d/%d 전략", len(inserted), len(registry.enabled()))
+    logger.info("파라미터 추천 생성 완료: %d/%d 전략", len(inserted), len(advisable))
 
     # Phase 3 (2026-05-16) — 자문 INSERT 직후 백테스트 enqueue (동기 await).
     # _enqueue_backtest_jobs 내부에서 fire-and-forget 으로 폴 루프 task 발화.

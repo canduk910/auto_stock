@@ -125,6 +125,10 @@ async def _run_boot(
     async def _get_recent_buy_strategy(ticker):
         return recent_buy_strategy_map.get(ticker)
 
+    async def _open_roundtrip_owner(ticker):
+        sid = await _get_recent_buy_strategy(ticker)
+        return ("found", sid) if sid else ("none", None)
+
     with (
         patch("src.engine.boot_manager.token_manager") as tm,
         patch(
@@ -140,9 +144,11 @@ async def _run_boot(
         patch("src.db.positions.load_all", new=AsyncMock(return_value=db_positions)),
         patch("src.db.positions.delete_position", new=AsyncMock()),
         patch("src.db.positions.save_position", new=AsyncMock()),
+        # cycle461 — KIS 잔고 보완 복구의 주인 판정은 열린 왕복 조회(`get_open_roundtrip_owner`)로
+        # 바뀌었다. 같은 표(전략 or None)·같은 예외 주입을 그 모양으로 옮긴다.
         patch(
-            "src.db.trade_history.get_recent_buy_strategy",
-            new=AsyncMock(side_effect=_get_recent_buy_strategy),
+            "src.db.trade_history.get_open_roundtrip_owner",
+            new=AsyncMock(side_effect=_open_roundtrip_owner),
         ),
         patch("src.db.trade_history.mark_pending_buys_completed", new=AsyncMock()),
         patch(

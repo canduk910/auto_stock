@@ -15,6 +15,7 @@ from src.db.strategy_config import save_params, save_weights
 # 사이클 223 F2 (2026-08-21) — 수동 apply 화이트리스트 재검증 소스.
 # 자동 경로(`recommendation_engine.auto_apply_recommendations`)가 쓰는 것과 **동일한**
 # 정본을 참조해야 두 경로가 갈라지지 않는다 (사본 금지).
+from src.engine.unknown_holding_policy import is_unknown_strategy_id
 from src.engine.recommendation_engine import PARAM_RANGES
 from src.engine.scheduler import trading_scheduler
 from src.engine.strategy_base import StrategyBase
@@ -73,6 +74,8 @@ async def _reject_zero_weight_if_held(strategy_id: str, new_weight: float) -> bo
             return False
     except (TypeError, ValueError):
         return False
+    if is_unknown_strategy_id(strategy_id):
+        return False  # cycle461 — 항상 켜짐(비중 0 이어도 꺼지지 않는다)
     try:
         held = await _weight_zero_blocked_by_holdings(strategy_id)
     except Exception:
@@ -151,6 +154,18 @@ async def apply_rec(rec_id: str, req: ApplyRequest):
                 success=False,
                 message="적용할 weight 가 없습니다 (recommended_weight=null)",
             )
+        # cycle461 — 비식별 보유(`unknown`)는 비중 0 고정이다. 비중이 생기면 Σ 정규화로 다른
+        # 전략 예산을 깎는다(자문은 이 전략을 다루지 않지만 방어로 한 번 더 막는다).
+        if is_unknown_strategy_id(rec.get("strategy_id")):
+            try:
+                _unknown_positive = float(recommended_weight) > 0
+            except (TypeError, ValueError):
+                _unknown_positive = True
+            if _unknown_positive:
+                return ApiResponse(
+                    success=False,
+                    message="비식별 보유(unknown) 전략은 비중을 0 보다 크게 둘 수 없습니다",
+                )
         # weight 가 있는 경우, 키 없이도 적용 가능 — valid_keys 빈집합 통과
     elif not valid_keys:
         if blocked_keys:

@@ -6,7 +6,7 @@
 // "변동성 돌파", "20일 신고가 스윙" vs "돈키언 추세 스윙"), id 원문을 그대로 찍는 화면
 // (BacktestComparisonCard, LlmEvaluationModal) 이 공존했다.
 //
-// 표시명 정본(사용자 09-27 확정 3개 + 기존 4개, 10-02 전수 통일 + cycle403 etf_trend · cycle443 ndx2x_riskoff 추가)
+// 표시명 정본(사용자 09-27 확정 3개 + 기존 4개, 10-02 전수 통일 + cycle403 etf_trend · cycle443 ndx2x_riskoff · cycle461 unknown 추가)
 // — 이 표가 유일한 출처다. 9 전략은 **백엔드 API 가 주는 `name` 보다 이 표가 항상 우선**
 // 한다(백엔드 응답마다 이름이 다르다 — 예: params-schema 는 momentum 을 "상한가 모멘텀"으로,
 // 다른 경로는 "모멘텀"으로 부른다). 화면에 전략 id 를 사람에게 보일 일이 있으면 반드시
@@ -23,6 +23,8 @@ export const STRATEGY_DISPLAY_NAMES: Record<string, string> = {
   etf_trend: 'ETF 추세',
   // cycle443 (2026-10-11) — 나스닥2배-위험회피. 백엔드 명부(`strategy_manifest`) 이름과 같다.
   ndx2x_riskoff: '나스닥2배-위험회피',
+  // cycle461 (2026-10-15) — 출처 모를 보유를 맡아 청산만 하는 전용 전략(⑦-F1 안 U). 매수하지 않는다.
+  unknown: '비식별 보유',
 }
 
 /**
