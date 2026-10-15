@@ -446,8 +446,9 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle330(2026-09-20) — 합류자 없는 토큰 발급 실패의 고아 Future 회수, 8영역 승인",
     ),
     "src/engine/order_engine.py": (
-        "6eeab4bc5b614a933df6ca4d8e1b4bde0d991716eb665db2fcb240bc7559a435",
-        "cycle440(2026-10-10) — 카드 #9: 참조 0인 cancel_remaining 삭제 + 3경로→2경로 주석 정정, 사용자 승인",
+        "3dbaaf2ab899b8e9bf496447ca960a2e3bf01ead4c0fc956a6195f73ca466953",
+        "cycle458(2026-10-15) — 사건당 system_logs 1행(logger 와 같은 메시지의 write_log 중복 제거), "
+        "사용자 승인 2026-10-15",
     ),
     "src/engine/risk.py": (
         "340dacde0b888ac6d1bc15e2b4f833afcb169a0be50f543d4079b2127dea5bb0",
@@ -455,13 +456,14 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "(등록용 최소 변경, 사용자 '구현 시작' 승인 범위)",
     ),
     "src/engine/scanner.py": (
-        "0ca6a0f1ddcfa95f540a51560db35c473a9ea2aa47bf4ea1e22758b4cc92d06c",
-        "cycle444 섀도 후보 구독 최후순위 사용자 승인 2026-10-11",
+        "40638a20198bda573425d368b673c3432c079a7c577fdb73908718277e26ad43",
+        "cycle458(2026-10-15) — 사건당 system_logs 1행(logger 와 같은 메시지의 write_log 중복 제거), "
+        "사용자 승인 2026-10-15",
     ),
     "src/engine/scheduler.py": (
-        "b80bb83f8d5f03449f683ae4344716792df2e50481a06e8b87ceef18079b1066",
-        "cycle461 ⑦-F1 안 U, 사용자 승인 2026-10-10·10-15 — _sync_positions_from_balance 의 "
-        "주인 판정·채택을 unknown_holding_policy 로 위임 + 끝 sync_pass 1줄",
+        "78e84fa15174c0b76aa7a00b751ff17b7fb532e82950ca62085277372651e665",
+        "cycle458(2026-10-15) _report_tick_coverage write_log 중복 제거 + cycle461 ⑦-F1 안 U "
+        "(_sync_positions_from_balance 주인 판정·채택 위임 + sync_pass), 사용자 승인 2026-10-10·10-15",
     ),
     "src/engine/session.py": (
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",

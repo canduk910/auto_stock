@@ -3483,10 +3483,6 @@ class TradingScheduler:
                 logger.warning(msg)
             else:
                 logger.info(msg)
-            try:
-                await write_log(level, msg)
-            except Exception:
-                logger.debug("write_log [tick_coverage] 실패")
 
             # 사이클 28 (2026-05-21) — [tick_coverage_session] 세션별 분포 신규 행
             # 기존 [tick_coverage] 보존 (G1) + 별도 prefix 1행 추가. subscribed=0 → skip
@@ -3502,10 +3498,6 @@ class TradingScheduler:
                         ]
                         sess_msg = "[tick_coverage_session] " + " | ".join(parts)
                         logger.info(sess_msg)
-                        try:
-                            await write_log("INFO", sess_msg)
-                        except Exception:
-                            logger.debug("write_log [tick_coverage_session] 실패")
                 except Exception:
                     logger.debug("[tick_coverage_session] 빌드 실패", exc_info=True)
         except Exception:

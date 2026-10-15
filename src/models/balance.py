@@ -37,6 +37,10 @@ class AccountSummary(BaseModel):
     purchase_total: int        # pchs_amt_smtl_amt (매입금액합계)
     eval_total: int            # evlu_amt_smtl_amt (평가금액합계)
     profit_loss_total: int     # evlu_pfls_smtl_amt (평가손익합계)
+    # cycle459 — 같은 TTTC8434R output2 의 결제 예정 예수금. 칸이 없거나 숫자가
+    # 아니면 None(「모름」) — 0 으로 채우지 않는다.
+    deposit_d1: Optional[int] = None   # nxdy_excc_amt (익일정산금액 = D+1 예수금)
+    deposit_d2: Optional[int] = None   # prvs_rcdl_excc_amt (가수도정산금액 = D+2 예수금)
 
 
 class BuyableInfo(BaseModel):

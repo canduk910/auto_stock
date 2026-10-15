@@ -491,18 +491,12 @@ class VolatilityBreakoutStrategy(StrategyBase):
         self._scan_stats["last_run_at"] = datetime.now(KST).isoformat()
 
         if not filtered:
-            from src.db.system_logs import write_log
-
             msg = (
                 f"변동성돌파 유니버스 0종목 — stock_master {len(rows)}건 중 "
                 f"시총 {min_mcap // 100_000_000}억+ / 거래대금 "
                 f"{min_trade // 100_000_000}억+ / ETF 제외 후 통과 없음"
             )
             logger.error(msg)
-            try:
-                await write_log("ERROR", msg)
-            except Exception:
-                logger.exception("system_logs 기록 실패")
 
         return filtered
 

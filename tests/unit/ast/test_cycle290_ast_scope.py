@@ -156,8 +156,11 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     # 보호 종목) 두 집합으로 분리(R1) — 남의 보유 엔트리를 보존·재구성 어느 쪽도 하지
     # 않는다.
     # 🔁 cycle382 재핀 — `_refresh_market_unit` 호출 삽입(`_resolve_prepare_as_of` 직후).
+    # 🔁 cycle458 재핀 — 「도치안 일봉 길이 부족」 WARNING 의 `write_log` 중복 기록 제거
+    # (사건당 system_logs 1행, 사용자 승인 2026-10-15). 로거 1행·조건·문구 무변경.
+    # 직전 값(cycle382) = `48641aa3d9ccea27d1f5375671270726ccae0f816143d4292ad3b27c8cd2d8b0`.
     ("donchian_swing", "prepare"):
-        "48641aa3d9ccea27d1f5375671270726ccae0f816143d4292ad3b27c8cd2d8b0",
+        "94cb15faee89463c96d759e9a18b41a5232dce454e31ef9d4fb8085cd13ffae3",
     # 🔁 cycle449 재핀 — 만석 직전 가격 추적(사용자 결정 2026-10-12): `is_max_positions()` 반환
     # 앞에 `_track_baseline_while_full(...)` 호출 1줄 + fresh 경로 주석에 만석 추적 언급 1줄.
     # 그 밖 무변경. 직전 값 = `b39b26fb398ca352edaf91816b4aed04cd50f47aef29d13a8b82af0f6580ed7d`.
