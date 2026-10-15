@@ -628,10 +628,11 @@ Dashboard `MarketRegimeCard` 바로 아래. 장세와 시장 유닛을 한 카�
 Dashboard `MarketRegimeLabelCard` 바로 아래. 시장 유닛 배수가 정해지는 과정을 시장마다 보인다(cycle456, **읽기 전용**). `fetchMarketUnitChart()`(`api/market-unit-chart.ts`) → `GET /api/market-unit/chart`(래퍼째 받는다 — `success=false` 면 서버 `message` 를 그대로 보인다 · 네트워크 오류 = 「시장 유닛 차트를 불러오지 못했습니다.」). queryKey `['marketUnitChart']` · `staleTime` 10분 · `retry: 1`. 타입 = `types/market-unit-chart.ts`(라우트 응답 1:1 — `src/routes/CLAUDE.md` `/api/market-unit/chart` 행).
 
 - 🔴 **판정은 서버가 운영 함수(`market_unit.classify`·`compute_snapshot`)로 낸 값이다. 화면은 다시 계산하지 않는다** — 위/아래·상승/하락·배수를 화면 코드로 재판정하지 않는다.
-- 탭 `mu-chart-tab-{kospi|kosdaq}`(`aria-pressed`, 라벨 = 시장 이름 + 지수 코드).
-- 오늘 적용 배수 `mu-chart-today-m` = 엔진 `effective.m`. 엔진이 아직 계산하지 않았으면(`fallback='not_computed'`) `decision` 재계산값(`decision.ok` 면 그 m, 판정 불가면 ×1, `decision` 도 없으면 —).
-- 출처 문구 `mu-chart-source` — `effective.fallback` 별로 「엔진 메모리 값」(`-`) · 「이 시장 지수를 판정하지 못해 {다른 시장} 배수를 대신 씁니다」(`other_market`) · 「두 시장 모두 판정 불가 — 배수를 줄이지 않습니다(×1)」(`none`) · 「엔진이 아직 계산하지 않았습니다 — 운영 함수로 다시 낸 값」(`not_computed`).
-- `mu-chart-mismatch` = 엔진 값이 있고 엔진·재계산 둘 다 `ok` 인데 `state` 가 다를 때만(엔진은 부팅 때 계산 — 그 뒤 지수가 갱신됐을 수 있다).
+- 위쪽 「오늘 적용 배수」 `mu-chart-today` 는 **두 시장 칸 `mu-chart-today-{kospi|kosdaq}` 을 늘 나란히** 보인다 — 탭과 무관하다. 아래 세 항목(배수·출처·불일치)은 시장마다 따로이고 testid 꼬리가 시장 키다.
+- 탭 `mu-chart-tab-{kospi|kosdaq}`(`aria-pressed`, 라벨 = 시장 이름 + 지수 코드)은 아래 「차트 상세」 `mu-chart-detail`(3단계 판정 · 차트)에만 적용된다.
+- 오늘 적용 배수 `mu-chart-today-m-{market}` = 엔진 `effective.m`. 엔진이 아직 계산하지 않았으면(`fallback='not_computed'`) `decision` 재계산값(`decision.ok` 면 그 m, 판정 불가면 ×1, `decision` 도 없으면 —).
+- 출처 문구 `mu-chart-source-{market}` — `effective.fallback` 별로 「엔진 메모리 값」(`-`) · 「이 시장 지수를 판정하지 못해 {다른 시장} 배수를 대신 씁니다」(`other_market`) · 「두 시장 모두 판정 불가 — 배수를 줄이지 않습니다(×1)」(`none`) · 「엔진이 아직 계산하지 않았습니다 — 운영 함수로 다시 낸 값」(`not_computed`).
+- `mu-chart-mismatch-{market}` = 그 시장의 엔진 값이 있고 엔진·재계산 둘 다 `ok` 인데 `state` 가 다를 때만(엔진은 부팅 때 계산 — 그 뒤 지수가 갱신됐을 수 있다).
 - 모드 칩 `mu-chart-mode-{sid}`(`strategyLabel` + `UNIT_MODE_KO`, 미등록 = 「모름」, `enforce` 만 색).
 - 3단계(`decision` 기준) — `mu-chart-step-position`(종가 vs 60일선 → 위/아래) · `mu-chart-step-slope`(60일선 vs 20봉 전 60일선 → 상승/하락) · `mu-chart-step-table`(4칸 `mu-chart-state-{state}`, 오늘 칸 `data-active`, 배수는 응답 `rules.multipliers`). 판정 불가 = `mu-chart-steps-unavailable`(사유 한글) · `decision` 없음 = `mu-chart-steps-unknown`.
 - 차트 `mu-chart-price`(`data-bars` = 봉 수) — recharts `ComposedChart`. 가격 = **캔들**(`Bar` + 커스텀 shape `CandleShape`, 캔들마다 testid `mu-chart-candle`): 꼬리 = 저가~고가 · 몸통 = 시가~종가 · 상승(종가 ≥ 시가) `var(--color-red-500)` · 하락 `var(--color-blue-500)` · 🔴 시가를 모르는 봉은 회색 `var(--color-gray-400)`(오른 날로 칠하지 않는다) · OHLC 가 없는 봉은 종가 한 점. 캔들 `<g>` 에 `data-dir`(`up`·`down`·`unknown`)·`data-color` — e2e G-E2E-MU1 이 봉마다 색이 데이터와 맞는지 센다. 선은 둘뿐 — 60일선 · 20봉 전 60일선 점선. 같은 판정이 이어진 구간은 배경 띠(`ReferenceArea`). 툴팁 = 커스텀 `CandleTooltip`(시가·고가·저가·종가 · 60일선 · 20봉 전 60일선 · 판정 → 배수 「다음 거래일 적용」). 아래 `mu-chart-multiplier` = 봉별 배수 막대(`minPointSize` 2px — ×0 인 날도 보인다, 판정 없는 봉은 그리지 않는다) · 범례 `mu-chart-legend`. 🔴 띠·막대는 **그 봉 기준 판정**이고 다음 거래일 진입에 쓰인다 — 범례가 이 말을 한다. 봉 0개 = `mu-chart-empty`.

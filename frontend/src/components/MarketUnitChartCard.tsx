@@ -5,6 +5,9 @@
  * (① 종가 vs 60일선 → 위/아래 ② 60일선 vs 20봉 전 60일선 → 상승/하락 ③ 4칸 표 → 배수)를 보인다.
  * 데이터 = `GET /api/market-unit/chart`(판정은 서버가 운영 함수로 낸 값 — 화면은 다시 계산하지 않는다).
  * 차트 배경 띠 = 그 봉 기준 판정(다음 거래일 신규 진입에 쓰임). 아래 막대 = 봉별 배수.
+ *
+ * 위쪽 「오늘 적용 배수」(배수 · 출처 문구 · 불일치 경고)는 두 시장을 늘 나란히 보인다. 코스피/코스닥 탭은
+ * 아래 「차트 상세」(3단계 판정 · 차트)에만 적용된다(사용자 요청 2026-10-15).
  */
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -191,6 +194,43 @@ function DecisionSteps({ snap, mult }: { snap: MarketUnitSnapshot | null; mult: 
   )
 }
 
+/** 한 시장의 오늘 적용 배수 · 출처 · 엔진/재계산 불일치. testid 꼬리 = 시장 키. */
+function MarketToday({ market, mk }: { market: MarketKey; mk: MarketUnitChartData['markets'][MarketKey] }) {
+  const eff = mk.effective
+  const engineKnown = eff.fallback !== 'not_computed'
+  const shownM = engineKnown ? eff.m : mk.decision?.ok ? mk.decision.m : mk.decision ? 1 : null
+  const mismatch = engineKnown && mk.decision?.ok && mk.engine?.ok && mk.engine.state !== mk.decision.state
+  return (
+    <section className="rounded border border-gray-200 px-3 py-2" data-testid={`mu-chart-today-${market}`}>
+      <div className="text-xs text-gray-500">{`${MARKET_KO[market]} (${mk.index_code}) 오늘 적용 배수`}</div>
+      <div className="flex items-baseline gap-2">
+        <span className="text-3xl font-bold text-gray-900" data-testid={`mu-chart-today-m-${market}`}>
+          {formatUnitM(shownM)}
+        </span>
+        {mk.decision?.ok && mk.decision.state && mk.decision.state !== 'unavailable' && (
+          <span className={`px-1.5 py-0.5 rounded text-xs ${STATE_CHIP[mk.decision.state]}`}>
+            {STATE_KO[mk.decision.state]}
+          </span>
+        )}
+      </div>
+      <div className="text-xs text-gray-600 mt-1" data-testid={`mu-chart-source-${market}`}>
+        {!engineKnown
+          ? '엔진이 아직 계산하지 않았습니다 — 운영 함수로 다시 낸 값'
+          : eff.fallback === 'other_market'
+            ? `이 시장 지수를 판정하지 못해 ${MARKET_KO[eff.from_market as MarketKey]} 배수를 대신 씁니다`
+            : eff.fallback === 'none'
+              ? '두 시장 모두 판정 불가 — 배수를 줄이지 않습니다(×1)'
+              : '엔진 메모리 값'}
+      </div>
+      {mismatch && (
+        <div className="text-xs text-amber-700 mt-1" data-testid={`mu-chart-mismatch-${market}`}>
+          엔진 값과 지금 다시 계산한 값이 다릅니다(엔진은 부팅 때 계산 — 그 뒤 지수가 갱신됐을 수 있음).
+        </div>
+      )}
+    </section>
+  )
+}
+
 export default function MarketUnitChartCard() {
   const [market, setMarket] = useState<MarketKey>('kospi')
   const { data, isLoading, isError } = useQuery({
@@ -226,145 +266,123 @@ export default function MarketUnitChartCard() {
 
   const d = data.data
   const mk = d.markets[market]
-  const eff = mk.effective
-  const engineKnown = eff.fallback !== 'not_computed'
-  const shownM = engineKnown ? eff.m : mk.decision?.ok ? mk.decision.m : mk.decision ? 1 : null
   const runs = stateRuns(mk.bars)
   const closes = mk.bars.flatMap((b) => [b.close, b.sma60 ?? b.close, b.low ?? b.close, b.high ?? b.close])
   const lo = closes.length ? Math.min(...closes) : 0
   const hi = closes.length ? Math.max(...closes) : 1
   const pad = (hi - lo) * 0.05 || 1
   const modes = Object.entries(d.modes)
-  const mismatch =
-    engineKnown && mk.decision?.ok && mk.engine?.ok && mk.engine.state !== mk.decision.state
 
   return (
     <div className={BOX} data-testid="mu-chart-card">
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
-        <h2 className="text-base font-semibold text-gray-900">시장 유닛 결정 과정</h2>
-        <div className="flex gap-1" role="tablist">
-          {MARKETS.map((m) => (
-            <button
-              key={m}
-              type="button"
-              data-testid={`mu-chart-tab-${m}`}
-              aria-pressed={m === market}
-              onClick={() => setMarket(m)}
-              className={`px-2 py-1 rounded text-xs ${m === market ? 'bg-navy-600 text-white' : 'bg-gray-100 text-gray-700'}`}
-            >
-              {`${MARKET_KO[m]} (${d.markets[m].index_code})`}
-            </button>
-          ))}
-        </div>
-      </div>
+      <h2 className="text-base font-semibold text-gray-900 mb-1">시장 유닛 결정 과정</h2>
       <p className="text-xs text-gray-500 mb-3">
-        {`터틀 4전략의 신규 진입 랏을 그 종목이 속한 시장의 종합지수로 줄입니다(${mk.name}). enforce 인 전략만 실제 수량에 반영됩니다.`}
+        터틀 4전략의 신규 진입 랏을 그 종목이 속한 시장의 종합지수로 줄입니다(코스피 종목 = 코스피 종합 · 코스닥 종목 =
+        코스닥 종합). enforce 인 전략만 실제 수량에 반영됩니다.
       </p>
 
-      <div className="grid gap-4 md:grid-cols-3 mb-3">
-        <section className="md:col-span-1">
-          <div className="text-xs text-gray-500">오늘 적용 배수</div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-gray-900" data-testid="mu-chart-today-m">
-              {formatUnitM(shownM)}
-            </span>
-            {mk.decision?.ok && mk.decision.state && mk.decision.state !== 'unavailable' && (
-              <span className={`px-1.5 py-0.5 rounded text-xs ${STATE_CHIP[mk.decision.state]}`}>
-                {STATE_KO[mk.decision.state]}
-              </span>
-            )}
-          </div>
-          <div className="text-xs text-gray-600 mt-1" data-testid="mu-chart-source">
-            {!engineKnown
-              ? '엔진이 아직 계산하지 않았습니다 — 운영 함수로 다시 낸 값'
-              : eff.fallback === 'other_market'
-                ? `이 시장 지수를 판정하지 못해 ${MARKET_KO[eff.from_market as MarketKey]} 배수를 대신 씁니다`
-                : eff.fallback === 'none'
-                  ? '두 시장 모두 판정 불가 — 배수를 줄이지 않습니다(×1)'
-                  : '엔진 메모리 값'}
-          </div>
-          {mismatch && (
-            <div className="text-xs text-amber-700 mt-1" data-testid="mu-chart-mismatch">
-              엔진 값과 지금 다시 계산한 값이 다릅니다(엔진은 부팅 때 계산 — 그 뒤 지수가 갱신됐을 수 있음).
-            </div>
-          )}
-          <div className="flex flex-wrap gap-1 mt-2 text-xs" data-testid="mu-chart-modes">
-            {modes.map(([sid, mode]) => (
-              <span
-                key={sid}
-                data-testid={`mu-chart-mode-${sid}`}
-                className={`px-1.5 py-0.5 rounded ${mode === 'enforce' ? 'bg-sky-100 text-sky-800' : 'bg-gray-100 text-gray-600'}`}
-              >
-                {`${strategyLabel(sid)} ${mode ? UNIT_MODE_KO[mode] : '모름'}`}
-              </span>
-            ))}
-          </div>
-        </section>
-        <section className="md:col-span-2">
-          <DecisionSteps snap={mk.decision} mult={d.rules.multipliers} />
-        </section>
+      {/* 오늘 적용 배수 — 두 시장을 늘 함께 보인다(아래 탭과 무관) */}
+      <div className="grid gap-3 sm:grid-cols-2 mb-2" data-testid="mu-chart-today">
+        {MARKETS.map((m) => (
+          <MarketToday key={m} market={m} mk={d.markets[m]} />
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-1 mb-4 text-xs" data-testid="mu-chart-modes">
+        {modes.map(([sid, mode]) => (
+          <span
+            key={sid}
+            data-testid={`mu-chart-mode-${sid}`}
+            className={`px-1.5 py-0.5 rounded ${mode === 'enforce' ? 'bg-sky-100 text-sky-800' : 'bg-gray-100 text-gray-600'}`}
+          >
+            {`${strategyLabel(sid)} ${mode ? UNIT_MODE_KO[mode] : '모름'}`}
+          </span>
+        ))}
       </div>
 
-      {mk.bars.length === 0 ? (
-        <p className="text-sm text-gray-500" data-testid="mu-chart-empty">
-          지수 일봉이 아직 적재되지 않았습니다(부팅·20:30 적재 뒤 표시).
-        </p>
-      ) : (
-        <>
-          <div className="h-64" data-testid="mu-chart-price" data-bars={mk.bars.length}>
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={mk.bars} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
-                {runs.map((r) => (
-                  <ReferenceArea
-                    key={`${r.x1}-${r.state}`}
-                    x1={r.x1}
-                    x2={r.x2}
-                    fill={STATE_FILL[r.state]}
-                    fillOpacity={0.18}
-                    strokeOpacity={0}
-                    ifOverflow="extendDomain"
-                  />
-                ))}
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-200)" />
-                <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={(v: string) => v.slice(5)} minTickGap={24} />
-                <YAxis
-                  domain={[lo - pad, hi + pad]}
-                  tick={{ fontSize: 10 }}
-                  width={56}
-                  tickFormatter={(v: number) => v.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}
-                />
-                <Tooltip content={<CandleTooltip />} />
-                {/* 가격 = 캔들(고가~저가 꼬리 + 시가~종가 몸통). 상승 빨강 · 하락 파랑(한국 관례) */}
-                <Bar dataKey={candleRange} name="가격" shape={CandleShape} isAnimationActive={false} />
-                <Line type="monotone" dataKey="sma60" name="60일선" stroke="var(--color-navy-600)" dot={false} strokeWidth={2} isAnimationActive={false} connectNulls={false} />
-                <Line type="monotone" dataKey="sma60_prev" name="20봉 전 60일선" stroke="var(--color-navy-300)" strokeDasharray="4 3" dot={false} strokeWidth={1} isAnimationActive={false} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="h-16" data-testid="mu-chart-multiplier">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={mk.bars} margin={{ top: 0, right: 8, bottom: 0, left: 0 }}>
-                <XAxis dataKey="date" hide />
-                <YAxis domain={[0, 1]} ticks={[0, 0.5, 1]} tick={{ fontSize: 9 }} width={56} />
-                <Tooltip formatter={(v) => [formatUnitM(typeof v === 'number' ? v : null), '배수']} labelFormatter={(l) => String(l)} />
-                {/* ×0 인 날도 보이게 최소 높이 2px(판정 없는 봉 = null 이라 그리지 않는다) */}
-                <Bar dataKey="m" isAnimationActive={false} minPointSize={2}>
-                  {mk.bars.map((b) => (
-                    <Cell key={b.date} fill={b.state ? STATE_FILL[b.state] : 'var(--color-gray-200)'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-gray-500 mt-1" data-testid="mu-chart-legend">
-            <span>캔들 = 가격(빨강 상승 · 파랑 하락) · ━ 60일선(남색) · ┅ 20봉 전 60일선</span>
-            <span>배경·아래 막대 = 그 봉 기준 판정(다음 거래일 진입에 쓰임)</span>
-            {STATE_ORDER.map((s) => (
-              <span key={s} className={`px-1 rounded ${STATE_CHIP[s]}`}>{`${STATE_KO[s]} ${formatUnitM(d.rules.multipliers[s])}`}</span>
+      {/* 차트 상세 — 코스피/코스닥 탭은 여기(3단계 판정 · 차트)에만 적용된다 */}
+      <div className="border-t border-gray-100 pt-3" data-testid="mu-chart-detail">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <h3 className="text-sm font-semibold text-gray-800">{`차트 상세 — ${mk.name}`}</h3>
+          <div className="flex gap-1" role="tablist">
+            {MARKETS.map((m) => (
+              <button
+                key={m}
+                type="button"
+                data-testid={`mu-chart-tab-${m}`}
+                aria-pressed={m === market}
+                onClick={() => setMarket(m)}
+                className={`px-2 py-1 rounded text-xs ${m === market ? 'bg-navy-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+              >
+                {`${MARKET_KO[m]} (${d.markets[m].index_code})`}
+              </button>
             ))}
           </div>
-        </>
-      )}
+        </div>
+        <div className="mb-3">
+          <DecisionSteps snap={mk.decision} mult={d.rules.multipliers} />
+        </div>
+
+        {mk.bars.length === 0 ? (
+          <p className="text-sm text-gray-500" data-testid="mu-chart-empty">
+            지수 일봉이 아직 적재되지 않았습니다(부팅·20:30 적재 뒤 표시).
+          </p>
+        ) : (
+          <>
+            <div className="h-64" data-testid="mu-chart-price" data-bars={mk.bars.length}>
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={mk.bars} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+                  {runs.map((r) => (
+                    <ReferenceArea
+                      key={`${r.x1}-${r.state}`}
+                      x1={r.x1}
+                      x2={r.x2}
+                      fill={STATE_FILL[r.state]}
+                      fillOpacity={0.18}
+                      strokeOpacity={0}
+                      ifOverflow="extendDomain"
+                    />
+                  ))}
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-200)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={(v: string) => v.slice(5)} minTickGap={24} />
+                  <YAxis
+                    domain={[lo - pad, hi + pad]}
+                    tick={{ fontSize: 10 }}
+                    width={56}
+                    tickFormatter={(v: number) => v.toLocaleString('ko-KR', { maximumFractionDigits: 0 })}
+                  />
+                  <Tooltip content={<CandleTooltip />} />
+                  {/* 가격 = 캔들(고가~저가 꼬리 + 시가~종가 몸통). 상승 빨강 · 하락 파랑(한국 관례) */}
+                  <Bar dataKey={candleRange} name="가격" shape={CandleShape} isAnimationActive={false} />
+                  <Line type="monotone" dataKey="sma60" name="60일선" stroke="var(--color-navy-600)" dot={false} strokeWidth={2} isAnimationActive={false} connectNulls={false} />
+                  <Line type="monotone" dataKey="sma60_prev" name="20봉 전 60일선" stroke="var(--color-navy-300)" strokeDasharray="4 3" dot={false} strokeWidth={1} isAnimationActive={false} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="h-16" data-testid="mu-chart-multiplier">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={mk.bars} margin={{ top: 0, right: 8, bottom: 0, left: 0 }}>
+                  <XAxis dataKey="date" hide />
+                  <YAxis domain={[0, 1]} ticks={[0, 0.5, 1]} tick={{ fontSize: 9 }} width={56} />
+                  <Tooltip formatter={(v) => [formatUnitM(typeof v === 'number' ? v : null), '배수']} labelFormatter={(l) => String(l)} />
+                  {/* ×0 인 날도 보이게 최소 높이 2px(판정 없는 봉 = null 이라 그리지 않는다) */}
+                  <Bar dataKey="m" isAnimationActive={false} minPointSize={2}>
+                    {mk.bars.map((b) => (
+                      <Cell key={b.date} fill={b.state ? STATE_FILL[b.state] : 'var(--color-gray-200)'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-gray-500 mt-1" data-testid="mu-chart-legend">
+              <span>캔들 = 가격(빨강 상승 · 파랑 하락) · ━ 60일선(남색) · ┅ 20봉 전 60일선</span>
+              <span>배경·아래 막대 = 그 봉 기준 판정(다음 거래일 진입에 쓰임)</span>
+              {STATE_ORDER.map((s) => (
+                <span key={s} className={`px-1 rounded ${STATE_CHIP[s]}`}>{`${STATE_KO[s]} ${formatUnitM(d.rules.multipliers[s])}`}</span>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   )
 }
