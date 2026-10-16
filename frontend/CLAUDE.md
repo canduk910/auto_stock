@@ -287,8 +287,8 @@ testid = `strategy-summary-table` · `strategy-summary-row-{sid}` · `strategy-s
 `isBreakout` 을 `isVbLtv`/`isVcpOrBfb` 로 갈라 **VB/LTV 경로는 byte 동일 보존**, VCP/BFB 만 전용 컴포넌트. 대시보드 VCP/BFB 탭은 `hideDuplicateDetail` 로 이 컴포넌트를 끄고 `StrategyMonitor` ④ 후보 종목이 대신한다 — `ScanMonitor` 를 단독으로 쓸 때만 그려진다. 패널 3:
 
 - ⓪ **진입 게이트**(`breakout-entry-window`) — `params.entry_start~entry_end` KST 판정(VCP 09:05~14:30 / BFB 09:05~13:00 은 MAIN 안이라 보드 판정을 포함한다).
-- ① **구독 커버리지**(`breakout-subscription-coverage`) — `scan.subscribed_tickers` ∖ `scanned_tickers`. 미수신 종목은 `on_tick` 이 없어 `check_buy_signal` 이 불리지 않는다.
-- ② **후보 그리드**(`breakout-candidate-row-{ticker}`) — 종목명/현재가/돌파선/거리%/손절선/측정목표(BFB)/거래량컷/상태. 돌파선 근접순, 미수신은 최하단. 상태 배지 `breakout-status-{ticker}` 우선순위 = 매수완료 > 쿨다운 D-n > 📵미구독 > ⏱m:ss 대기(BFB `breakout_seen_at`+`retention_minutes`) > 대기.
+- ① **구독 커버리지**(`breakout-subscription-coverage`, cycle466) — 두 수를 따로 센다. **미구독** = 후보 중 `scan.subscribed_tickers` 에 없는 종목 · **구독 중 시세 없음** = 구독됐는데 `tickerPrices[t].current_price > 0` 이 아닌 종목. 둘 다 `on_tick` 이 없어 `check_buy_signal` 이 불리지 않으므로 어느 하나라도 있으면 amber 경고다(장 시작 전의 시세 없음은 정상이라 안내문에 적는다). 「시세 미수신」 이라는 말로 두 경우를 섞지 않는다.
+- ② **후보 그리드**(`breakout-candidate-row-{ticker}`) — 종목명/현재가/돌파선/거리%/손절선/측정목표(BFB)/거래량컷/상태. 돌파선 근접순, 현재가 없는 종목은 최하단. 상태 배지 `breakout-status-{ticker}` 우선순위 = 매수완료 > 쿨다운 D-n > 📵미구독 > 📭시세 없음 > ⏱m:ss 대기(BFB `breakout_seen_at`+`retention_minutes`) > 대기.
 
 백엔드는 `get_targets_status` 에 키를 **추가만** 한다(`name`/`prev_close`/`stop_line`/`measured_target`/`volume_threshold`/`bought_today`/`in_cooldown`/`cooldown_until`/`breakout_seen_at`/`retention_minutes` — `strategy_registry` 가 덕타이핑 제네릭이라 registry·route 수정 0). ⚠️ **VB 호환 5키는 `scheduler._confirm_breakout_open_prices` 가 소비하므로 제거 금지**(`scheduler.py` 는 승인 대상 — 루트 「자율 진행과 승인 빈도」 절). 가드 `BreakoutCandidateMonitor.test.tsx`.
 
@@ -649,12 +649,12 @@ Dashboard `MarketRegimeLabelCard` 바로 아래. 시장 유닛 배수가 정해�
 
 5번째 카드 `MarketOperationCard`(`realtime-health-card-market-operation`) — `fetchMarketOperationStatus()` → `GET /api/realtime/market-operation`(`data.data ?? fallback`), 원천 = 백엔드 `market_operation_monitor`(H0UNMKO0). **표시만 한다(매수 가드 아님)**. 상수 `types/market-operation.ts`.
 
-- 헤더 배지 = VI 활성 N / 거래정지 N / 종목상태 이상 N(0=gray, >0=amber/red) + **서킷브레이커 배지**(`realtime-health-cb-badge`, `circuit_breaker.suspected` true→orange "추정" / false→gray "정상") + 종목별 detail + raw `MKOP_CLS_CODE`/거래정지 사유.
+- 헤더 배지 = VI 활성 N / 거래정지 N / 종목상태 이상 N(0=gray, >0=amber/red) + **서킷브레이커 배지**(`realtime-health-cb-badge` — `circuit_breaker.confirmed.markets` 중 하나라도 `CB_ACTIVE`·`HALT_164` 면 red "발동" > `circuit_breaker.suspected` true 면 orange "추정" > 그 밖 gray "정상") + 종목별 detail + raw `MKOP_CLS_CODE`/거래정지 사유.
 - 「종목상태 이상」 = `iscd_stat_active_count` — **표시 집합** 51~54·58·59(관리·시장경고·거래정지·단기과열)로 센다(55·57·00 제외). 「거래정지」 = `TRHT_YN=="Y"` 또는 종목상태 `58`. 범위가 달라 두 숫자가 달라도 정상이다.
 - 행(`realtime-health-op-row-<ticker>`) 배지 셋 — VI(`vi_code`·`ovtm_vi_code` 중 하나라도 활성일 때만, 비활성 집합 `VI_INACTIVE_CODES` = 백엔드 `src/api/market_operation.py::_INACTIVE_VALUES`) · 거래정지(`halt_yn` Y 또는 `58`, 행당 1개) · 종목상태(51 관리종목·52 투자위험·53 투자경고·54 투자주의·59 단기과열만, 55·57·00 은 안 그린다). 정지 사유는 정확히 `(null)` 일 때만 숨긴다.
 - 행 목록 = 백엔드 `details`(VI ∪ 거래정지 ∪ 종목상태(51·52·53·54·59), cycle371). 58 은 거래정지 TTL(600초)이 관리하므로 합집합에서 뺀다(넣으면 TTL 만료 뒤에도 영구 잔존).
 - 헤더 「종목상태 이상 N건」(58 포함 6종)과 행 배지 수(5종 + 58 은 거래정지 배지)는 갈릴 수 있다(헤더는 마지막 이벤트 기준으로 58 을 세고, 58 행은 600초 뒤 빠진다). 가드 `RealtimeHealth.cycle370.test.tsx`.
-- **CB 는 휴리스틱**(사유 키워드 OR 전 시장 halt 비율) — H0UNMKO0 에 CB 전용 필드가 없다. 가드 `RealtimeHealth.cycle186.test.tsx`.
+- CB 축은 둘이다 — `suspected` = **휴리스틱**(사유 키워드 OR 전 시장 halt 비율, H0UNMKO0 에 CB 전용 필드가 없다. 가드 `RealtimeHealth.cycle186.test.tsx`) · `confirmed` = 시장 대표 종목(005930 코스피 · 196170 코스닥)의 장운영 코드로 확인한 상태(백엔드 `market_cb_state`, cycle465 — 타입 `CircuitBreakerConfirmed`, optional·`null` 가능).
 
 ## Strategies (`/strategies`)
 
@@ -694,7 +694,7 @@ Dashboard `MarketRegimeLabelCard` 바로 아래. 시장 유닛 배수가 정해�
 - (1) 현재 상태 카드 `market-state-card-{market}` — 시간대·시장가 가능 여부·주문 가능 여부·확신도·동시에 열린 창·`market-state-card-countdown-{market}`
 - (1-A) **지금 시장은**(`MarketStateNow.tsx`, `market-state-now-section`) — 실시간 VI·거래정지·서킷브레이커(추정). 🔴 지킬 셋:
   - ① **관측 커버리지를 숨기지 않는다** — `H0UNMKO0` 는 대표 종목 + 보유·익일청산 종목만 구독해 "VI 0건" ≠ "VI 없음". 수신 종목 수(`last_event_count`)를 **항상** 병기(`market-state-now-coverage-note`)
-  - ② **서킷브레이커는 추정이다** — "추정" + 판정 근거(halted/observed·사유 표본, `market-state-now-cb-basis`)를 평시에도 보인다
+  - ② **서킷브레이커 추정은 추정으로 보인다** — "추정" + 판정 근거(halted/observed·사유 표본, `market-state-now-cb-basis`)를 평시에도 보인다. 확인 축(`circuit_breaker.confirmed`, cycle465)이 있으면 그 아래 `ConfirmedCb`(`market-state-now-cb-confirmed`)가 시장별 배지 `market-state-now-cb-confirmed-{KOSPI|KOSDAQ}`(정상 / 「서킷브레이커 N단계 발동 HH:MM」(1·2단계는 「늦어도 HH:MM 해제 판단」 병기) / 「시장 임시정지」 / 「해제 직후(재개 대기)」) · 사이드카 `market-state-now-sidecar-{m}` · 후보 재구독 정지 문구 `market-state-now-low-skip` 를 따로 그린다. 가드 `MarketStateNow.cycle465.test.tsx`
   - ③ **세션 상태 4분기**(`market-state-now-session-badge`) = 관측 중 / 장 종료 — 마지막 관측값(엔진 phase `closing`·`settling`·`log_analysis` 는 값이 얼어붙는다) / 세션 종료 — 집계 없음(정산 `_reset_daily_state` 뒤의 0 ≠ "이상 없음") / 엔진 상태 확인 불가
 - (1-B) **오늘 야간작업**(`MarketStateOps.tsx`, `market-state-ops-section`) — `GET /api/market-ops` 시각순 타임라인. 예정 시각 = 라우트가 `scheduler.TIME_*`(+ `quote_token_refresh.TIME_QUOTE_TOKEN_REFRESH`)에서 읽은 문자열. 상태 어휘 10종을 그대로 보인다 — `scheduled` / `running` / `done` / `overwritten`(20:05 metrics 1차 스냅샷을 21:30 정산 완전판이 덮은 정상 — **결함 아님**, `failed` 와 다른 색) / `failed` / `skipped_fresh` / `skipped_weekly` / `not_fired`(증거 없음, 점선 테두리) / `holiday` / `unknown`(마커 영구 결측 — **없는 증거를 실패로 위장하지 않는다**). 실패(red)·미발화(gray) 배지는 sRGB 거리로 벌린다
 - (2) 커서 표 `market-state-table` — 시장별 그룹, 행 `market-state-row-{row_id}`. 현재 행 커서 · 지난 행 흐리게 · 동시에 열린 창 점선

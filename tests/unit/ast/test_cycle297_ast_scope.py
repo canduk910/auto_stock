@@ -408,9 +408,12 @@ def test_g2_5_catalog_applies_to_is_all_seven(key: str) -> None:
 #: 경고가 막으려던 "조용한 재작문"이 아니다). `_SNAPSHOT_KEYS`·`_USER_PREAMBLE` 은
 #: 이 사이클에서도 byte 동일 — 제안4(VCP 스냅샷 키 확장)는 VCP golden 고정 테스트
 #: (`fixtures/cycle349_golden.json`, "확장 후 재생성 금지")와 충돌해 보류했다.
+#: 🔁 cycle467 — 사용자 결정(2026-10-16, 주간 자문 2026-10-15 D5 「실행」)으로 「결측 3개면
+#: 50 상한」 문장 한 줄을 교체했다(cycle445 절과의 충돌 제거). `_SNAPSHOT_KEYS`·
+#: `_USER_PREAMBLE` 은 byte 동일.
 _PROMPT_SEGMENT_SHA: dict[str, str] = {
     "SYSTEM_PROMPT":
-        "a411331cc1c7e9ebdd363e7b5eb0cc1c870dd9a24ab6b23ac7de19036268df91",
+        "fee9babd7b032bee46e787af63653c3981bc62e546b73baf0dcc78f49e7470bf",
     "_USER_PREAMBLE":
         "1aa37f98cd96031ea90b2d66283944f0f999a3a880df4a582175cbd6c955e589",
     "_SNAPSHOT_KEYS":

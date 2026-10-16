@@ -37,6 +37,7 @@ engine/tick_channel_mode.py ← engine/{scanner,tick_channel_clock,tick_channel_
 engine/tick_channel_clock.py ← engine/{scanner,risk,stale_watcher_core,tick_channel_mode,tick_channel_switch}.py, routes/realtime.py
 engine/tick_channel_switch.py ← engine/stale_watcher_core.py (120초 트리거 — 유일한 실행 호출자) + engine/tick_channel_mode.py (테스트 초기화 reset_state_for_test 만)
 engine/market_op_subscribe.py ← engine/scheduler.py (5줄 위임 wrapper)
+engine/market_cb_state.py ← engine/{market_operation_monitor,stale_watcher_core,scheduler}.py (전부 함수 안)
 engine/trading_calendar.py ← engine/{task_loop_helper,strategy_base,funnel_capture,status_exit_watch,market_unit,log_metrics_collector}.py · db/stock_master_daily.py(함수 안)
 engine/funnel_capture.py ← engine/{scheduler,boot_manager}.py
 engine/etf_like.py ← db/stock_master.py · engine/scanner.py(모듈 상단) + strategies/{volatility_breakout,long_tail_volatility,donchian_swing,bull_flag_breakout,vcp_breakout,kojiro}.py(함수 안)

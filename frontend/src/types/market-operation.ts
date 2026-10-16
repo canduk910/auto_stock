@@ -13,6 +13,31 @@ export interface CircuitBreakerState {
   observed: number
   representative_mkop_cls_code: string
   halt_reasons_sample: string[]
+  /** cycle465 — 시장 대표 종목 장운영 코드로 확인한 상태(휴리스틱 `suspected` 와 별개 축) */
+  confirmed?: CircuitBreakerConfirmed | null
+}
+
+export type MarketCbStateName = 'NORMAL' | 'CB_ACTIVE' | 'HALT_164' | 'RELEASED'
+
+export interface MarketCbMarket {
+  state: MarketCbStateName
+  stage: number
+  since: string | null
+  last_code: string
+  source: string
+  ttl_expires_at: string | null
+}
+
+export interface MarketSidecar {
+  side: 'sell' | 'buy'
+  since: string | null
+}
+
+export interface CircuitBreakerConfirmed {
+  markets: Record<'KOSPI' | 'KOSDAQ', MarketCbMarket>
+  sidecar: Record<'KOSPI' | 'KOSDAQ', MarketSidecar | null>
+  low_skip_active: boolean
+  events_today: Array<Record<string, unknown>>
 }
 
 export interface MarketOpDetail {

@@ -119,7 +119,7 @@ _PINNED_DIR_FILE_COUNTS = {
     # RS·재무 2단계(2026-10-13) — 신규 leaf `fundamental_load_tasks.py`(추가 적재 3갈래)·
     # `rs_fundamental_observe.py`(부팅 점수 관찰 기록) 로 104 → 106.
     # cycle455 — 신규 leaf `domestic_index_ingest.py`(종합지수 일봉 적재) 로 106 → 107.
-    "src/engine": 109,  # cycle461 +unknown_holding_policy.py +strategies/unknown.py
+    "src/engine": 110,  # cycle461 +unknown_holding_policy.py +strategies/unknown.py · cycle465 +market_cb_state.py
 }
 
 #: `scheduler.py` cycle257 영구 상한.

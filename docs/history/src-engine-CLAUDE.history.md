@@ -3257,3 +3257,11 @@ cycle359 조사). cycle368 이 파서 기준점을 고치고, VI 수명 600초(�
 - 전략 등록 9행 / `strategies/` 9 전략 / `param_catalog.py` 9 전략 합집합 125 키.
 
 → CHANGELOG: cycle461 행
+
+## 모듈 맵 `ndx2x_ingest.py`
+### 2026-10-16 cycle464 — 증분 적재 분기 추가 (정본에서 옮긴 원문)
+
+- **`ndx2x_ingest.py`** — `ndx2x_riskoff` 신호 원천 적재(cycle443). 공개 = `async ensure_history(*, target_days=MIN_HISTORY_DAYS+50, today=None) -> IngestResult`(`rows_upserted`·`total_history_days`·`latest_date`·`reached_target`). KIS `FHKST03030100` 나스닥100(`NDX_INDEX_CODE="NDX"`)을 **종료일 커서를 이전 응답의 최저 날짜로 당겨 겹쳐 받는** widening-fetch(`_MAX_FETCH_ATTEMPTS`=6, 창 `_WINDOW_CALENDAR_DAYS`=160일)로 요청 시작일 근처 누락을 메워 `overseas_index_daily` 에 upsert 한다. 이미 최신이고 이력이 충분하면 KIS 호출 0회. 시각을 판단하지 않는다 — 호출자가 미국 종가 확정(KST 07:00) 뒤에만 부른다. 메우는 순수 로직 = `ndx2x_core.merge_batches`.
+- 이 서술 아래에서 이력이 목표(300) 이상이면 widening 루프가 0회라 새 봉을 받지 못했다(운영 NDX 최신일 2026-10-09 에서 멈춤).
+
+→ CHANGELOG: cycle464 행

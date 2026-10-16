@@ -216,6 +216,14 @@ def record_market_op_event(event: MarketOpEvent) -> None:
             cb_state["reasons"],
         )
 
+    # cycle465 — 시장 대표 종목의 장운영 코드로 서킷브레이커·사이드카 확인 상태 갱신.
+    # 보드 콜백 보호 계약(handler.py `_handle_market_op`) — 예외는 여기서 흡수한다.
+    try:
+        from src.engine import market_cb_state as _market_cb_state
+        _market_cb_state.on_event(event)
+    except Exception:
+        logger.debug("[market_cb_state] on_event 실패 graceful", exc_info=True)
+
 
 def is_ticker_stale_excluded(ticker: str) -> bool:
     """stale 판정 회피 hook (`check_and_resubscribe_stale` 영역).
@@ -303,6 +311,11 @@ def reset_market_op_state() -> None:
     _vi_last_active_at.clear()  # cycle368
     _halt_last_active_at.clear()  # cycle368 F2
     _cb_suspected_logged_today.reset_daily()  # 사이클 186
+    try:  # cycle465 — 서킷브레이커 확인 상태 동행 초기화
+        from src.engine import market_cb_state as _market_cb_state
+        _market_cb_state.reset_market_cb_state()
+    except Exception:
+        logger.debug("[market_cb_state] reset 실패 graceful", exc_info=True)
 
 
 def get_circuit_breaker_state() -> dict:
@@ -378,6 +391,18 @@ def get_circuit_breaker_state() -> dict:
 _ISCD_STAT_DISPLAY_CODES: frozenset[str] = frozenset({"51", "52", "53", "54", "58", "59"})
 
 
+def _circuit_breaker_with_confirmed() -> dict:
+    """휴리스틱(`suspected`) 그대로 + cycle465 확인 축(`confirmed` = 시장 대표 코드 기반)."""
+    cb = get_circuit_breaker_state()
+    try:
+        from src.engine import market_cb_state as _market_cb_state
+        cb["confirmed"] = _market_cb_state.get_market_cb_summary()
+    except Exception:
+        logger.debug("[market_cb_state] summary 실패 graceful", exc_info=True)
+        cb["confirmed"] = None
+    return cb
+
+
 def get_market_op_state_summary() -> dict:
     """진단/UI 응답용 state snapshot (사이클 186 확장 = circuit_breaker + iscd_stat_active_count).
 
@@ -398,7 +423,7 @@ def get_market_op_state_summary() -> dict:
         "last_event_count": len(_market_op_last_event),
         "vi_active_sample": sorted(_vi_active_tickers)[:10],
         "halt_active_sample": sorted(_halt_active_tickers)[:10],
-        "circuit_breaker": get_circuit_breaker_state(),
+        "circuit_breaker": _circuit_breaker_with_confirmed(),
         "iscd_stat_active_count": iscd_stat_active_count,
     }
 

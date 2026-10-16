@@ -710,15 +710,30 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
     except Exception:
         pass
 
-    if _is_call_auction:
+    # cycle465 — 서킷브레이커·시장임시정지 중(09:00~15:30) 도 같은 LOW-scoped skip.
+    # 동시호가 판정과 독립(OR), 마커는 따로 남긴다. HIGH 는 그대로 처리한다.
+    try:
+        from src.engine.market_cb_state import is_low_resub_suppressed as _cb_suppressed
+        _is_market_cb = bool(_cb_suppressed(now))
+    except Exception:
+        _is_market_cb = False
+
+    if _is_call_auction or _is_market_cb:
         # cycle371 — LOW 만 skip(사이클 216 미러), HIGH 는 이어서 그대로 처리한다.
         low_stale = [t for t in stale_tickers if t not in high_tickers]
         high_stale = [t for t in stale_tickers if t in high_tickers]
-        logger.warning(
-            "[stale_skip_call_auction] subscribed=%d low=%d high=%d — 동시호가 시간대 "
-            "LOW stale 회피 (HIGH 유지, 체결 부재 정상 영역)",
-            len(subscribed), len(low_stale), len(high_stale),
-        )
+        if _is_call_auction:
+            logger.warning(
+                "[stale_skip_call_auction] subscribed=%d low=%d high=%d — 동시호가 시간대 "
+                "LOW stale 회피 (HIGH 유지, 체결 부재 정상 영역)",
+                len(subscribed), len(low_stale), len(high_stale),
+            )
+        else:
+            logger.warning(
+                "[stale_skip_market_cb] subscribed=%d low=%d high=%d — 서킷브레이커·시장정지 "
+                "LOW stale 회피 (HIGH 유지)",
+                len(subscribed), len(low_stale), len(high_stale),
+            )
         if not high_stale:
             # HIGH stale 없음(LOW 뿐이거나 stale 자체가 없음) — 누적 retry 카운터 보존
             # (fresh 회복 케이스 분기 미진입 = 정상 영역 영구 영속, 사이클 162 원 계약).
@@ -1136,6 +1151,18 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
     if _is_call_auction and low_targets:
         logger.warning(
             "[stale_skip_call_auction_priority] low=%d skip — 동시호가 LOW 재구독 회피 (HIGH 유지)",
+            len(low_targets),
+        )
+        low_targets = []
+    # cycle465 — 서킷브레이커·시장임시정지 중(09:00~15:30) LOW 재구독 회피(HIGH 유지).
+    try:
+        from src.engine.market_cb_state import is_low_resub_suppressed as _cb_suppressed
+        _is_market_cb = bool(_cb_suppressed(now))
+    except Exception:
+        _is_market_cb = False
+    if _is_market_cb and low_targets:
+        logger.warning(
+            "[stale_skip_market_cb_priority] low=%d skip — 서킷브레이커·시장정지 LOW 재구독 회피 (HIGH 유지)",
             len(low_targets),
         )
         low_targets = []

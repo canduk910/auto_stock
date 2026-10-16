@@ -1225,3 +1225,9 @@ BFB·VCP 는 `_prev_price` 가 이미 이번 틱으로 갱신된 뒤라 끈 뒤 
 - `StrategyBase` 서브클래스 9개. · 코드 등록 기본값(`scheduler.py` `__init__`)은 `momentum` … `ndx2x_riskoff` 가 `enabled=True`·`weight=0.0`(섀도 전략 규약), 나머지 7전략은 `enabled=False`·`weight=0.0` 이다.
 
 → CHANGELOG: cycle461 행
+
+### 2026-10-16 cycle464 — `ndx2x_riskoff` 카탈로그 행 적재 방식 (정본에서 옮긴 원문)
+
+- … → `overseas_index_daily`(≥300 미국영업일 적재, `src/engine/ndx2x_ingest.py` 겹침 widening-fetch) → …
+
+→ CHANGELOG: cycle464 행

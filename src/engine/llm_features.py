@@ -443,7 +443,7 @@ score = 이 진입이 아래 "청산 규약"까지 **수수료·세금 차감 �
 - 판단에 필요한 데이터가 입력에 없으면 **점수를 낮춘다**. 지어내지 않는다.
 - 특히 다음은 입력에 **없다**: 호가창(매수/매도 잔량), 분봉, 뉴스, 공시, 수급(외국인·기관),
   업종 상대강도, 지수 방향. 이것들을 아는 척하거나 추측해서 점수를 올리지 마라.
-- 데이터가 결측(`null`)인 필드가 3개 이상이면 score 는 50 을 넘기지 않는다.
+- 결측(`null`) 필드가 많으면 확신을 낮춰라. 다만 결측 수 자체를 점수 상한으로 쓰지는 마라 — 주어진 일봉·기술지표만으로 판단이 서면 70점 이상을 매겨도 된다.
 
 ## 데이터 범위와 점수 분포 (cycle445)
 - 호가·분봉·뉴스·수급 정보는 **이 시스템이 제공하지 않는다**. 없다는 사실을 위험으로
@@ -646,6 +646,20 @@ _STRATEGY_META = {
     },
 }
 
+# cycle467 — 스윙 조회(`strategy_manifest` `eval_driver="swing_poll"`) 4전략은 장 시작 직후
+# 조회 시세로 주문해 틱 기반 값이 대개 비어 있다(10-16 실측 kojiro 8/9 · donchian 3/4).
+# 값이 있는 날도 있어 키는 빼지 않고(`_SNAPSHOT_NA_KEYS` 와 다르다), 비어 있는 것이 정상이라고
+# 알린다. META 안에 두는 이유 = `llm_buy_gate._prompt_version` 해시가 META 를 넣는다.
+_DATA_TIMING_NOTE_SWING_POLL = (
+    "이 전략은 장 시작 직후 조회 시세로 주문한다. 그 시점에는 실시간 체결이 아직 쌓이지 "
+    "않아 acml_vol_shares·vol_ratio_vs_avg20·vol_ratio_time_norm·board_open_won·"
+    "gap_open_pct 가 비어 있는 것이 정상이다 — 위험 신호가 아니다. 거래량은 "
+    "recent_bars_desc 의 최근 일봉 거래량 추이로 대신 본다."
+)
+for _sid in ("donchian_swing", "kojiro", "etf_trend", "ndx2x_riskoff"):
+    _STRATEGY_META[_sid]["data_timing"] = _DATA_TIMING_NOTE_SWING_POLL
+del _sid
+
 # cycle297 §3.2 — 「해당 없음」 설명(5전략만, `not_applicable` 키로 strategy 블록에 싣는다).
 # VB·LTV 는 대상이 아니다(byte 동일 유지, test_g1_7b).
 _NOT_APPLICABLE_NOTE_TARGET = (
@@ -787,6 +801,9 @@ def build_messages(payload: dict, tech: dict, bars30: list) -> list[dict]:
     _na_note = _NOT_APPLICABLE_NOTES.get(sid)
     if _na_note:
         strategy_block["not_applicable"] = _na_note
+    # cycle467 — 스윙 조회 4전략만 META 에 있다(VB·LTV byte 동일 유지, test_g1_6).
+    if meta_tpl.get("data_timing"):
+        strategy_block["data_timing"] = meta_tpl["data_timing"]
     symbol_block = {
         "ticker": payload.get("ticker", ""),
         "name": sanitize_text(payload.get("name")),

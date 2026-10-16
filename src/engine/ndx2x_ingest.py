@@ -31,6 +31,12 @@ _WINDOW_CALENDAR_DAYS = 160
 #: widening 반복 상한 — 무한루프 방지. 도달 실패는 WARNING + 있는 만큼 저장(fail-open 적재,
 #: 판단은 `ndx2x_core.decide_daily` 의 `insufficient_history` fail-closed 가 맡는다).
 _MAX_FETCH_ATTEMPTS = 6
+#: 증분 모드 겹침 폭(달력일) — 첫 창 = [DB 최신일 − 14일, 오늘](cycle464, 자문 2026-10-16).
+#: 「오늘 − N」 이 아니라 최신일 앵커라 적재가 오래 멈춰도 구멍이 남지 않고, 겹침 밖 과거는
+#: 요청·쓰기 0(오염 반경 약 2주).
+INCREMENTAL_OVERLAP_DAYS = 14
+#: 새 봉이 없는 미국 평일이 이 수 이상이면 휴장이 아니라 미반영 의심 — WARNING.
+NO_NEW_BAR_WARN_WEEKDAYS = 2
 
 
 def _to_date(bsop: str) -> date:
@@ -43,6 +49,18 @@ class IngestResult:
     total_history_days: int
     latest_date: str | None
     reached_target: bool
+    #: fresh(KIS 0회) · backfill · new_bar · no_new_bar · fetch_failed(모름)
+    outcome: str = "fresh"
+
+
+def _us_weekdays_between(after: date, until: date) -> int:
+    """(after, until] 평일 수 — 미국 공휴일 미반영 근사."""
+    n, d = 0, after + timedelta(days=1)
+    while d <= until:
+        if d.weekday() < 5:
+            n += 1
+        d += timedelta(days=1)
+    return n
 
 
 async def ensure_history(
@@ -61,6 +79,9 @@ async def ensure_history(
         and len(existing) >= target_days
     ):
         return IngestResult(0, len(existing), latest.isoformat(), True)
+
+    if latest is not None and len(existing) >= min(target_days, MIN_HISTORY_DAYS):
+        return await _ensure_incremental(latest, existing, today)
 
     existing_batch = [(d.strftime("%Y%m%d"), c) for d, c in existing]
     fetched_batches: list[list[tuple[str, float]]] = []
@@ -105,4 +126,84 @@ async def ensure_history(
             target_days, len(merged), attempts,
         )
     latest_str = merged[-1][0] if merged else (latest.strftime("%Y%m%d") if latest else None)
-    return IngestResult(upserted, len(merged), latest_str, reached)
+    return IngestResult(
+        upserted, len(merged), latest_str, reached,
+        "backfill" if fetched_batches else "fetch_failed",
+    )
+
+
+async def _ensure_incremental(
+    latest: date, existing: list[tuple[date, float]], today: date,
+) -> IngestResult:
+    """이력이 충분할 때 — [최신일 − 겹침, 오늘] 만 받아 덮는다(cycle464 슬라이딩).
+
+    받은 배치의 가장 오래된 날짜가 DB 최신일 이하가 되면 끝(DB 와 이어졌다).
+    아니면 100행 캡에 잘린 것이므로 커서를 그 날짜로 당겨 다시 받는다(상한 6회).
+    KIS 실패(빈 응답·예외)는 「모름」 — 쓰기 0, 다음 날 같은 앵커로 재시도.
+    """
+    latest_str = latest.strftime("%Y%m%d")
+    anchor = latest - timedelta(days=INCREMENTAL_OVERLAP_DAYS)
+    fetched_batches: list[list[tuple[str, float]]] = []
+    raw_by_date: dict[str, dict] = {}
+    cursor_end = today
+    attempts = 0
+    failed = False
+    joined = False
+
+    while attempts < _MAX_FETCH_ATTEMPTS:
+        attempts += 1
+        try:
+            rows = await fetch_daily_chartprice(anchor, cursor_end, iscd=NDX_ISCD)
+            parsed = parse_kis_rows(rows)
+        except Exception:
+            logger.debug("[ndx2x_ingest] 증분 조회 실패", exc_info=True)
+            failed = True
+            break
+        if not parsed:
+            failed = True
+            break
+        for d, _ in parsed:
+            raw_by_date.setdefault(d, next(r for r in rows if r.get("stck_bsop_date") == d))
+        fetched_batches.append(parsed)
+        oldest = min(d for d, _ in parsed)
+        if oldest <= latest_str:
+            joined = True
+            break
+        next_cursor_end = _to_date(oldest)
+        if next_cursor_end >= cursor_end:
+            break  # 진전 없음 — 안전 종료
+        cursor_end = next_cursor_end
+
+    if not fetched_batches:
+        logger.error(
+            "[ndx2x_ingest_outcome] outcome=fetch_failed latest=%s fetched_max=- attempts=%d"
+            " upserted=0 — KIS 응답 없음(모름), 기존 이력 보존·다음 날 재시도",
+            latest_str, attempts,
+        )
+        return IngestResult(0, len(existing), latest_str, False, "fetch_failed")
+
+    fetched = merge_batches(fetched_batches)
+    upserted = await db.upsert_many(NDX_INDEX_CODE, fetched, raw_by_date=raw_by_date)
+    existing_batch = [(d.strftime("%Y%m%d"), c) for d, c in existing]
+    merged = merge_batches([fetched, existing_batch])
+    fetched_max = fetched[-1][0]
+
+    if not joined:
+        logger.warning(
+            "[ndx2x_ingest_short] incremental attempts=%d failed=%d — DB 최신일 %s 까지 못 이음,"
+            " 구멍이 남을 수 있다",
+            attempts, int(failed), latest_str,
+        )
+    if fetched_max > latest_str:
+        outcome = "new_bar"
+        level = logging.INFO
+    else:
+        outcome = "no_new_bar"
+        gap = _us_weekdays_between(latest, today - timedelta(days=1))
+        level = logging.WARNING if gap >= NO_NEW_BAR_WARN_WEEKDAYS else logging.INFO
+    logger.log(
+        level,
+        "[ndx2x_ingest_outcome] outcome=%s latest=%s fetched_max=%s attempts=%d upserted=%s",
+        outcome, latest_str, fetched_max, attempts, upserted,
+    )
+    return IngestResult(upserted, len(merged), merged[-1][0], len(merged) >= MIN_HISTORY_DAYS, outcome)

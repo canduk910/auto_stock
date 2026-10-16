@@ -90,6 +90,7 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 ```bash
 pip install -r requirements-dev.txt # 1회
 python -m pytest -q # 백엔드 전체 + 거래일지 워커(journal_worker/tests)·청산 AI 섀도 워커(llm_worker/tests) — pyproject.toml testpaths
+python -m pytest -q -n auto # 같은 범위를 CPU 수만큼 병렬로(pytest-xdist, requirements-dev.txt)
 cd frontend && npm install && npm test # 프론트엔드 전체
 cd.. && npx playwright install && npx playwright test --config=e2e/playwright.config.ts # E2E
 

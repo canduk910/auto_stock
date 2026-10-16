@@ -72,10 +72,11 @@ describe('BreakoutCandidateMonitor — 구독 커버리지 배너', () => {
         strategyId="bull_flag_breakout"
         strategies={strategies}
         subscribedTickers={['005930', '000660']}
+        tickerPrices={{ '005930': price(80000), '000660': price(150000) }}
       />,
     )
     const banner = screen.getByTestId('breakout-subscription-coverage')
-    expect(banner.textContent).toContain('후보 2종목 중 2종목 구독 · 0종목 시세 미수신')
+    expect(banner.textContent).toContain('후보 2종목 중 2종목 구독 · 0종목 미구독')
     expect(banner.className).toMatch(/emerald/)
   })
 
@@ -92,7 +93,7 @@ describe('BreakoutCandidateMonitor — 구독 커버리지 배너', () => {
       />,
     )
     const banner = screen.getByTestId('breakout-subscription-coverage')
-    expect(banner.textContent).toContain('후보 2종목 중 1종목 구독 · 1종목 시세 미수신')
+    expect(banner.textContent).toContain('후보 2종목 중 1종목 구독 · 1종목 미구독')
     expect(banner.className).toMatch(/amber/)
     expect(banner.textContent).toContain('매수 신호 평가 자체가 일어나지 않습니다')
   })
@@ -216,6 +217,7 @@ describe('BreakoutCandidateMonitor — 상태 배지 우선순위', () => {
         strategyId="bull_flag_breakout"
         strategies={strategies}
         subscribedTickers={['005930']}
+        tickerPrices={{ '005930': price(80500) }}
       />,
     )
     // 총 180초 - 경과 90초 = 잔여 90초 = 1:30
@@ -227,7 +229,12 @@ describe('BreakoutCandidateMonitor — 상태 배지 우선순위', () => {
       '005930': { target_price: 80000 },
     })
     render(
-      <BreakoutCandidateMonitor strategyId="vcp_breakout" strategies={strategies} subscribedTickers={['005930']} />,
+      <BreakoutCandidateMonitor
+        strategyId="vcp_breakout"
+        strategies={strategies}
+        subscribedTickers={['005930']}
+        tickerPrices={{ '005930': price(80500) }}
+      />,
     )
     expect(screen.getByTestId('breakout-status-005930').textContent).toBe('대기')
   })

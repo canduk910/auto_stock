@@ -96,8 +96,14 @@ function MarketOperationCard({ status }: { status: MarketOperationStatus | undef
 
   const cb = status.circuit_breaker
   const cbSuspected = cb?.suspected ?? false
+  // cycle465 — 대표 종목 장운영 코드로 확인한 발동(추정보다 우선 표시)
+  const cbConfirmed = Object.values(cb?.confirmed?.markets ?? {}).some(
+    (m) => m?.state === 'CB_ACTIVE' || m?.state === 'HALT_164',
+  )
 
-  const cbBadgeClass = cbSuspected
+  const cbBadgeClass = cbConfirmed
+    ? 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700'
+    : cbSuspected
     ? 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700'
     : 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600'
 
@@ -114,7 +120,7 @@ function MarketOperationCard({ status }: { status: MarketOperationStatus | undef
           data-testid="realtime-health-cb-badge"
           className={cbBadgeClass}
         >
-          서킷브레이커: {cbSuspected ? '추정' : '정상'}
+          서킷브레이커: {cbConfirmed ? '발동' : cbSuspected ? '추정' : '정상'}
         </span>
       </div>
 

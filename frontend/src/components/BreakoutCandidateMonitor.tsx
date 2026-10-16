@@ -43,8 +43,10 @@ interface StatusBadge {
   cls: string
 }
 
-// 상태 배지 우선순위: 매수완료 > 쿨다운 D-n > 미구독 > retention 대기(BFB) > 대기.
-function computeStatus(t: BreakoutDiagTarget, subscribed: boolean, isBfb: boolean): StatusBadge {
+// 상태 배지 우선순위: 매수완료 > 쿨다운 D-n > 미구독 > 구독 중 시세 없음 > retention 대기(BFB) > 대기.
+function computeStatus(
+  t: BreakoutDiagTarget, subscribed: boolean, hasPrice: boolean, isBfb: boolean,
+): StatusBadge {
   if (t.bought_today) {
     return { label: '매수완료', cls: 'bg-emerald-100 text-emerald-700' }
   }
@@ -54,6 +56,9 @@ function computeStatus(t: BreakoutDiagTarget, subscribed: boolean, isBfb: boolea
   }
   if (!subscribed) {
     return { label: '📵 미구독', cls: 'bg-red-100 text-red-700' }
+  }
+  if (!hasPrice) {
+    return { label: '📭 시세 없음', cls: 'bg-amber-100 text-amber-700' }
   }
   if (isBfb && t.breakout_seen_at) {
     const remain = retentionRemainSec(t.breakout_seen_at, t.retention_minutes)
@@ -132,6 +137,14 @@ export default function BreakoutCandidateMonitor({
     [candidateTickers, subscribedSet],
   )
   const subscribedCount = candidateTickers.length - missingTickers.length
+  // 구독은 됐는데 시세(현재가 > 0)가 한 번도 오지 않은 종목 — 미구독과 같이 매수 평가가 안 돈다.
+  const noPriceTickers = useMemo(
+    () => candidateTickers.filter(
+      (t) => subscribedSet.has(t) && num(prices[t]?.current_price, 0) <= 0,
+    ),
+    [candidateTickers, subscribedSet, prices],
+  )
+  const coverageWarn = missingTickers.length > 0 || noPriceTickers.length > 0
 
   // 돌파선 근접순(거리% 내림차순) — 가장 가까운(또는 이미 돌파한) 종목이 위로.
   // 현재가 미수신(distPct=null) 종목은 정렬 최하단.
@@ -168,16 +181,22 @@ export default function BreakoutCandidateMonitor({
       <div
         data-testid="breakout-subscription-coverage"
         className={`rounded border px-3 py-2 text-xs ${
-          missingTickers.length > 0
+          coverageWarn
             ? 'border-amber-300 bg-amber-50 text-amber-800'
             : 'border-emerald-200 bg-emerald-50 text-emerald-800'
         }`}
       >
         <div className="font-semibold">
-          후보 {candidateTickers.length}종목 중 {subscribedCount}종목 구독 · {missingTickers.length}종목 시세 미수신
+          후보 {candidateTickers.length}종목 중 {subscribedCount}종목 구독 · {missingTickers.length}종목 미구독
+          {noPriceTickers.length > 0 && ` · ${noPriceTickers.length}종목 구독 중 시세 없음`}
         </div>
         {missingTickers.length > 0 && (
-          <div className="mt-1">시세 미수신 종목은 매수 신호 평가 자체가 일어나지 않습니다.</div>
+          <div className="mt-1">미구독 종목은 시세가 오지 않아 매수 신호 평가 자체가 일어나지 않습니다.</div>
+        )}
+        {noPriceTickers.length > 0 && (
+          <div className="mt-1">
+            구독 중 시세 없음 종목도 아직 매수 신호 평가가 일어나지 않습니다(장 시작 전이면 정상입니다).
+          </div>
         )}
       </div>
 
@@ -210,7 +229,7 @@ export default function BreakoutCandidateMonitor({
                 {rows.map(({ ticker, t, curPrice, targetPrice, distPct }) => {
                   const name = t.name || ticker
                   const subscribed = subscribedSet.has(ticker)
-                  const status = computeStatus(t, subscribed, isBfb)
+                  const status = computeStatus(t, subscribed, curPrice > 0, isBfb)
                   const stopLine = num(t.stop_line, 0)
                   const volumeThreshold = num(t.volume_threshold, 0)
                   const measuredTarget = num(t.measured_target, 0)

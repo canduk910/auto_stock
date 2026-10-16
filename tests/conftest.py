@@ -916,6 +916,20 @@ def _reset_cost_overlay_memo():
     _reset_cost_overlay_memo_now()
 
 
+# cycle465 — 서킷브레이커 확인 상태(`market_cb_state`)는 모듈 전역이다. 한 테스트가 대표
+# 종목에 발동 코드를 흘리면 같은 워커의 다음 stale watcher 테스트가 LOW skip 을 탄다.
+# 이미 import 된 경우에만 비운다(위 cost_overlay 와 같은 이유).
+@pytest.fixture(autouse=True)
+def _reset_market_cb_state():
+    mod = sys.modules.get("src.engine.market_cb_state")
+    if mod is not None:
+        mod.reset_market_cb_state()
+    yield
+    mod = sys.modules.get("src.engine.market_cb_state")
+    if mod is not None:
+        mod.reset_market_cb_state()
+
+
 # ---------------------------------------------------------------------------
 # cycle447(제안 3) — `src/api/balance.py::get_balance_cached` 의 20초 TTL 캐시도
 # 모듈 전역이다. 그대로 두면 한 테스트가 채운 잔고값이 (실제 벽시계로는 20초가

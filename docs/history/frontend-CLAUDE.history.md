@@ -1727,3 +1727,18 @@ nginx 계약(`auth_basic off;` 금지 · 옛 `nginx.conf` 부활 금지)은 루�
 - 비중 슬라이더는 `GET /api/strategies` 의 전 전략을 그렸다.
 
 → CHANGELOG: cycle461 행
+
+### 2026-10-16 cycle465 — 서킷브레이커 확인 축(`confirmed`) 추가 (정본에서 옮긴 원문)
+
+- RealtimeHealth 헤더 **서킷브레이커 배지**(`realtime-health-cb-badge`, `circuit_breaker.suspected` true→orange "추정" / false→gray "정상")
+- **CB 는 휴리스틱**(사유 키워드 OR 전 시장 halt 비율) — H0UNMKO0 에 CB 전용 필드가 없다. 가드 `RealtimeHealth.cycle186.test.tsx`.
+- MarketStateNow ② **서킷브레이커는 추정이다** — "추정" + 판정 근거(halted/observed·사유 표본, `market-state-now-cb-basis`)를 평시에도 보인다
+
+→ CHANGELOG: cycle465 행
+
+### 2026-10-16 cycle466 — 돌파 후보 화면 구독 커버리지 문구 (정본에서 옮긴 원문)
+
+- ① **구독 커버리지**(`breakout-subscription-coverage`) — `scan.subscribed_tickers` ∖ `scanned_tickers`. 미수신 종목은 `on_tick` 이 없어 `check_buy_signal` 이 불리지 않는다.
+- 상태 배지 우선순위 = 매수완료 > 쿨다운 D-n > 📵미구독 > ⏱m:ss 대기 > 대기. 돌파선 근접순, 미수신은 최하단.
+
+→ CHANGELOG: cycle466 행

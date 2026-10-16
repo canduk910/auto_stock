@@ -624,6 +624,8 @@ class TradingScheduler:
                     logger.info("통합 장운영정보 구독: H0UNMKO0 / 005930")
                 except Exception:
                     logger.warning("통합 장운영정보 구독 실패 — 시각 기반 보드 매핑으로 동작")
+                from src.engine import market_cb_state as _mcb  # cycle465 — CB·사이드카 대표 구독
+                await _mcb.subscribe_market_status_reps(kis_ws)
 
             # 세션 트래커 background task — 1분 주기 보드 전환 감시
             self._session_task = asyncio.create_task(self._session_loop())

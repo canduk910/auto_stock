@@ -19,8 +19,12 @@
  *    비우므로 그 뒤 0 은 "이상 없음" 이 아니라 "집계 자체가 없다". 20:00~21:30 은 값이
  *    마지막 관측에서 **얼어붙은 채** 남아 있어 또 다른 상태다 — 세 상태를 구분한다.
  */
-import type { MarketOperationStatus } from '../types/market-operation'
+import type {
+  CircuitBreakerConfirmed,
+  MarketOperationStatus,
+} from '../types/market-operation'
 import type { MarketOpsEngine } from '../types/market-ops'
+import { formatKstHHMM } from '../utils/kst'
 
 /** 저녁 구간 중 엔진은 살아 있지만(`running`) VI/거래정지 집계가 마지막 관측에서 얼어붙는
  *  구간의 phase 값 — `scheduler.py` 의 엔진 단계 이름이지 market-state 표의 phase 가
@@ -62,6 +66,51 @@ function countBadgeClass(count: number, tone: 'amber' | 'red'): string {
 
 const STAT_BADGE_BASE =
   'inline-flex items-center rounded px-2 py-0.5 text-xs font-medium border'
+
+const MARKET_LABEL = { KOSPI: '코스피', KOSDAQ: '코스닥' } as const
+
+/** cycle465 — 시장 대표 종목의 장운영 코드로 확인한 서킷브레이커·사이드카(추정 배지와 별개). */
+function ConfirmedCb({ confirmed }: { confirmed: CircuitBreakerConfirmed }) {
+  const rows = (['KOSPI', 'KOSDAQ'] as const).map((m) => {
+    const st = confirmed.markets?.[m]
+    const sc = confirmed.sidecar?.[m] ?? null
+    let text = '정상'
+    let cls = 'bg-gray-100 text-gray-600 border-gray-300'
+    if (st?.state === 'CB_ACTIVE') {
+      text = `서킷브레이커 ${st.stage}단계 발동 ${formatKstHHMM(st.since)}`
+      if (st.stage < 3 && st.ttl_expires_at) text += ` · 늦어도 ${formatKstHHMM(st.ttl_expires_at)} 해제 판단`
+      cls = 'bg-red-200 text-red-900 border-red-400'
+    } else if (st?.state === 'HALT_164') {
+      text = `시장 임시정지 ${formatKstHHMM(st.since)}`
+      cls = 'bg-red-200 text-red-900 border-red-400'
+    } else if (st?.state === 'RELEASED') {
+      text = `서킷브레이커 해제 직후(재개 대기)`
+      cls = 'bg-amber-100 text-amber-900 border-amber-300'
+    }
+    return (
+      <span key={m} className="inline-flex items-center gap-1">
+        <StatBadge testId={`market-state-now-cb-confirmed-${m}`} label={`${MARKET_LABEL[m]} ${text}`} className={cls} />
+        {sc ? (
+          <StatBadge
+            testId={`market-state-now-sidecar-${m}`}
+            label={`사이드카(${sc.side === 'sell' ? '매도' : '매수'}) ${formatKstHHMM(sc.since)}`}
+            className="bg-amber-100 text-amber-900 border-amber-300"
+          />
+        ) : null}
+      </span>
+    )
+  })
+  return (
+    <div data-testid="market-state-now-cb-confirmed" className="mt-2 flex flex-wrap items-center gap-2">
+      {rows}
+      {confirmed.low_skip_active ? (
+        <span data-testid="market-state-now-low-skip" className="text-[0.7rem] text-gray-600">
+          후보 종목 재구독 멈춤 중(보유 종목은 그대로)
+        </span>
+      ) : null}
+    </div>
+  )
+}
 
 function StatBadge({
   testId,
@@ -185,6 +234,10 @@ export function MarketStateNow({
               {marketOp.circuit_breaker.representative_mkop_cls_code || '—'}
             </span>
           </div>
+
+          {marketOp.circuit_breaker.confirmed ? (
+            <ConfirmedCb confirmed={marketOp.circuit_breaker.confirmed} />
+          ) : null}
 
           <p
             data-testid="market-state-now-coverage-note"
