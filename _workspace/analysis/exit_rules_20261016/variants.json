@@ -1,0 +1,81 @@
+{
+ "kojiro": {
+  "V0": {
+   "wins": [
+    "T",
+    "V",
+    "H"
+   ]
+  }
+ },
+ "donchian": {
+  "V0": {
+   "wins": [
+    "T",
+    "V",
+    "H"
+   ]
+  }
+ },
+ "bfb": {
+  "V0": {
+   "wins": [
+    "T",
+    "V",
+    "H"
+   ]
+  },
+  "T": {
+   "wins": [
+    "T",
+    "V",
+    "H"
+   ],
+   "ovr": {
+    "atr_trail_mult": 1.0
+   }
+  },
+  "DSTAR": {
+   "wins": [
+    "T",
+    "V",
+    "H"
+   ],
+   "ovr": {
+    "atr_trail_mult": 1.0
+   },
+   "crash": null,
+   "stall": null
+  },
+  "MIRROR": {
+   "wins": [
+    "T",
+    "V",
+    "H"
+   ],
+   "ovr": {
+    "atr_trail_mult": 3.0
+   },
+   "crash": null,
+   "stall": null
+  }
+ },
+ "vcp": {
+  "V0": {
+   "wins": [
+    "T",
+    "V",
+    "H"
+   ]
+  }
+ },
+ "etf": {
+  "V0": {
+   "wins": [
+    "T",
+    "V",
+    "H"
+   ]
+  }
+ }
+}

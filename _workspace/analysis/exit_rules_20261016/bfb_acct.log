@@ -1,0 +1,17 @@
+[bfb    72s] ready
+[bfb    76s] repro-book T 0.0
+[bfb    76s] V0 T -0.24564 -0.99047
+[bfb    78s] repro-book V 0.0
+[bfb    78s] V0 V -0.39885 -0.98548
+[bfb    80s] repro-book H 0.0
+[bfb    80s] V0 H -0.33676 -0.9136
+[bfb    83s] T T -0.23338 -0.9905
+[bfb    86s] T V -0.42169 -0.98807
+[bfb    87s] T H -0.31594 -0.90164
+[bfb    91s] DSTAR T -0.23338 -0.9905
+[bfb    93s] DSTAR V -0.42169 -0.98807
+[bfb    95s] DSTAR H -0.31594 -0.90164
+[bfb    99s] MIRROR T -0.24911 -0.99294
+[bfb   101s] MIRROR V -0.38345 -0.98338
+[bfb   102s] MIRROR H -0.33978 -0.91472
+[bfb   102s] done

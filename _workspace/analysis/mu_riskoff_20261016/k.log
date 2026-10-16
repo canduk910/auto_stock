@@ -1,0 +1,26 @@
+/Users/koscom/Projects/auto_stock/tools/replay/audit/panel.py:96: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  arch_g = {t: g for t, g in arch.groupby("ticker", sort=True)}
+[kojiro    29s] ready
+[kojiro    32s] on T -0.13351 -0.91088
+[kojiro    33s] on V -0.16106 -0.79652
+[kojiro    34s] on H -0.17545 -0.68802
+[kojiro    37s] off T -0.2488 -0.98994
+[kojiro    39s] off V -0.23095 -0.89778
+[kojiro    40s] off H -0.23923 -0.83868
+[kojiro    43s] plc126 T -0.17468 -0.95511
+[kojiro    44s] plc126 V -0.19198 -0.83094
+[kojiro    47s] plc252 T -0.16192 -0.94595
+[kojiro    48s] plc252 V -0.17234 -0.81418
+[kojiro    50s] plc378 T -0.15477 -0.93301
+[kojiro    52s] plc378 V -0.15698 -0.80601
+[kojiro    54s] plc504 T -0.15849 -0.93825
+[kojiro    56s] plc504 V -0.17893 -0.80892
+[kojiro    58s] plc756 T -0.16767 -0.95407
+[kojiro    60s] plc756 V -0.13686 -0.73764
+[kojiro    62s] plc1008 T -0.13966 -0.91065
+[kojiro    64s] plc1008 V -0.16921 -0.81873
+[kojiro    66s] plc1260 T -0.15644 -0.94044
+[kojiro    68s] plc1260 V -0.14696 -0.77746
+[kojiro    70s] plc1512 T -0.14774 -0.92416
+[kojiro    72s] plc1512 V -0.16038 -0.80798
+[kojiro    72s] done

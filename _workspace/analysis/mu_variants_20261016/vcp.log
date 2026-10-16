@@ -1,0 +1,40 @@
+[vcp    46s] ready
+[vcp    47s] repro-m kospi True
+[vcp    47s] repro-m kosdaq True
+[vcp    49s] repro-book off T 0.0
+[vcp    49s] off T -0.18277 -0.96431
+[vcp    50s] repro-book off V 0.0
+[vcp    50s] off V -0.25008 -0.91442
+[vcp    51s] repro-book off H 0.0
+[vcp    51s] off H -0.21561 -0.80509
+[vcp    52s] repro-book V0 T 0.0
+[vcp    52s] V0 T -0.12448 -0.89354
+[vcp    53s] repro-book V0 V 0.0
+[vcp    53s] V0 V -0.19155 -0.85213
+[vcp    54s] repro-book V0 H 0.0
+[vcp    54s] V0 H -0.12523 -0.65786
+[vcp    74s] V1a T -0.13591 -0.91468
+[vcp    75s] V1a V -0.18213 -0.84744
+[vcp    76s] V1a H -0.10723 -0.61565
+[vcp    96s] V1b T -0.13359 -0.91516
+[vcp    97s] V1b V -0.1786 -0.82332
+[vcp    97s] V1b H -0.13057 -0.66782
+[vcp   117s] V2a T -0.134 -0.91065
+[vcp   118s] V2a V -0.17285 -0.8122
+[vcp   119s] V2a H -0.13867 -0.68937
+[vcp   138s] V2b T -0.13857 -0.91
+[vcp   139s] V2b V -0.15853 -0.79179
+[vcp   140s] V2b H -0.12704 -0.64554
+[vcp   159s] V3 T -0.11551 -0.87085
+[vcp   160s] V3 V -0.1766 -0.85519
+[vcp   161s] V3 H -0.13467 -0.65085
+[vcp   179s] V4 T -0.12154 -0.89197
+[vcp   180s] V4 V -0.18894 -0.85867
+[vcp   181s] V4 H -0.14008 -0.6513
+[vcp   201s] V5a T -0.12767 -0.90012
+[vcp   202s] V5a V -0.199 -0.86348
+[vcp   203s] V5a H -0.12843 -0.65448
+[vcp   223s] V5b T -0.12785 -0.8967
+[vcp   224s] V5b V -0.16709 -0.80877
+[vcp   224s] V5b H -0.1614 -0.67642
+[vcp   244s] done /private/tmp/claude-501/-Users-koscom-Projects-auto-stock/41ef15a3-9e33-4d1b-9131-dedfd7533390/scratchpad/mv/vcp.pkl

@@ -1,0 +1,7 @@
+kojiro H 5 {'T': 13799, 'V': 11945, 'H': 11112}
+donchian H 14 {'T': 5801, 'V': 3467, 'H': 2838}
+bfb H 5 {'T': 6773, 'V': 5491, 'H': 5168}
+vcp H 5 {'T': 3558, 'V': 2440, 'H': 1836}
+etf H 5 {'T': 203, 'V': 407, 'H': 423}
+{"derived": {"kojiro": {"z_star": null, "x_star_pct": null, "terc_z": [null, null, null], "unit": "불명", "y_star": null, "n_star": null}, "donchian": {"z_star": null, "x_star_pct": null, "terc_z": [null, null, null], "unit": "불명", "y_star": null, "n_star": null}, "bfb": {"z_star": null, "x_star_pct": null, "terc_z": [null, null, null], "unit": "불명", "y_star": 1.0, "n_star": null}, "vcp": {"z_star": null, "x_star_pct": null, "terc_z": [null, null, null], "unit": "불명", "y_star": null, "n_star": null}, "etf": {"z_star": null, "x_star_pct": null, "terc_z": [null, null, null], "unit": "불명", "y_star": null, "n_star": null}}, "theta_raw": null, "gate": null, "theta": null}
+{"kojiro": {"V0": {}}, "donchian": {"V0": {}}, "bfb": {"V0": {}, "T": {"ovr": {"atr_trail_mult": 1.0}}, "DSTAR": {"ovr": {"atr_trail_mult": 1.0}, "crash": null, "stall": null}, "MIRROR": {"ovr": {"atr_trail_mult": 3.0}, "crash": null, "stall": null}}, "vcp": {"V0": {}}, "etf": {"V0": {}}}

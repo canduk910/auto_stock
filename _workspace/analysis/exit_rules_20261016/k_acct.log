@@ -1,0 +1,10 @@
+/Users/koscom/Projects/auto_stock/tools/replay/audit/panel.py:96: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  arch_g = {t: g for t, g in arch.groupby("ticker", sort=True)}
+[kojiro    27s] ready
+[kojiro    31s] repro-book T 0.0
+[kojiro    31s] V0 T -0.13351 -0.91088
+[kojiro    32s] repro-book V 0.0
+[kojiro    32s] V0 V -0.16106 -0.79652
+[kojiro    33s] repro-book H 0.0
+[kojiro    33s] V0 H -0.17545 -0.68802
+[kojiro    33s] done

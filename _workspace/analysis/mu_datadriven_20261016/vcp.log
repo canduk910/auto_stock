@@ -1,0 +1,25 @@
+[vcp    47s] ready
+[vcp    48s] repro-m kospi True
+[vcp    48s] repro-m kosdaq True
+[vcp    50s] repro-book off T 0.0
+[vcp    50s] off T -0.18277 -0.96431
+[vcp    51s] repro-book off V 0.0
+[vcp    51s] off V -0.25008 -0.91442
+[vcp    51s] repro-book off H 0.0
+[vcp    51s] off H -0.21561 -0.80509
+[vcp    53s] repro-book V0 T 0.0
+[vcp    53s] V0 T -0.12448 -0.89354
+[vcp    54s] repro-book V0 V 0.0
+[vcp    54s] V0 V -0.19155 -0.85213
+[vcp    55s] repro-book V0 H 0.0
+[vcp    55s] V0 H -0.12523 -0.65786
+[vcp    56s] DS T -0.16126 -0.95096
+[vcp    57s] DS V -0.26045 -0.92289
+[vcp    58s] DS H -0.19107 -0.74261
+[vcp    77s] DKR T -0.16785 -0.94809
+[vcp    78s] DKR V -0.16818 -0.83336
+[vcp    78s] DKR H -0.12184 -0.6666
+[vcp   103s] ORC T -0.1068 -0.85644
+[vcp   104s] ORC V -0.22152 -0.90072
+[vcp   105s] ORC H -0.14159 -0.7213
+[vcp   105s] done /private/tmp/claude-501/-Users-koscom-Projects-auto-stock/41ef15a3-9e33-4d1b-9131-dedfd7533390/scratchpad/md/vcp.pkl

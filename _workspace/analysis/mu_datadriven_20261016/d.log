@@ -1,0 +1,25 @@
+[du     3s] features
+[du     4s] repro-m kospi True
+[du     4s] repro-m kosdaq True
+[du     6s] repro-book off T 0.0
+[du     6s] off T -0.15392 -0.94633
+[du     7s] repro-book off V 0.0
+[du     7s] off V -0.03427 -0.56666
+[du     7s] repro-book off H 0.0
+[du     7s] off H -0.00759 -0.52629
+[du     9s] repro-book V0 T 0.0
+[du     9s] V0 T -0.02328 -0.573
+[du     9s] repro-book V0 V 0.0
+[du     9s] V0 V -0.01608 -0.50056
+[du    10s] repro-book V0 H 0.0
+[du    10s] V0 H 0.06169 -0.35698
+[du    11s] DS T -0.06099 -0.84561
+[du    12s] DS V -0.05343 -0.60447
+[du    13s] DS H 0.06949 -0.36651
+[du    31s] DKR T -0.05946 -0.76008
+[du    32s] DKR V -0.0339 -0.50409
+[du    32s] DKR H 0.08735 -0.34098
+[du    55s] ORC T 0.0589 -0.51246
+[du    55s] ORC V -0.01378 -0.5212
+[du    56s] ORC H 0.12621 -0.41709
+[du    56s] done /private/tmp/claude-501/-Users-koscom-Projects-auto-stock/41ef15a3-9e33-4d1b-9131-dedfd7533390/scratchpad/md/donchian.pkl

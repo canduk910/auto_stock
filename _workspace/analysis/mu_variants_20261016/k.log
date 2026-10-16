@@ -1,0 +1,42 @@
+/Users/koscom/Projects/auto_stock/tools/replay/audit/panel.py:96: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  arch_g = {t: g for t, g in arch.groupby("ticker", sort=True)}
+[kojiro    30s] ready
+[kojiro    31s] repro-m kospi True
+[kojiro    31s] repro-m kosdaq True
+[kojiro    35s] repro-book off T 0.0
+[kojiro    35s] off T -0.2488 -0.98994
+[kojiro    36s] repro-book off V 0.0
+[kojiro    36s] off V -0.23095 -0.89778
+[kojiro    37s] repro-book off H 0.0
+[kojiro    37s] off H -0.23923 -0.83868
+[kojiro    40s] repro-book V0 T 0.0
+[kojiro    40s] V0 T -0.13351 -0.91088
+[kojiro    41s] repro-book V0 V 0.0
+[kojiro    41s] V0 V -0.16106 -0.79652
+[kojiro    42s] repro-book V0 H 0.0
+[kojiro    42s] V0 H -0.17545 -0.68802
+[kojiro    76s] V1a T -0.15063 -0.93211
+[kojiro    78s] V1a V -0.17019 -0.81016
+[kojiro    79s] V1a H -0.16562 -0.65657
+[kojiro   112s] V1b T -0.14884 -0.92895
+[kojiro   114s] V1b V -0.16722 -0.8117
+[kojiro   115s] V1b H -0.19356 -0.72025
+[kojiro   148s] V2a T -0.13792 -0.91318
+[kojiro   150s] V2a V -0.17671 -0.81881
+[kojiro   151s] V2a H -0.14545 -0.63108
+[kojiro   184s] V2b T -0.1352 -0.9119
+[kojiro   185s] V2b V -0.18019 -0.82696
+[kojiro   186s] V2b H -0.18113 -0.70464
+[kojiro   219s] V3 T -0.10272 -0.86292
+[kojiro   220s] V3 V -0.15934 -0.79053
+[kojiro   221s] V3 H -0.14712 -0.6612
+[kojiro   252s] V4 T -0.12721 -0.905
+[kojiro   254s] V4 V -0.16988 -0.80333
+[kojiro   255s] V4 H -0.15135 -0.68198
+[kojiro   289s] V5a T -0.14007 -0.91527
+[kojiro   290s] V5a V -0.17683 -0.82147
+[kojiro   291s] V5a H -0.18516 -0.70034
+[kojiro   325s] V5b T -0.14207 -0.91841
+[kojiro   326s] V5b V -0.17381 -0.80458
+[kojiro   327s] V5b H -0.15678 -0.66437
+[kojiro   361s] done /private/tmp/claude-501/-Users-koscom-Projects-auto-stock/41ef15a3-9e33-4d1b-9131-dedfd7533390/scratchpad/mv/kojiro.pkl
