@@ -24,32 +24,36 @@
 | ④ 로그 1회화 = cycle458 | ✅ 구현·검증 완료(14곳 `write_log` 제거, AST G-458, `scheduler.py` 3,890줄) — `b20964f9`. 🚚 10-15 21:41 push 배포 |
 | ⑤ D+2 예수금 = cycle459 | ✅ 구현·검증 완료(`deposit_d1/d2` = `nxdy_excc_amt`/`prvs_rcdl_excc_amt`, 잔고 화면 「D+2 예수금」) — `c82513c5`. 🚚 10-15 21:41 push 배포 |
 | ⑥ 계좌 교체 수익률 보정 | ✅ 완료(DB UPDATE) — 10-13 총자산 4,867,072·예수금 4,246,946·외부입출금 0 / 10-14 외부입출금 0·일 0.0719%·누적 −7.8868%. 원래 값 EC2 `~/dp_fix_20261015.log` |
-| ⑦-F1 안 U = cycle461 | ✅ 구현·tester 검수·보완 완료(브랜치 `worktree-agent-a209873c799eb8f0d` `c6846633`, migration 054, 기본 observe = 주문 0). ⏳ **배포 대기 — 10-16 21:35 이후 별도 배포**(사용자 「응 그렇게 하자」). `enforce` 전환은 몇 주 observe 뒤 사용자 결정 |
-| RS·재무 관찰 화면 | ⏳ 「전략」 메뉴 아래 탭(사용자 결정) — RS 범위라 클라우드 세션 `auto-turnaround` 에 구현 요청 전달, 진행 중 |
+| ⑦-F1 안 U = cycle461 | ✅ 구현·tester 검수·보완 완료(브랜치 `worktree-agent-a209873c799eb8f0d` `c6846633`, migration 054, 기본 observe = 주문 0). ✅ main 병합(`52bb1db3`) → 10-16 15:48 배포(`8099cd37` 마커)에 포함. `enforce` 전환은 몇 주 observe 뒤 사용자 결정 |
+| RS·재무 관찰 화면 | ✅ cycle462(「전략」 메뉴 세 번째 세부) |
 | 병합 검증(458~460) | 백엔드 17,367 통과(알려진 pyarrow 1건) · 프론트 1,639 통과 · tsc 통과 |
 
 ### 10-16(금) 사용자 결정·진행
 | 항목 | 상태 |
 |---|---|
-| cycle464 — ndx2x 나스닥100 일봉 증분 적재 결함 | ✅ 구현·검증(사용자 「권고대로 진행」). 원인 = 이력이 목표(300) 이상이면 widening 루프가 0회라 새 봉을 못 받았다(운영 NDX 최신일 10-09 에 멈춤). 고친 뒤에는 DB 최신일 − 14일부터 받아 잇는다. 자문 `_workspace/domain_consult/2026-10-16_ndx2x_ingest_incremental.md`. ⏳ **미커밋·미배포** |
-| cycle465 — 서킷브레이커·사이드카 인지 + CB 중 LOW 재구독 정지 | ✅ 구현·검증(사용자 「장운영정보를 메인계좌에서 웹소켓으로 구독관리」 + 범위 「인지 + R3 C」). 10-15 12:40 분석(`_workspace/analysis/2026-10-15_silent_skip_1240.md`)의 약점 **C(CB 중 LOW 재구독 반복)·D(CB 의심 경보 미발화) 해소**. `scheduler.py` +2줄(3,869줄) 승인 도장 갱신. 자문 `_workspace/domain_consult/2026-10-16_market_cb_sidecar_detect.md`. ⏳ **미커밋·미배포** |
+| cycle464 — ndx2x 나스닥100 일봉 증분 적재 결함 | ✅ 구현·검증(사용자 「권고대로 진행」). 원인 = 이력이 목표(300) 이상이면 widening 루프가 0회라 새 봉을 못 받았다(운영 NDX 최신일 10-09 에 멈춤). 고친 뒤에는 DB 최신일 − 14일부터 받아 잇는다. 자문 `_workspace/domain_consult/2026-10-16_ndx2x_ingest_incremental.md`. ✅ `8099cd37` 배포 15:48 — `[ndx2x_ingest_outcome] outcome=new_bar fetched_max=20261015 upserted=13` |
+| cycle465 — 서킷브레이커·사이드카 인지 + CB 중 LOW 재구독 정지 | ✅ 구현·검증(사용자 「장운영정보를 메인계좌에서 웹소켓으로 구독관리」 + 범위 「인지 + R3 C」). 10-15 12:40 분석(`_workspace/analysis/2026-10-15_silent_skip_1240.md`)의 약점 **C(CB 중 LOW 재구독 반복)·D(CB 의심 경보 미발화) 해소**. `scheduler.py` +2줄(3,869줄) 승인 도장 갱신. 자문 `_workspace/domain_consult/2026-10-16_market_cb_sidecar_detect.md`. ✅ `8099cd37` 배포 15:48 — `[market_status_rep_subscribed]` 3건 |
 | 그 분석의 약점 A·B | ⏳ **미착수** — A = 시장 침묵 판정에 「시장이 실제로 멈췄다」는 양성 증거가 없다(`stale_session_recovery.py` 게이트) · B = REST 폴이 `ticker_last_tick` 을 찍어 세션 fresh 비율을 흐린다 |
 | 개발 도구 | `requirements-dev.txt` 에 `pytest-xdist>=3.5`(사용자 지시) — 병렬 실행 `python -m pytest -q -n auto` |
 | 원격·로컬 브랜치 정리 · PR #27 | ✅ 원격 병합 브랜치 21개 삭제(원격 = `main` 만). PR #27 주간 자문 10-15 = 머리에 정정 메모(D6 철회 · §3.5 · 지난주 반영 표 · 서술 오류 6 · 작성 뒤 변경 3) 달고 병합(`de6bacae`), 브랜치 삭제. 검토 원문 `_workspace/analysis/2026-10-16_pr27_weekly_advice_review.md`. wt280 작업 폴더는 아직 남아 있다(폐기 여부 미지시) |
 | cycle466 — 돌파 후보 화면 「미구독」·「구독 중 시세 없음」 분리 | ✅ 구현·검증(사용자 지시). 프론트만. 10-16 15:31 커밋에 포함 |
 | 주간 자문 10-15 결정 (사용자 2026-10-16) | **A kojiro 비중** = 비용 하락(우대 계좌)·시장 유닛을 반영한 재백테스트 완료(`_workspace/domain_consult/2026-10-16_rerun_cost_market_unit.md`, prereg sha `877dad1b…` 15:12 동결) — 우대 전환(10-13)으로 거래당 +0.26%p 평행 이동, 부호 바뀐 전략 0 · 주식 4전략 모두 음의 기대값 · 시장 유닛은 kojiro·VCP 계좌 성과를 올림 · 판정 kojiro 0.25(효과 거래당 +0.01~0.02%p). ✅ 사용자 「판정대로」 → 10-16 15:28 `PUT /api/strategies/weights {kojiro:0.25}` 적용(kojiro 예산 957,072원). **B D2 kojiro 손절선** = 그대로. 시장 배수가 올라가면 주간 리스크 검토(risk-review)에서 재검토. **C D3 BFB 유지 1분** = 보류 — BFB `breakout_volume_mult` 1.5 사전 약속 실험(첫 10건) 판정이 끝난 뒤 다시 본다(두 실험이 섞이지 않게). **D D4** `llm_gate_min_score` 70→50(9전략, `unknown` 제외) = ✅ 10-16 15:28 적용(9전략 50, `unknown` 70 그대로). **E D5** = cycle467(프롬프트 「결측 3개면 50 상한」 제거 + 스윙 조회 4전략 빈 값 안내) 구현·검증, main 작업 트리로 옮겨 10-16 15:31 커밋에 포함(사용자 「같이 올려줘」). **F D7** ndx2x 권고(`5af97199…`) 명시 기각 = ✅ 10-16 15:28 `rejected`. **G D8** = 자동 자문은 Claude 주간 루틴 참고용으로 유지 + 「OpenAI 자문 없이 Claude 주간 자문만」 안 추가 자문 완료(`_workspace/domain_consult/2026-10-16_drop_openai_weekly_advisory.md`) — 권고 = 지금은 현행 유지, 끄기로 하면 「OpenAI 호출만 끄고 파라미터 스냅샷 INSERT·pending 만료·루틴 프롬프트 한 줄」 세 조건 동반. 🔴 끄는 전용 스위치 없음, `pending` 만료는 생성 함수 안에서만 돌아 10-15 행은 다음 목요일까지 「적용」 가능(10-15 문서 §3.9 「다음 영업일 자동 만료」 는 틀림) · 부수 결함 = 운영 현황 「AI 매매자문」 행(`market_ops.py:595`)이 요일을 몰라 주 4일 `not_fired` 로 보인다 |
+| 분석 5건(사용자 지시) | ✅ 재백테스트 · 시장배수 위험 회피(있음 — 긴 약세장엔 강, 빠른 급락엔 약) · 개선안 9개(채택 0, 20일 안 V5b 기각) · 데이터 기반 도출(현행 60/20 유지) · 청산 규칙 점검(5전략 현행 유지, donchian 이 급락 방어 가장 약함) — 문서 커밋 `786022f8` |
+| 장운영 체크 점검(KIS 코드표·거래소 규칙 대조) | 알파벳 경로(AF8→AF1→BF9) 일치. 의심 = 숫자 `182` 를 발동으로 분류(재개 신호일 가능성) · `175`/`185` 해제가 10분 단일가 전일 가능성 · 동시호가 창이 08:25/08:30 시작(지금 08:20). ✅ 사용자 「(가)」 → **cycle468** 코드 변화 관측 기록 `[market_status_code_trace]`(판정 무변경). ⏳ 다음 CB·임시정지(164) 때 순서 확정 → 해석 수정 여부 결정. 동시호가 창(`session.py` 8영역)은 별도 승인 |
 
-### 배포 다음 거래일(D+1) 확인 — cycle464·465
+### 배포 다음 거래일(D+1 = 10-19 월) 확인 — cycle464·465·467·468
 - `[market_status_rep_subscribed]` INFO **3건**(H0STMKO0/005930 · H0STMKO0/196170 · H0UNMKO0/196170). 실패 WARNING 이 있으면 원인 확인.
 - 정상일에 H0STMKO0 대표 구독에서 장운영 코드 `110`·`112`·`121`·`129` 가 실제로 오는가(안 오면 KRX 채널 숫자 코드 경로가 죽은 것 — 통합 채널 `AF8`/`AF1`/`BF9` 만 남는다). `[market_status_unknown_code]` 로 처음 보는 코드 목록도 본다.
 - 정상일에 `AF8`·`AF1`·`BF9` 가 나오면 안 된다(나오면 `market_cb_state._UN_CODES_DRIVE_STATE` 를 False 로 내릴 대상). EC2 로그 V0 실측에서는 10-15 에만 나왔다.
 - ndx2x — `overseas_index_daily` NDX 10-12~10-15 행 적재 · `[ndx2x_ingest_outcome] outcome=new_bar` · `[ndx2x_data_stale]` 소멸.
 - ndx2x — 기존 397행을 Yahoo `^NDX` 와 1회 대조(종가 어긋남 여부).
+- AI 매수평가 새 프롬프트(cycle467)·문턱 50 — 시장 배수가 0 이 아닌 날 점수 분포·통과 건수.
+- cycle468 — 정상일 `[market_status_code_trace]` 가 INFO 로만, 출처 `ST`·`UN` 각각 몇 줄인지(하루 200 상한에 닿지 않는지).
 
 ### 결정이 필요한 것 (사용자)
 1. ~~돈키언 유니버스 확대~~ — ✅ 10-15 결정 = 유지(위 표 ①).
 2. ~~BFB·VCP 래치 한계~~ — ✅ cycle460(위 표 ②).
-3. ~~⑦-F1~~ — ✅ cycle461 안 U(위 표, 배포 10-16 밤).
+3. ~~⑦-F1~~ — ✅ cycle461 안 U(위 표, 10-16 15:48 배포에 포함).
 4. ~~로그 이중 기록~~ — ✅ cycle458(위 표 ④).
 5. **21:30 정산 「외부입출금」 추정식** — D+2 결제 미반영으로 매 거래일 0 아님(아래 10-13 절 ⑤). `scheduler.py` 승인. ⏳ **미착수** — 이번에는 화면 표시(cycle459 D+2 예수금)만.
 6. ~~10-13 `daily_performance` 행~~ — ✅ 10-13·10-14 보정 완료(위 표 ⑥).

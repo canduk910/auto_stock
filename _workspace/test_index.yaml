@@ -1073,6 +1073,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
       - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -2498,6 +2499,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -3933,6 +3935,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -5358,6 +5361,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
       - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -6786,6 +6790,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -8216,6 +8221,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -9647,6 +9653,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -11077,6 +11084,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -12506,6 +12514,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -13937,6 +13946,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -14319,6 +14329,7 @@ backend:
       - tests/unit/engine/test_cycle214_h0unmko0_pool.py
       - tests/unit/engine/test_cycle221_market_op_off_main.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_market_op_subscribe_import_regression.py
       - tests/unit/realtime/test_cycle359_mkop_field_offset.py
       - tests/unit/realtime/test_cycle368_market_op_decisions.py
@@ -16797,6 +16808,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -18226,6 +18238,7 @@ backend:
       - tests/unit/engine/test_cycle461b_unknown_holding_review.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -19732,6 +19745,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -21161,6 +21175,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -22611,6 +22626,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -24042,6 +24058,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -25481,6 +25498,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -26900,6 +26918,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -28334,6 +28353,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -29761,6 +29781,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -31193,6 +31214,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -32621,6 +32643,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -34051,6 +34074,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -35573,6 +35597,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -37002,6 +37027,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -38431,6 +38457,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -39863,6 +39890,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -41291,6 +41319,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -42721,6 +42750,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -44151,6 +44181,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -45581,6 +45612,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -47011,6 +47043,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -48444,6 +48477,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -49872,6 +49906,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -51307,6 +51342,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -52732,6 +52768,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -54162,6 +54199,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -55593,6 +55631,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -57021,6 +57060,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -58455,6 +58495,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -59888,6 +59929,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -61316,6 +61358,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -62749,6 +62792,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -64250,6 +64294,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -65681,6 +65726,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -67111,6 +67157,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -68542,6 +68589,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -70046,6 +70094,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -71477,6 +71526,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -72906,6 +72956,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -74336,6 +74387,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -75766,6 +75818,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -77196,6 +77249,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -78719,6 +78773,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -80155,6 +80210,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -81580,6 +81636,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -83011,6 +83068,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -84439,6 +84497,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -85870,6 +85929,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -87301,6 +87361,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -88733,6 +88794,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -90163,6 +90225,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -91590,6 +91653,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -93095,6 +93159,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -94525,6 +94590,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -95957,6 +96023,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -97385,6 +97452,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -98815,6 +98883,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -100327,6 +100396,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -101755,6 +101825,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -102200,6 +102271,7 @@ backend:
   src/engine/market_cb_state.py:
     direct_tests:
       - tests/unit/engine/test_cycle465_market_cb_state.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -104686,6 +104758,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -105063,6 +105136,7 @@ backend:
       - tests/unit/engine/test_cycle186_market_op_cb_heuristic.py
       - tests/unit/engine/test_cycle369_status_sell_pass.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/realtime/test_cycle149_handler_market_op.py
       - tests/unit/realtime/test_cycle359_mkop_field_offset.py
       - tests/unit/realtime/test_cycle368_market_op_decisions.py
@@ -107557,6 +107631,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -109050,6 +109125,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -110482,6 +110558,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -111910,6 +111987,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -113340,6 +113418,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -114770,6 +114849,7 @@ backend:
       - tests/unit/engine/test_cycle461b_unknown_holding_review.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -116200,6 +116280,7 @@ backend:
       - tests/unit/engine/test_cycle461b_unknown_holding_review.py
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -117630,6 +117711,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -119060,6 +119142,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -120490,6 +120573,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -121919,6 +122003,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -123456,6 +123541,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -124977,6 +125063,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -126585,6 +126672,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -128016,6 +128104,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -129446,6 +129535,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -130885,6 +130975,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -132308,6 +132399,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -133739,6 +133831,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -135164,6 +135257,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -136597,6 +136691,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -138027,6 +138122,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -139529,6 +139625,7 @@ backend:
       - tests/unit/engine/test_cycle461b_unknown_holding_review.py
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -140973,6 +141070,7 @@ backend:
       - tests/unit/engine/test_cycle455_market_unit_by_market.py
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle61_phase2A2_dataclass_completeness.py
       - tests/unit/engine/test_cycle61_phase2A2_dependency_direction.py
@@ -142317,6 +142415,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -143747,6 +143846,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -145175,6 +145275,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -146604,6 +146705,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -148036,6 +148138,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -149486,6 +149589,7 @@ backend:
       - tests/unit/engine/test_cycle461b_unknown_holding_review.py
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -150895,6 +150999,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -152344,6 +152449,7 @@ backend:
       - tests/unit/engine/test_cycle461b_unknown_holding_review.py
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -153756,6 +153862,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -155184,6 +155291,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -156614,6 +156722,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -158045,6 +158154,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -159475,6 +159585,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -160905,6 +161016,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -162339,6 +162451,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -163799,6 +163912,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
       - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -165233,6 +165347,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
       - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -166657,6 +166772,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -168094,6 +168210,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -169518,6 +169635,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -170948,6 +171066,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -172376,6 +172495,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -173806,6 +173926,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -175240,6 +175361,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
       - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -176671,6 +176793,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -178133,6 +178256,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle48_stale_tracker_state.py
       - tests/unit/engine/test_cycle60_phase2A1_stale_manager.py
@@ -179526,6 +179650,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -180958,6 +181083,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -182408,6 +182534,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -183817,6 +183944,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -185246,6 +185374,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -186769,6 +186898,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -188200,6 +188330,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -189628,6 +189759,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -191061,6 +191193,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -192488,6 +192621,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -193918,6 +194052,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -195347,6 +195482,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -196779,6 +196915,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -198208,6 +198345,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -199638,6 +199776,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -201075,6 +201214,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -202502,6 +202642,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -204004,6 +204145,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -205434,6 +205576,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -206868,6 +207011,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -208303,6 +208447,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -209804,6 +209949,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -211236,6 +211382,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -212741,6 +212888,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -214372,6 +214520,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -215876,6 +216025,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -217336,6 +217486,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
       - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -218748,6 +218899,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -220195,6 +220347,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
       - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -221624,6 +221777,7 @@ backend:
       - tests/unit/engine/test_cycle461b_unknown_holding_review.py
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
       - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -225280,6 +225434,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -226707,6 +226862,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -228140,6 +228296,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -229567,6 +229724,7 @@ backend:
       - tests/unit/engine/test_cycle464_ndx2x_ingest_incremental.py
       - tests/unit/engine/test_cycle465_market_cb_state.py
       - tests/unit/engine/test_cycle467_llm_prompt_missing_cap.py
+      - tests/unit/engine/test_cycle468_market_status_code_trace.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -234788,10 +234946,10 @@ frontend:
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-16T06:28:28.988Z'
+generated_at: '2026-10-16T12:56:25.831Z'
 stats:
   backend_modules: 213
-  backend_tests: 1411
+  backend_tests: 1412
   frontend_modules: 173
   frontend_tests: 183
   unmapped_modules:

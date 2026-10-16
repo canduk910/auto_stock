@@ -231,6 +231,11 @@
   - 대표 종목의 VI·거래정지·종목상태는 판정에 쓰지 않는다(시장 코드 집합만 본다). 모르는 코드 = `[market_status_unknown_code]` INFO 코드당 1회/일(`_KNOWN_NORMAL` 정상 장운영 코드·`AB1`·`F`/`P` 계열은 조용). KST 날짜가 바뀌면 스스로 리셋, 21:30 `reset_market_op_state()` 가 동행 리셋.
   - **소비** — `is_low_resub_suppressed(now)` = 어느 시장이든 `CB_ACTIVE`·`HALT_164`·`RELEASED` ∧ `LOW_SKIP_START`(09:00) ≤ 시각 < `LOW_SKIP_END`(15:30), never-raise(예외 = False). 소비처 = `stale_watcher_core` 두 경로(120초 `[stale_skip_market_cb]` · 5분 `[stale_skip_market_cb_priority]`) — LOW 만 멈추고 HIGH(보유·익일청산)는 그대로 재구독한다. `get_market_cb_summary()` = `markets`·`sidecar`·`low_skip_active`·`events_today`(최근 10건) → `get_market_op_state_summary()["circuit_breaker"]["confirmed"]`.
   - 마커(전부 WARNING, CRITICAL·경고등 명부 아님) = `[market_cb_active] market= stage= code= source=` · `[market_cb_release] … reason=code|ttl` · `[market_halt_164] transition=on|off|ttl` · `[market_sidecar] transition=on|off|ttl` · `[market_cb_unexpected]`(09:00~15:30 밖 발동, 또는 14:50 이후 1·2단계). 회귀 = `tests/unit/engine/test_cycle465_market_cb_state.py`(conftest autouse `_reset_market_cb_state`).
+  - **코드 변화 관측 기록(cycle468 — 사용자 결정 2026-10-16 「(가) 관찰 기록만 먼저」, 판정 무관)** — 왜: 숫자 코드 `182`(KIS 코드표 명칭 「서킷브레이크 장중동시마감」)는 재개 신호일 수 있는데 진입으로 분류돼 있다. `175`·`185`(해제)는 거래소 일반 규칙(CB 해제 뒤 10분 단일가)상 단일가 구간의 시작일 수 있다. 다음 CB·임시정지 때 실제 순서를 보고 확정한다. **확정 전에는 진입·해제 코드 집합을 바꾸지 않는다.**
+    - 기록 = 대표 종목 코드가 (시장, 출처 `ST`|`UN`)마다 직전과 달라질 때 `[market_status_code_trace] market= source= code= prev= ts= state=` 1줄(`state` = 처리 뒤 상태). 그날 첫 프레임도 남긴다(`prev=-`).
+    - 등급 = 정상 코드(`_KNOWN_NORMAL`·`F`/`P` 계열)끼리의 변화는 INFO(보관 2일), 한쪽이라도 정상 밖이면 WARNING(보관 30일).
+    - 상한 = (시장, 출처)당 하루 `TRACE_DAILY_MAX`(200)줄. 넘으면 WARNING `cap_reached=1 limit=` 1줄 뒤 조용하다. 카운터는 KST 날짜 리셋을 따른다.
+    - 기록 예외는 DEBUG 로 남기고 흡수한다(상태 판정에 닿지 않는다). 회귀 = `tests/unit/engine/test_cycle468_market_status_code_trace.py` · `test_cycle465_market_cb_state.py::test_t5b_normal_codes_are_silent`(정상 코드 = 상태·경보 마커 0, 코드 변화 기록만 INFO).
 
 ### 계좌 리스크 · 관측기
 

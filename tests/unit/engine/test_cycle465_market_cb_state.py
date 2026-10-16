@@ -124,10 +124,14 @@ def test_t5_non_rep_ticker_and_stock_level_events_ignored(caplog):
 
 
 def test_t5b_normal_codes_are_silent(caplog):
+    """정상 코드는 상태·경보 마커를 남기지 않는다. 코드 변화 관측 기록(cycle468)은 INFO 로만."""
     with caplog.at_level(logging.INFO, logger="src.engine.market_cb_state"):
         for code in ("110", "112", "121", "129", "F06", "P11"):
             _frame("005930", code, _t(9, 0))
-    assert not [r for r in caplog.records if r.name == "src.engine.market_cb_state"]
+    recs = [r for r in caplog.records if r.name == "src.engine.market_cb_state"]
+    assert recs and all(r.getMessage().startswith("[market_status_code_trace]") for r in recs)
+    assert all(r.levelno == logging.INFO for r in recs)
+    assert mcb.get_market_cb_summary(_t(9, 1))["events_today"] == []
 
 
 def test_t6_window_outside_0900_1530_does_not_suppress(caplog):

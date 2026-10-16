@@ -65,6 +65,8 @@ _LATE_CB_CUTOFF = time(14, 50)
 LOW_SKIP_START = time(9, 0)
 LOW_SKIP_END = time(15, 30)
 _EVENTS_MAX = 10
+#: 코드 변화 관측 기록(cycle468)의 (시장, 출처)당 하루 상한.
+TRACE_DAILY_MAX = 200
 
 _CB = "CB_ACTIVE"
 _HALT = "HALT_164"
@@ -85,6 +87,8 @@ _markets: dict[str, dict] = {m: _fresh_market() for m in MARKETS}
 _sidecar: dict[str, dict | None] = {m: None for m in MARKETS}
 _events: list[dict] = []
 _unknown_logged: set[str] = set()
+_trace_prev: dict[tuple[str, str], str] = {}
+_trace_count: dict[tuple[str, str], int] = {}
 
 
 def reset_market_cb_state() -> None:
@@ -96,6 +100,8 @@ def reset_market_cb_state() -> None:
         _sidecar[m] = None
     _events.clear()
     _unknown_logged.clear()
+    _trace_prev.clear()
+    _trace_count.clear()
 
 
 def _now() -> datetime:
@@ -112,6 +118,38 @@ def _roll_day(now: datetime) -> None:
 
 def _source(code: str) -> str:
     return "UN" if code[:1].isalpha() else "ST"
+
+
+def _is_quiet_code(code: str) -> bool:
+    return code in _KNOWN_NORMAL or code[:1] in ("F", "P")
+
+
+def _trace_code(market: str, code: str, now: datetime) -> None:
+    """대표 종목 코드가 바뀔 때마다 한 줄(cycle468 — 판정 로직 무관, 관측 전용).
+
+    182·175·185 의 실제 뜻과 도착 순서를 다음 CB·임시정지 때 확정하려고 남긴다.
+    정상 코드끼리의 변화 = INFO, 한쪽이라도 정상 밖 코드 = WARNING(30일 보관).
+    """
+    key = (market, _source(code))
+    prev = _trace_prev.get(key)
+    if prev == code:
+        return
+    _trace_prev[key] = code
+    n = _trace_count.get(key, 0)
+    if n > TRACE_DAILY_MAX:
+        return
+    _trace_count[key] = n + 1
+    if n == TRACE_DAILY_MAX:
+        logger.warning(
+            "[market_status_code_trace] market=%s source=%s cap_reached=1 limit=%d",
+            market, key[1], TRACE_DAILY_MAX,
+        )
+        return
+    quiet = _is_quiet_code(code) and (prev is None or _is_quiet_code(prev))
+    (logger.info if quiet else logger.warning)(
+        "[market_status_code_trace] market=%s source=%s code=%s prev=%s ts=%s state=%s",
+        market, key[1], code, prev or "-", now.strftime("%H:%M:%S"), _markets[market]["state"],
+    )
 
 
 def _record(kind: str, market: str, now: datetime, **extra) -> None:
@@ -233,6 +271,11 @@ def on_event(event) -> None:
     elif code not in _unknown_logged:
         _unknown_logged.add(code)
         logger.info("[market_status_unknown_code] market=%s code=%s", market, code)
+
+    try:
+        _trace_code(market, code, now)
+    except Exception:
+        logger.debug("[market_status_code_trace] 기록 실패", exc_info=True)
 
 
 def suppressing_markets(now: datetime | None = None) -> list[str]:
