@@ -12,6 +12,7 @@ from datetime import date, datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, ClassVar, NamedTuple
 
+import src.engine.indicators as _ind  # 지표 계산 정본(cycle471, 과제 B)
 from src.engine.daily_emit_cap import KstDailyEmitCap
 from src.engine.observer_trace import trace_observer_failure
 from src.engine.turtle_sizing import compute_unit_qty
@@ -2104,17 +2105,7 @@ class StrategyBase(ABC):
         다르다. kojiro 는 self._atr 을 쓰지 않는다(ATR 이원화 봉인, 회귀 가드
         test_refactor_a5a6_atr_base.py). donchian/VCP/BFB 공유 (refactor-review A6).
         """
-        if len(highs) <= period or len(lows) <= period or len(closes) <= period + 1:
-            return 0.0
-        trs = []
-        for i in range(period):
-            tr = max(
-                highs[i] - lows[i],
-                abs(highs[i] - closes[i + 1]),
-                abs(lows[i] - closes[i + 1]),
-            )
-            trs.append(tr)
-        return sum(trs) / period
+        return _ind.atr_sma_latest_first(highs, lows, closes, period)
 
     def _rederive_entry_atr(self, ticker: str, pos, candles: list, atr_period: int) -> None:
         """재시작으로 소실된 `_entry_atr` 을 **매수일 이전 봉만으로** 재도출 (loosen 차단).

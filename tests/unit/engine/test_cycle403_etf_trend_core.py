@@ -422,7 +422,7 @@ def test_leaf_imports_stdlib_only():
             continue
         for m in mods:
             top = m.split(".")[0]
-            if top == "__future__":
+            if top == "__future__" or m == "src.engine.indicators":  # cycle471 — 순수 지표 정본 leaf
                 continue
             if top not in sys.stdlib_module_names or top == "logging":
                 bad.append(f"{node.lineno}: {m}")

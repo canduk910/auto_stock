@@ -383,6 +383,23 @@ def _extract_5xx_detail(resp: httpx.Response) -> str:
     return mask_account_number(detail)[:200]
 
 
+def _warn_quote_http_status(
+    status: int, attempt: int, max_retries: int, path: str, label: str, *, detail: str = "",
+) -> None:
+    """cycle473 — 보조 시세 풀 HTTP 오류 WARNING. `detail`(`_extract_5xx_detail`)이 있으면
+    한 줄 끝에 붙인다(메인 `_warn_http_status` 와 같은 규약). 빈 문자열이면 기존 글자와 같다."""
+    if detail:
+        logger.warning(
+            "[quote_pool] HTTP %s (attempt %d/%d): %s label=%s detail=%s",
+            status, attempt, max_retries, path, label, detail,
+        )
+        return
+    logger.warning(
+        "[quote_pool] HTTP %s (attempt %d/%d): %s label=%s",
+        status, attempt, max_retries, path, label,
+    )
+
+
 def _warn_http_status(
     status: int, attempt: int, max_retries: int, path: str, *, detail: str = "",
 ) -> None:
@@ -1030,9 +1047,9 @@ async def _request_via_quote_pool(
                             exc_info=True,
                         )
                 if should_emit_warning:
-                    logger.warning(
-                        "[quote_pool] HTTP %s (attempt %d/%d): %s label=%s",
+                    _warn_quote_http_status(
                         status, attempt, MAX_RETRIES, path, actual_label,
+                        detail=_extract_5xx_detail(e.response) if 500 <= status < 600 else "",
                     )
                 if attempt == MAX_RETRIES:
                     if 500 <= status < 600:

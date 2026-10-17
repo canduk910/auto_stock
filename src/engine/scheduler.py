@@ -3559,7 +3559,7 @@ class TradingScheduler:
         """일일 정산: 잔고 조회 후 전략별 + 합산 daily_performance 기록.
 
         새 수익률 모델:
-        - 외부 입출금 자동 추정: (Δ예수금) - (매도총액 - 매수총액)
+        - 외부 입금 추정: D+2 기준 증가분만(`settlement_cashflow`, cycle469)
         - 일별 수익률(실현손익 기준) = daily_realized_pnl / 어제 자산
         - 누적 수익률 = TWR 복리: (1 + prev_cum) × (1 + daily_rate) - 1
         """
@@ -3581,19 +3581,15 @@ class TradingScheduler:
             # 전체('total') 정산
             prev_total = await get_latest_performance(strategy="total")
             prev_total_asset = float(prev_total["total_asset"]) if prev_total else float(summary.net_asset)
-            prev_deposit = float(prev_total["deposit"]) if prev_total else float(summary.deposit)
             prev_cum_rate = float(prev_total["cumulative_return_rate"]) if prev_total else 0.0
 
             # 당일 체결 raw (전 전략 합산)
             today_trades_all = await get_today_trades_for_settlement()
-            buy_total = sum(float(t.get("price", 0)) * int(t.get("quantity", 0))
-                            for t in today_trades_all if t.get("trade_type") == "BUY")
-            sell_total = sum(float(t.get("price", 0)) * int(t.get("quantity", 0))
-                             for t in today_trades_all if t.get("trade_type") == "SELL")
-            net_trade_cashflow = sell_total - buy_total  # 매매로 인한 예수금 증가분
 
-            # 외부 입출금 추정 (Δ예수금 - 매매 cashflow)
-            net_ext_cashflow = (float(summary.deposit) - prev_deposit) - net_trade_cashflow
+            # 외부 입금 추정 — D+2 기준 증가분만(cycle469, 사용자 결정 2026-10-16). leaf 위임.
+            from src.engine.settlement_cashflow import estimate_external_inflow
+            net_ext_cashflow = (await estimate_external_inflow(
+                today=today, deposit=float(summary.deposit), prev_row=prev_total)).recognized
 
             # 당일 실현손익 합 (매도 거래 profit_loss)
             daily_realized_pnl_total = sum(

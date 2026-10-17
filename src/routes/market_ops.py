@@ -213,6 +213,26 @@ def _iso_date(value: "date | None") -> "str | None":
     return value.isoformat() if value is not None else None
 
 
+def _recommendation_weekly_status(status: str, *, advisory_day) -> str:
+    """AI 자문은 주간 자문일(기본 목요일, cycle445)에만 돈다 — 그 밖의 날 증거 없는 행은 `skipped_weekly`.
+
+    `advisory_day` 가 `None`(판정 실패)이면 그대로 둔다. 증거가 있는 상태는 이긴다(cycle472).
+    """
+    if advisory_day is False and status in ("not_fired", "scheduled"):
+        return "skipped_weekly"
+    return status
+
+
+async def _is_weekly_advisory_today(now_kst) -> bool | None:
+    """`weekly_advisory.should_run_weekly_advisory` 위임 — 예외 = `None`(모름)."""
+    try:
+        from src.engine import weekly_advisory
+        return bool(await weekly_advisory.should_run_weekly_advisory(now_kst))
+    except Exception:
+        logger.debug("[market_ops] 주간 자문일 판정 실패", exc_info=True)
+        return None
+
+
 def _finalize_status(status: str, trading_day) -> str:
     """휴장 확정 → **아직 증거가 없는** 상태(`not_fired`/`scheduled`)만 `holiday` 로.
     확인 불가(`None`) + `not_fired` → `unknown`.
@@ -598,11 +618,13 @@ async def read_market_ops():
         _artifact_status(count=rec_rows, now_t=now_t, scheduled=TIME_RECOMMENDATION),
         errored=_artifacts_failed,
     )
+    status = _recommendation_weekly_status(status, advisory_day=await _is_weekly_advisory_today(as_of))
     tasks.append(_task_row(
         "recommendation", "AI 매매자문",
         TIME_RECOMMENDATION, _finalize_status(status, trading_day),
         last_success_at=combined.get("rec_last_at"),
         evidence={"recommendation_rows_today": rec_rows},
+        note="주간 자문일(기본 목요일)에만 돈다 — 오늘은 실행일이 아니다" if status == "skipped_weekly" else None,
     ))
 
     # 8. 전체 유니버스 적재 — TIME_FULL_UNIVERSE_LOAD. 마커는 읽지 않는다, progress 만

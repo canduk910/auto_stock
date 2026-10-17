@@ -1,0 +1,22 @@
+[bfb    74s] ready
+[bfb    75s] repro-m kospi True
+[bfb    75s] repro-m kosdaq True
+[bfb    80s] repro-book off T 0.0
+[bfb    80s] off T -0.3257 -0.99827
+[bfb    83s] repro-book off V 0.0
+[bfb    83s] off V -0.48612 -0.99654
+[bfb    85s] repro-book off H 0.0
+[bfb    85s] off H -0.46779 -0.97583
+[bfb    89s] repro-book V0 T 0.0
+[bfb    89s] V0 T -0.24564 -0.99047
+[bfb    91s] repro-book V0 V 0.0
+[bfb    91s] V0 V -0.39885 -0.98548
+[bfb    93s] repro-book V0 H 0.0
+[bfb    93s] V0 H -0.33676 -0.9136
+[bfb    96s] S2 T -0.30903 -0.99785
+[bfb    99s] S2 V -0.48969 -0.99677
+[bfb   101s] S2 H -0.47715 -0.98004
+[bfb   149s] S3 T -0.31113 -0.99785
+[bfb   152s] S3 V -0.50788 -0.99707
+[bfb   154s] S3 H -0.46212 -0.97799
+[bfb   199s] done /private/tmp/claude-501/-Users-koscom-Projects-auto-stock/41ef15a3-9e33-4d1b-9131-dedfd7533390/scratchpad/ms/bfb.pkl

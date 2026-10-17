@@ -34,6 +34,7 @@ import logging
 from datetime import date, datetime, time, timedelta, timezone
 
 from src.api.condition import add_business_days
+import src.engine.indicators as _ind  # 지표 계산 정본(cycle471, 과제 B)
 from src.engine.daily_emit_cap import KstDailyEmitCap
 from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
 
@@ -964,14 +965,9 @@ class VcpBreakoutStrategy(StrategyBase):
 
     @staticmethod
     def _ema(values: list[int], period: int) -> float:
-        """EMA — donchian 컨벤션 동일."""
-        if not values:
-            return 0.0
-        k = 2 / (period + 1)
-        ema = float(values[0])
-        for v in values[1:]:
-            ema = v * k + ema * (1 - k)
-        return ema
+        """EMA(첫 값 시작) — 계산 정본 `indicators.ema_last(seed="first")`. 빈 입력 = 0.0."""
+        out = _ind.ema_last(values, period, seed="first")
+        return out if out is not None else 0.0
 
     async def _scan_universe(self) -> list[str]:
         """stock_master DB 기반 확대 유니버스 (2026-08-08 — kojiro 동일 필터).

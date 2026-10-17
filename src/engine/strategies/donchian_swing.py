@@ -20,6 +20,7 @@ import logging
 import math
 from datetime import date, datetime, time, timezone, timedelta
 
+import src.engine.indicators as _ind  # 지표 계산 정본(cycle471, 과제 B)
 from src.engine.daily_emit_cap import KstDailyEmitCap
 from src.engine.observer_trace import trace_observer_failure
 from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
@@ -608,15 +609,9 @@ class DonchianSwingStrategy(StrategyBase):
 
     @staticmethod
     def _ema(values: list[int], period: int) -> float:
-        """단순화된 EMA — 전체 평균을 계산하여 SMA에 가까움. 추세 방향 판정용."""
-        if not values:
-            return 0.0
-        # 진정한 EMA 가중치
-        k = 2 / (period + 1)
-        ema = float(values[0])
-        for v in values[1:]:
-            ema = v * k + ema * (1 - k)
-        return ema
+        """EMA(첫 값 시작) — 계산 정본 `indicators.ema_last(seed="first")`. 빈 입력 = 0.0."""
+        out = _ind.ema_last(values, period, seed="first")
+        return out if out is not None else 0.0
 
     async def _scan_universe(self) -> list[str]:
         """stock_master DB 기반으로 시총·거래대금 조건 종목을 스캔한다 (사이클 119).

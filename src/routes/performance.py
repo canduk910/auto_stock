@@ -176,7 +176,7 @@ async def daily(days: int = 30, strategy: str = "total"):
     - daily_profit_rate: 일별 실현손익 기반 수익률(%)
     - cumulative_return_rate: TWR 복리 누적 수익률(%)
     - daily_realized_pnl: 당일 실현손익
-    - net_external_cashflow: 외부 입출금 추정 (입금 +, 출금 −)
+    - net_external_cashflow: 외부 입금 추정 — D+2 기준 증가분만(0 이상, cycle469 `settlement_cashflow`)
     - total_asset: 정산 시점 순자산
     - deposit: 정산 시점 예수금
     - daily_fee·daily_tax·daily_net_pnl·net_daily_profit_rate·net_cumulative_return_rate·

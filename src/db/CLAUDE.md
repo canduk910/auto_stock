@@ -142,8 +142,8 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 
 ## daily_performance.py — 일일 실적
 
-- **`upsert_daily_performance(target_date, total_asset, daily_profit_rate, strategy="total", *, net_external_cashflow=0.0, daily_realized_pnl=0.0, deposit=0.0, cumulative_return_rate=0.0)`**: **21:30 정산**(`scheduler.TIME_SETTLEMENT`) 기록, `target_date` 는 `to_date()`. `daily_realized_pnl`/`daily_profit_rate` 는 **실현손익(SELL) 기준** — 매도 0건이면 둘 다 0 이 정상(평가손익은 `BalanceTable.eval_profit_loss`). 컬럼 = total_asset / daily_profit_rate / daily_realized_pnl / net_external_cashflow / deposit / cumulative_return_rate(TWR 복리, 실현손익 누적).
-- `get_performance(days=30, strategy="total")`: 최근 N일(오름차순) · `get_latest_performance(strategy="total")`: 최근 영업일 1행(TWR 누적·Δ예수금 baseline)
+- **`upsert_daily_performance(target_date, total_asset, daily_profit_rate, strategy="total", *, net_external_cashflow=0.0, daily_realized_pnl=0.0, deposit=0.0, cumulative_return_rate=0.0)`**: **21:30 정산**(`scheduler.TIME_SETTLEMENT`) 기록, `target_date` 는 `to_date()`. `daily_realized_pnl`/`daily_profit_rate` 는 **실현손익(SELL) 기준** — 매도 0건이면 둘 다 0 이 정상(평가손익은 `BalanceTable.eval_profit_loss`). 컬럼 = total_asset / daily_profit_rate / daily_realized_pnl / net_external_cashflow / deposit / cumulative_return_rate(TWR 복리, 실현손익 누적). `net_external_cashflow` 는 외부 **입금** 추정값이다 — 21:30 정산이 `src/engine/settlement_cashflow.py`(D+2 결제 기준, 1만원 이상 증가분만 인지 · 출금은 인지하지 않는다, cycle469)로 계산해 넣는다. 기록·표시 전용이고 TWR·수익률 계산은 이 칸을 읽지 않는다.
+- `get_performance(days=30, strategy="total")`: 최근 N일(오름차순) · `get_latest_performance(strategy="total")`: 최근 영업일 1행(TWR 누적 · 외부 입금 추정의 직전 정산 행 — 그 날짜·예수금)
 - `recompute_from_trades()`: PG 함수 `recompute_daily_performance()` — `trade_history` 기반 일괄 재계산(멱등), `_settle()` 끝에서 자동 호출. `daily_profit_rate` 분모 = **가장 가까운 0이 아닌 이전 영업일 `total_asset`**(correlated subquery).
 
 ## system_logs.py — 시스템 로그

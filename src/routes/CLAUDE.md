@@ -283,6 +283,7 @@ body `{ticker, quantity}`, 시장가. 보유 전략이 있으면 그 전략 id·
 - **21:30 log_analysis** — cycle445 이후 "OpenAI 실패 placeholder" 상태가 없다(OpenAI 를 호출하지 않는다). `_log_analysis_status`
   는 `_is_complete_report` 하나만 보고 `done`/`scheduled`/`not_fired` 로만 나뉜다.
 - 소스가 개별 실패하면(`evidence_errors`) 그 소스에만 의존하는 행은 `unknown`(`scheduled` 는 시계 판정이라 보존).
+- **20:00 AI 매매자문 행(cycle472)** — 자문은 주간 자문일(기본 목요일)에만 돈다. 그래서 자문일이 아닌 날 증거가 없는 상태(`not_fired`·`scheduled`)는 `skipped_weekly` 로 바꾸고 note 「주간 자문일(기본 목요일)에만 돈다 — 오늘은 실행일이 아니다」 를 붙인다. 판정 = `_is_weekly_advisory_today(as_of)` → `weekly_advisory.should_run_weekly_advisory` 위임(예외 = `None`). 판정을 모르면(`None`) 상태를 그대로 둔다. 증거가 있는 상태(`done`·`running`·`failed` 등)가 이긴다. 이 변환은 `_finalize_status` **앞**이라 휴장일 판정보다 먼저 정해진다.
 - **16:40 재무 적재 행** — 진행률(`refresh_progress` `"financial"`)은 연간 적재 끝에 `completed` 가 되지만, 마커 `stock_master_financial_load`(`last_success_at`)는 그 뒤 추가 적재(분기 재무·투자의견·추정실적, 최대 19:30)까지 끝나야 찍힌다(cycle453 — `src/engine/CLAUDE.md` 「재무 적재」). 상태는 오늘 진행률이 먼저 정하므로 연간 적재가 끝나면 `done`/`skipped_fresh` 로 보이고, `last_success_at` 만 추가 적재가 끝난 뒤 갱신된다. 추가 적재의 진행·결과는 이 행에 없다 — `[fundamental_extra_load]` 로그로 본다.
 - **evidence-time 게이트** — 마커·진행률 기반 행(`full_universe_load`/`stock_master_daily_load` 등)은 예정 시각보다 2시간 넘게
   이른 "오늘 날짜" 증거(부팅 즉시실행·수동 새로고침)를 성공으로 인정하지 않는다.

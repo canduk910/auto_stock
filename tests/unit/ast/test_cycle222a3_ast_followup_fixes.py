@@ -461,9 +461,9 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "사용자 승인 2026-10-15",
     ),
     "src/engine/scheduler.py": (
-        "fa86803aa32d19bd1076b4d5101eae48127650898d61107d38dcab889c60feed",
-        "cycle465(2026-10-16) 서킷브레이커·사이드카 대표 장운영정보 메인 구독 2줄(market_cb_state 위임), "
-        "사용자 승인 2026-10-16 「장운영정보를 메인계좌에서 웹소켓으로 구독관리」",
+        "770b353d1474e2be89852a7efd5df25e29c1162de54d5222f595187265703c93",
+        "cycle469(2026-10-16) 21:30 정산 외부입출금 = D+2 기준 증가분만(settlement_cashflow 위임), "
+        "사용자 결정 2026-10-16 「D+2 기준보다 늘어날 때만 인지」 · 커밋·배포 승인 2026-10-18",
     ),
     "src/engine/session.py": (
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",

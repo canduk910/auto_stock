@@ -350,6 +350,9 @@ def test_g1_2_features_module_imports_no_src() -> None:
             mods.add(n.module)
         elif isinstance(n, ast.Import):
             mods |= {a.name for a in n.names if a.name.startswith("src")}
+    # cycle471 — 같은 순수 leaf 인 지표 계산 정본 하나만 허용(그 파일은 표준 라이브러리만 — 
+    # `test_cycle471_indicators_golden.py::test_indicators_leaf_is_stdlib_only`).
+    mods.discard("src.engine.indicators")
     assert not mods, f"`llm_features` 가 `src.*` 를 import 한다: {sorted(mods)}"
 
 

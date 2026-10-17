@@ -205,6 +205,7 @@ def test_a03_helpers_are_sync_and_io_free(name):
 _TOP_IMPORTS = {
     "logging", "math", "abc", "dataclasses", "datetime", "enum", "typing",
     "src.engine.daily_emit_cap", "src.engine.observer_trace", "src.engine.turtle_sizing",
+    "src.engine.indicators",  # cycle471 — 지표 계산 정본(표준 라이브러리만 쓰는 순수 leaf)
 }
 
 

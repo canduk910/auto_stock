@@ -747,6 +747,30 @@ def _neutralize_no_feed_probe(
 
 
 # ---------------------------------------------------------------------------
+# cycle470 — 세션 침묵 섀도 관측(`silence_shadow`) 중립화
+#
+# 시장 침묵 기각 사이클마다 대표 종목 REST 거래량을 읽는 seam `_probe_acml_vol` 을 None 스텁으로
+# 바꾸고 모듈 상태(하루 1회 cap · 조회 에피소드)를 테스트 전·후로 비운다. seam 자체를 검증하는
+# 테스트는 `monkeypatch.setattr(ss, "_probe_acml_vol", ...)` 로 값을 넣는다(뒤에 도는 쪽이 이긴다).
+# ---------------------------------------------------------------------------
+@pytest.fixture(autouse=True)
+def _neutralize_silence_shadow(monkeypatch: pytest.MonkeyPatch):
+    try:
+        from src.engine import silence_shadow as _ss_mod
+    except Exception:
+        yield
+        return
+    _ss_mod.reset_for_test()
+
+    async def _unmeasured(*_a: Any, **_k: Any) -> None:
+        return None
+
+    monkeypatch.setattr(_ss_mod, "_probe_acml_vol", _unmeasured, raising=False)
+    yield
+    _ss_mod.reset_for_test()
+
+
+# ---------------------------------------------------------------------------
 # 2026-09-26 C2(테스트 위생) — 실제 외부 네트워크 차단
 #
 # 2026-09-25 08:10 KST CI 첫 시도가 부팅 테스트 2개의 60초 타임아웃으로 취소됐다(재실행 초록).

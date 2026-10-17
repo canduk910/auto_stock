@@ -149,6 +149,23 @@ def _observe_market_wide(now: datetime, *, sessions_n: int, eligible_n: int, sil
         _trace_market_wide_failure(now)
 
 
+def _observe_shadow(now: datetime, rows: list, *, market_wide_now: bool, episode_since) -> None:
+    """cycle470 — 약점 A·B 섀도 관측(`silence_shadow`). 판정·cap·first_seen 무접촉. never-raise."""
+    try:
+        import src.engine.silence_shadow as _ss
+        _ss.observe_ws_shadow(
+            now, rows, market_wide_now=market_wide_now,
+            ratio_threshold=SILENT_INACTIVE_FRESH_RATIO_THRESHOLD,
+            min_subscribed=SILENT_INACTIVE_MIN_SUBSCRIBED, min_eligible=_MARKET_WIDE_MIN_ELIGIBLE,
+        )
+        if market_wide_now:
+            _ss.note_market_wide(now, episode_since)
+        else:
+            _ss.note_market_wide_closed()
+    except Exception:
+        logger.debug("[silent_inactive_shadow] 관측 실패", exc_info=True)
+
+
 def _close_market_wide_episode(now: datetime) -> None:
     """열린 에피소드가 있으면 exited(INFO 1회) 후 상태 해제. never-raise. 없으면 no-op."""
     try:
@@ -243,6 +260,7 @@ def detect_silent_inactive_sessions(scheduler: Any) -> list[str]:
 
     # ── pass 1 (cycle241): 세션별 판정 재료 — 상태 무변경. fresh/ratio/suspect 식은 사이클 29-R2 byte 동일.
     judged: list[tuple[str, int, bool]] = []          # (label, subscribed_count, silent_suspect)
+    shadow_rows: list = []                            # cycle470 관측 전용 — 판정에 쓰지 않는다
     for s in sessions:
         label = s["label"]
         subscribed_count = s["subscribed"]
@@ -267,6 +285,12 @@ def detect_silent_inactive_sessions(scheduler: Any) -> list[str]:
             and subscribed_count >= SILENT_INACTIVE_MIN_SUBSCRIBED
         )
         judged.append((label, subscribed_count, silent_suspect))
+        try:   # cycle470 — WS 프레임만 센 신선도(관측 전용, 약점 B)
+            import src.engine.silence_shadow as _ss
+            shadow_rows.append((label, subscribed_count, fresh_count,
+                                _ss.ws_fresh_count(subscribed_tickers, now, threshold), silent_suspect))
+        except Exception:
+            logger.debug("[silent_inactive_shadow] WS 신선도 계산 실패 label=%s", label, exc_info=True)
 
     # ── cycle241 세션 상대 판정: 판정 가능 세션(sub >= MIN) 이 2개 이상이고 전부 침묵이면 시장 침묵 → 기각.
     eligible_n = sum(1 for (_l, n, _s) in judged if n >= SILENT_INACTIVE_MIN_SUBSCRIBED)
@@ -282,8 +306,10 @@ def detect_silent_inactive_sessions(scheduler: Any) -> list[str]:
         _observe_market_wide(now, sessions_n=len(judged), eligible_n=eligible_n, silent_n=silent_n,
                               connected_n=_count_connected(sessions), reset_n=reset_n,
                               reconnects_n=_count_reconnects(sessions))
+        _observe_shadow(now, shadow_rows, market_wide_now=True, episode_since=_MW_EPISODE["since"])
         return []
     _close_market_wide_episode(now)                    # 열린 에피소드 있으면 exited 1행
+    _observe_shadow(now, shadow_rows, market_wide_now=False, episode_since=None)
 
     # ── pass 2: 사이클 24/29-R2 누적 루프 — 입력만 judged 튜플, 분기·대입·pop 위치 byte 동일.
     for (label, _n, silent_suspect) in judged:

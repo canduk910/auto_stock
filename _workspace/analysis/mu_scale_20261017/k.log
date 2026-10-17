@@ -1,0 +1,24 @@
+/Users/koscom/Projects/auto_stock/tools/replay/audit/panel.py:96: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+  arch_g = {t: g for t, g in arch.groupby("ticker", sort=True)}
+[kojiro    30s] ready
+[kojiro    31s] repro-m kospi True
+[kojiro    31s] repro-m kosdaq True
+[kojiro    35s] repro-book off T 0.0
+[kojiro    35s] off T -0.2488 -0.98994
+[kojiro    37s] repro-book off V 0.0
+[kojiro    37s] off V -0.23095 -0.89778
+[kojiro    38s] repro-book off H 0.0
+[kojiro    38s] off H -0.23923 -0.83868
+[kojiro    41s] repro-book V0 T 0.0
+[kojiro    41s] V0 T -0.13351 -0.91088
+[kojiro    43s] repro-book V0 V 0.0
+[kojiro    43s] V0 V -0.16106 -0.79652
+[kojiro    44s] repro-book V0 H 0.0
+[kojiro    44s] V0 H -0.17545 -0.68802
+[kojiro    47s] S2 T -0.22561 -0.9858
+[kojiro    49s] S2 V -0.27132 -0.93157
+[kojiro    50s] S2 H -0.24773 -0.8248
+[kojiro    90s] S3 T -0.23502 -0.98805
+[kojiro    92s] S3 V -0.25756 -0.92502
+[kojiro    94s] S3 H -0.23509 -0.8295
+[kojiro   133s] done /private/tmp/claude-501/-Users-koscom-Projects-auto-stock/41ef15a3-9e33-4d1b-9131-dedfd7533390/scratchpad/ms/kojiro.pkl

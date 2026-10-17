@@ -32,6 +32,9 @@ _KST = timezone(timedelta(hours=9))
 _observed: dict[str, int] = {}
 # 위 dict 가 담고 있는 값의 저장 날짜(KST, "YYYY-MM-DD"). None = 아직 아무 것도 없음.
 _observed_day: str | None = None
+# cycle470 — WS 체결 프레임(누적거래량 실린 것)을 마지막으로 받은 시각. REST 폴은 이 경로를
+# 타지 않으므로(`risk.on_tick` 이 `acml_vol` 없이 불린다) 「WS 로 실제 프레임이 왔는가」만 뜻한다.
+_observed_at: dict[str, datetime] = {}
 
 
 def _today_kst() -> str:
@@ -51,11 +54,21 @@ def record_acml_vol(ticker: str, value: int) -> None:
     if value < 0:
         return
     global _observed_day
-    today = _today_kst()
+    now = datetime.now(_KST)
+    today = now.strftime("%Y-%m-%d")
     if _observed_day != today:
         _observed_day = today
         _observed.clear()
+        _observed_at.clear()
     _observed[ticker] = value
+    _observed_at[ticker] = now
+
+
+def get_last_ws_frame_at(ticker: str) -> datetime | None:
+    """그 종목 WS 체결 프레임을 마지막으로 받은 KST 시각(오늘만). 없으면 None. (cycle470)"""
+    if _observed_day != _today_kst():
+        return None
+    return _observed_at.get(ticker)
 
 
 def get_observed_acml_vol(ticker: str) -> int | None:
@@ -73,4 +86,5 @@ def reset_for_test() -> None:
     """테스트 격리용 — 전체 초기화."""
     global _observed_day
     _observed.clear()
+    _observed_at.clear()
     _observed_day = None

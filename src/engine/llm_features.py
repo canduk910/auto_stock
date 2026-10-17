@@ -3,7 +3,8 @@
 정본 = `_workspace/domain_consult/cycle274_llm_buy_gate_20260910.md`
 (§3.2 A군 특징 · §4.1/§4.2 프롬프트(재작문 금지, 원문 그대로) · §4.5 프롬프트 위생 · §9 C13)
 
-이 모듈은 **순수 함수만** 담는다 — `src.*` import 0건(테스트 `test_g1_2` 가 강제). 지표
+이 모듈은 **순수 함수만** 담는다 — `src.*` import 는 같은 순수 leaf `src.engine.indicators`
+(지표 계산 정본, cycle471) 하나뿐이다(테스트 `test_g1_2` 가 그 하나만 허용한다). 지표
 계산(EMA/RSI/MACD/ATR/HV/채널/거래량 시간정규화)과 OpenAI 프롬프트 조립
 (`build_messages`)·문자열 위생(`sanitize_text`)만 제공한다.
 
@@ -29,6 +30,8 @@ from __future__ import annotations
 import json
 import math
 import re
+
+import src.engine.indicators as _ind  # 지표 계산 정본(cycle471, 과제 B) — 같은 순수 leaf
 
 # ---------------------------------------------------------------------------
 # 안전 변환 헬퍼
@@ -60,20 +63,8 @@ def _to_int(x) -> "int | None":
 
 
 def ema(values, period: int) -> "float | None":
-    """asc(오래된→최근) `values` 의 지수이동평균. 표본 부족 시 None."""
-    if period is None or period <= 0:
-        return None
-    try:
-        vals = [float(v) for v in values]
-    except (TypeError, ValueError):
-        return None
-    if len(vals) < period:
-        return None
-    result = sum(vals[:period]) / period
-    alpha = 2.0 / (period + 1)
-    for v in vals[period:]:
-        result = result + alpha * (v - result)
-    return result
+    """asc(오래된→최근) `values` 의 지수이동평균(첫 period 단순평균 시작). 표본 부족 시 None."""
+    return _ind.ema_last(values, period, seed="sma")
 
 
 # ---------------------------------------------------------------------------
@@ -149,25 +140,7 @@ def macd(closes, fast: int = 12, slow: int = 26, signal: int = 9):
 
 
 def atr_wilder(highs, lows, closes, period: int = 14) -> "float | None":
-    try:
-        h = [float(x) for x in highs]
-        low = [float(x) for x in lows]
-        c = [float(x) for x in closes]
-    except (TypeError, ValueError):
-        return None
-    n = min(len(h), len(low), len(c))
-    if n < period + 1:
-        return None
-    trs = []
-    for i in range(1, n):
-        tr = max(h[i] - low[i], abs(h[i] - c[i - 1]), abs(low[i] - c[i - 1]))
-        trs.append(tr)
-    if len(trs) < period:
-        return None
-    atr = sum(trs[:period]) / period
-    for tr in trs[period:]:
-        atr = (atr * (period - 1) + tr) / period
-    return atr
+    return _ind.atr_wilder_last(highs, lows, closes, period)
 
 
 # ---------------------------------------------------------------------------

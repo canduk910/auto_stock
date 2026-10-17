@@ -2,39 +2,27 @@
 
 재현 정본(`_workspace/domain_consult/cycle391_etf_s0_remeasure.py`)과 같은 식으로
 지표·진입 판정·청산 시뮬레이션·묶음 상관을 계산한다(cycle403 §3). 표준 라이브러리
-(`math`·`typing`)만 import 한다 — `src.*` import 0 · I/O 0 · `await` 0 · 로깅 0.
+(`math`·`typing`)만 import 한다 — `src.*` import 는 같은 순수 leaf `src.engine.indicators`
+(지표 계산 정본, cycle471) 하나뿐 · I/O 0 · `await` 0 · 로깅 0.
 """
 from __future__ import annotations
 
 import math
 from typing import NamedTuple
 
+import src.engine.indicators as _ind
+
 
 def ema(values, span):
-    a = 2.0 / (span + 1)
-    out = []
-    for i, v in enumerate(values):
-        out.append(float(v) if i == 0 else a * v + (1 - a) * out[-1])
-    return out
+    return _ind.ema_series(values, span)
 
 
 def true_ranges(highs, lows, closes):
-    out = []
-    for i in range(len(highs)):
-        if i == 0:
-            out.append(highs[0] - lows[0])
-        else:
-            pc = closes[i - 1]
-            out.append(max(highs[i] - lows[i], abs(highs[i] - pc), abs(lows[i] - pc)))
-    return out
+    return _ind.true_ranges(highs, lows, closes)
 
 
 def atr_wilder(tr, period=20):
-    a = 1.0 / period
-    out = []
-    for i, v in enumerate(tr):
-        out.append(float(v) if i == 0 else a * v + (1 - a) * out[-1])
-    return out
+    return _ind.wilder_series(tr, period)
 
 
 def n14(tr, i, period=14):  # 14 = 재현 측정값(묶음 B 사이징 ATR) — 바꾸면 측정 밖

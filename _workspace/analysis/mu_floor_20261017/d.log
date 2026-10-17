@@ -1,0 +1,31 @@
+[du     3s] features
+[du     4s] repro-m kospi True
+[du     4s] repro-m kosdaq True
+[du     5s] repro-book off T 0.0
+[du     5s] off T -0.15392 -0.94633
+[du     6s] repro-book off V 0.0
+[du     6s] off V -0.03427 -0.56666
+[du     7s] repro-book off H 0.0
+[du     7s] off H -0.00759 -0.52629
+[du     9s] repro-book V0 T 0.0
+[du     9s] V0 T -0.02328 -0.573
+[du    10s] repro-book V0 V 0.0
+[du    10s] V0 V -0.01608 -0.50056
+[du    10s] repro-book V0 H 0.0
+[du    10s] V0 H 0.06169 -0.35698
+[du    12s] F2 T -0.08761 -0.82008
+[du    13s] F2 V -0.0414 -0.54819
+[du    14s] F2 H 0.06205 -0.36063
+[du    38s] F3 T -0.06593 -0.76883
+[du    39s] F3 V -0.02359 -0.495
+[du    39s] F3 H 0.05043 -0.32222
+[du    63s] U2 T -0.20487 -0.97814
+[du    64s] U2 V -0.05648 -0.6968
+[du    65s] U2 H -0.00053 -0.59033
+[du    90s] U3 T -0.26703 -0.99353
+[du    91s] U3 V -0.05732 -0.71331
+[du    92s] U3 H -0.01197 -0.61764
+[du   117s] Z T -0.14477 -0.93872
+[du   118s] Z V -0.03289 -0.53932
+[du   119s] Z H 0.00367 -0.48074
+[du   119s] done /private/tmp/claude-501/-Users-koscom-Projects-auto-stock/41ef15a3-9e33-4d1b-9131-dedfd7533390/scratchpad/mf/donchian.pkl

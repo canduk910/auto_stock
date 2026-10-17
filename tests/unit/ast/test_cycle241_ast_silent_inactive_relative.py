@@ -42,6 +42,8 @@ _ALLOWED_SRC_MODULES = {
     "src.engine.stale_diagnostics",
     "src.realtime.websocket",
     "src.realtime.websocket_pool",
+    # cycle470 — 섀도 관측 leaf(판정에 쓰지 않는다). 시각·보드 신호가 아니라 WS 프레임 시각·REST 거래량.
+    "src.engine.silence_shadow",
 }
 
 
